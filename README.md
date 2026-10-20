@@ -1,5 +1,7 @@
 # Arkeol
 
+Play: https://jiidu.github.io/arkeol/
+
 An open source browser game inspired by Spelunky and Minecraft, among others.
 
 Open `index.html` in a browser to play.
