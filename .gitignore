@@ -1,0 +1,21 @@
+# Arkeol has no build step or dependencies; this only keeps local clutter out of the repo.
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editors and IDEs
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Release archives (attach these to GitHub releases instead of committing them)
+*.zip
+
+# Local tooling, in case someone adds it later
+node_modules/
+.env
+*.log
