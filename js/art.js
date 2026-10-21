@@ -1,5 +1,5 @@
 /*
-  Arkeol v0.2 · Copyright (C) 2026 JP Hakoluoto
+  Arkeol v0.3 · Copyright (C) 2026 JP Hakoluoto
   Free software under the GNU GPL v3 or later, with an attribution term (see LICENSE and NOTICE).
 */
 'use strict';
@@ -87,6 +87,8 @@ const ICON={};
   ICON.pick=pixIcon(pick('#9aa3ad','#d6dde3'));ICON.pick2=pixIcon(pick('#43c9e6','#c8fbff'));
   const drill=(body,tip)=>p=>{p(2,6,7,5,body);p(2,6,7,1,'#c8d0d8');p(3,11,2,3,'#3a3236');p(4,8,2,1,'#d24a2e');p(9,6,2,5,tip);p(11,7,2,3,tip);p(13,8,2,1,tip);p(10,7,1,1,'#555');p(12,8,1,1,'#555')};
   ICON.drill=pixIcon(drill('#5e6670','#b9c3cc'));ICON.drill2=pixIcon(drill('#7a5a20','#f2c84b'));
+  ICON.fez=pixIcon(p=>{p(5,4,6,9,'#b8322a');p(4,12,8,1,'#8a1e18');p(6,3,4,1,'#b8322a');p(10,4,1,9,'#d85a4a');p(4,4,1,6,'#1a1410');p(4,10,1,1,'#d6b04a')});
+  ICON.dye=pixIcon(p=>{p(4,6,8,8,'#8a6a44');p(5,5,6,1,'#a8845a');p(6,3,4,2,'#6a4a2a');p(5,8,2,2,'#b8322a');p(8,8,2,2,'#2f4470');p(6,11,2,2,'#c99a2a');p(9,11,2,2,'#3c6a34')});
   ICON.none=pixIcon(p=>{for(let i=3;i<13;i+=2){p(i,i,1,1,'#5a4f55');p(15-i,i,1,1,'#5a4f55')}});
   ICON.whip=pixIcon((p,g)=>{g.strokeStyle='#8a5f34';g.lineWidth=1.5;g.beginPath();g.arc(9,8,4.5,0,Math.PI*1.7);g.stroke();g.beginPath();g.arc(9,8,2.2,0,Math.PI*1.8);g.stroke();p(2,11,4,2,'#4b3628');p(1,12,2,2,'#2a1e16')});
   ICON.gun=pixIcon(p=>{p(3,6,12,2,'#3d3f48');p(3,6,12,1,'#7a7e8a');p(1,7,5,4,'#7a4a24');p(1,8,2,4,'#5e3618');p(7,8,2,2,'#2a2228');p(8,8,4,1,'#3d3f48')});

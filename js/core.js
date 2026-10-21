@@ -1,5 +1,5 @@
 /*
-  Arkeol v0.2 · Copyright (C) 2026 JP Hakoluoto
+  Arkeol v0.3 · Copyright (C) 2026 JP Hakoluoto
   Free software under the GNU GPL v3 or later, with an attribution term (see LICENSE and NOTICE).
 */
 'use strict';
@@ -10,7 +10,7 @@ const HP=[0,2,4,Infinity,5,7,4,6,6,0,9,9,Infinity,7,0,3,1];
 const SOL=[0,1,1,1,1,1,1,1,1,0,1,1,1,1,0,1,1];
 const LIQ=[0,0,0,0,0,0,0,0,0,1,0,0,0,0,1,0,0];
 const $=id=>document.getElementById(id);
-const cv=$('game'), ctx=cv.getContext('2d');
+const cv=$('game');let ctx=cv.getContext('2d');
 const lc=document.createElement('canvas'), lx=lc.getContext('2d');
 let S=3, VW=320, VH=200, DPR=1, lastOx=0, lastOy=0;
 const coarse=matchMedia('(pointer:coarse)').matches;

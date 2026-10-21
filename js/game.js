@@ -1,5 +1,5 @@
 /*
-  Arkeol v0.2 · Copyright (C) 2026 JP Hakoluoto
+  Arkeol v0.3 · Copyright (C) 2026 JP Hakoluoto
   Free software under the GNU GPL v3 or later, with an attribution term (see LICENSE and NOTICE).
 */
 'use strict';
@@ -87,6 +87,7 @@ function hitStuff(box,dmg,fromX,how){let any=false;
   for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){if(x<0||y<0||x>=MW||y>=MH)continue;const i=idx(x,y);if(webA[i]){webA[i]=0;any=true;sfx.cut();particle(x*T+8,y*T+6,'rgba(230,232,240,.8)',8,1.2,24,.03,1)}}
   return any}
 function breakPot(p){if(p.broken)return;p.broken=true;sfx.pot();particle(p.x+5,p.y+5,['#a8643a','#7a4428','#c98a5a'],12,2,30,.2,2);
+  if(Math.random()<.04&&gainCosmetic(randomCosmetic(),p.x+5,p.y-6))return;
   const r=Math.random(),cx=p.x+2,cy=p.y;
   if(r<.4){const n=1+(Math.random()*2|0);for(let k=0;k<n;k++)pickups.push({x:cx,y:cy,w:6,h:5,vx:rand(-1.2,1.2),vy:rand(-2.5,-1),kind:'gold',value:40+(Math.random()*5|0)*10,t:0})}
   else if(r<.62){pickups.push({x:cx,y:cy,w:6,h:5,vx:rand(-1,1),vy:-2,kind:'gold',value:30,t:0})}
@@ -120,6 +121,7 @@ function explode(x,y){
   save();
 }
 function openCrate(c){c.open=true;sfx.crate();particle(c.x+6,c.y+5,['#a8743c','#7a5228'],10,2,30,.2,2);
+  if(Math.random()<.16&&gainCosmetic(randomCosmetic(),c.x+6,c.y-6)){renderHotbar();return}
   const r=Math.random();let txt;
   if(!P.hasDrill&&r<.14){P.hasDrill=true;P.fuel=60;txt=t('foundDrill');sfx.relic()}else if(!P.weapons.length&&r<.3){giveWeapon('bow');P.slot=1;P.arrows+=6;txt=t('foundBow');sfx.relic()}
   else if(r<.48){P.bombs+=2;txt=t('plus2Bombs')}else if(r<.72){P.ropes+=2;txt=t('plus2Ropes')}else if(r<.84&&P.hasDrill){P.fuel=Math.min(100,P.fuel+50);txt=t('fuel50')}
@@ -602,7 +604,7 @@ const NPCD={
 let talkT=0;
 function showTalk(name,txt){const el=$('talk');el.innerHTML=`<b>${esc(name)}</b>${esc(txt)}`;el.hidden=false;clearTimeout(talkT);talkT=setTimeout(()=>el.hidden=true,5200)}
 function talkTo(n){const D=NPCD[n.type];let line;
-  if(!n.gift){n.gift=true;line=D.gift();store.stats.talks++;save()}else{const ls=tr(D.lines);line=ls[n.li%ls.length];n.li++}
+  if(!n.gift){n.gift=true;line=D.gift();store.stats.talks++;save();const k=n.type==='knitter'?(['h:beanie','n:scarf','t:sweater'].find(k=>!wOwn(k))||randomCosmetic()):Math.random()<.4?randomCosmetic():null;if(k)setTimeout(()=>gainCosmetic(k,n.x,n.y-24),900)}else{const ls=tr(D.lines);line=ls[n.li%ls.length];n.li++}
   sfx.talk();showTalk(n.name,line);checkAch()}
 function updateNpcs(){for(const n of npcs){n.anim++;if(Math.abs(n.x-(P.x+P.w/2))>VW)continue;
   const fx=n.x+n.face*13;

@@ -1,5 +1,5 @@
 /*
-  Arkeol v0.2 · Copyright (C) 2026 JP Hakoluoto
+  Arkeol v0.3 · Copyright (C) 2026 JP Hakoluoto
   Free software under the GNU GPL v3 or later, with an attribution term (see LICENSE and NOTICE).
 */
 'use strict';
@@ -117,6 +117,66 @@ const TRACKS={
       if(b%2===0&&Math.random()<.32+M.tension*.3)M.box(t,pickR([77,79,81,83,84,86,88]));
       if(Math.random()<.03)M.bell(t,pickR([89,91,95]))},
     tension:true},
+  // ---- run start: an original heroic march, played once (~17 s) before the level music
+  hero:{bpm:112,step(t,b,M){const E=M.eighth;if(b>=72)return;
+      // D · D · G · A · D · Bb · A · D – a fanfare motif stated twice, the second time climbing to the high D
+      const CH=[[50,57,62,66],[50,57,62,66],[43,55,59,62],[45,52,57,61],[50,57,62,66],[46,53,58,62],[45,52,57,61],[50,57,62,66]];
+      const bar=Math.floor(b/8),p=b%8;
+      if(bar<8){const c=CH[bar];
+        if(p===0){M.pad(t,c.slice(1).map(n=>n+12),E*8,'triangle',.011,1500);M.pad(t,c,E*8,'sawtooth',.004,900);M.timp(t,c[0]-12+(c[0]<48?12:0),.12)}
+        if(p===0||p===4)M.bassN(t,c[0]-12,E*3.5,.07,false);if(p===2||p===6)M.bassN(t,c[0]-5,E*1.5,.045,false);
+        if(p===2||p===6)M.snare(t,.06);if(p===3&&Math.random()<.5)M.snare(t+E/2,.03);
+        if(p===7&&bar%2===1){M.snare(t,.03);M.snare(t+E/3,.04);M.snare(t+E*2/3,.055)}
+        if(p%2===1)M.harp(t,c[1+((p>>1)%3)]+24);
+      }
+      // melody with sub-beat timing (quarter-note triplets in bar 2)
+      if(!M.heroMel){const T3=4/3;const raw=[[74,2],[74,1],[74,1],[81,4], [79,T3],[78,T3],[79,T3],[81,4], [83,3],[81,1],[79,2],[74,2], [76,6],[69,1],[73,1],
+          [74,2],[74,1],[74,1],[81,4], [86,3],[84,1],[82,2],[77,2], [81,3],[83,1],[85,4], [86,8]];let acc=0;M.heroMel=raw.map(([n,d])=>{const o={n,d,at:acc};acc+=d;return o})}
+      for(const m of M.heroMel){if(m.at>=b&&m.at<b+1){const tt=t+(m.at-b)*E,dur=E*m.d*.9,bar2=Math.floor(m.at/8);
+        M.brass(tt,m.n-12,dur);M.flute(tt,m.n,dur);
+        if(m.d>=3){const c=CH[Math.min(7,bar2)],below=[...c,...c.map(x=>x+12)].filter(x=>x<m.n-12-2).pop();if(below)M.brass(tt,below,dur*.95)}}}
+      if(b===0)M.cymbal(t,.05);if(b===56){M.cymbal(t,.08);for(let k=0;k<6;k++)M.timp(t+E*2+k*E/3,38,.03+k*.015)}
+      if(b===64){M.timp(t,38,.16);M.cymbal(t,.07);M.pad(t,[62,66,69,74],E*7,'triangle',.014,1400);M.bassN(t,38,E*6,.07,true)}},
+    tension:false},
+  // ---- alternative level pieces so a run does not always sound the same
+  cave2:{bpm:76,step(t,b,M){const E=M.eighth; // E dorian, walking bass and a marimba-like figure
+      const CH=[[52,59,62,67],[45,57,61,64],[50,57,62,66],[47,55,59,62]],ci=Math.floor(b/32)%4;
+      if(b%32===0)M.pad(t,CH[ci].slice(1),E*32,'triangle',.016,900+M.tension*1200);
+      if(b%4===0){const w=[0,2,3,5,7,5,3,2][(b/4)%8];M.bassN(t,CH[ci][0]-12+w,E*3.6,.055,false)}
+      if(b%2===0&&Math.random()<.45+M.tension*.3){const sc=[64,66,67,69,71,74,76];M.box(t,sc[(b/2+ci*2)%sc.length]-12)}
+      if(Math.random()<.012)M.bell(t,pickR([83,86,88]))},
+    tension:true},
+  cave3:{bpm:58,step(t,b,M){const E=M.eighth; // F lydian, slow flute phrases over a warm drone
+      const CH=[[53,60,64,67,71],[55,62,67,71,74],[50,57,62,65,69],[48,55,60,64,67]],ci=Math.floor(b/32)%4;
+      if(b%32===0){M.pad(t,CH[ci].slice(1),E*32,'sine',.02,1400);M.bassN(t,CH[ci][0]-12,E*32,.05,true)}
+      M.fmel(t,b,[65,67,69,71,72,74,76,77],.5+M.tension*.3);
+      if(b%8===6&&Math.random()<.3)M.harp(t,pickR([77,79,81,84]))},
+    tension:true},
+  desert2:{bpm:98,step(t,b,M){const E=M.eighth; // A phrygian dominant, faster groove and a ney-like flute
+      if(b%32===0){M.pad(t,[45,52,57,61],E*32,'triangle',.013,900+M.tension*900);M.bassN(t,33,E*32,.05,true)}
+      const p=b%8;if(p===0||p===3||p===6)M.doum(t,.14);if(p===2||p===5||(p===7&&Math.random()<.6))M.tek(t,.045);if(p===4&&Math.random()<.5)M.tek(t,.03);
+      M.fmel(t,b,[69,70,73,74,76,77,79,81,82],.55+M.tension*.3);
+      if(b%16===12&&Math.random()<.5)M.oud(t,pickR([57,58,61,64]))},
+    tension:true},
+  frost2:{bpm:50,step(t,b,M){const E=M.eighth; // C# minor, glassy bells and a high music box
+      const CH=[[49,56,61,64,68],[45,52,57,61,64],[42,54,57,61,66],[44,56,59,63,68]],ci=Math.floor(b/32)%4;
+      if(b%32===0){M.pad(t,CH[ci].slice(1).map(n=>n+12),E*32,'sine',.017,2600);M.bassN(t,CH[ci][0],E*32,.045,true)}
+      if(b%4===0&&Math.random()<.5)M.box(t,CH[ci][1+((b/4)%4)]+24);
+      if(Math.random()<.07)M.bell(t,pickR([85,88,92,97]))},
+    tension:true},
+  grove2:{bpm:72,step(t,b,M){const E=M.eighth; // G mixolydian, rolling harp and a pastoral flute
+      const CH=[[43,55,59,62,67],[41,53,57,60,65],[48,55,60,64,67],[43,55,59,62,65]],ci=Math.floor(b/32)%4;
+      if(b%32===0){M.pad(t,CH[ci].slice(1),E*32,'triangle',.015,1200);M.bassN(t,CH[ci][0],E*32,.05,true)}
+      const arp=[1,2,3,4,3,2];if(Math.random()<.7)M.harp(t,CH[ci][arp[b%6]]+12);
+      M.fmel(t,b,[67,69,71,72,74,76,77,79],.4+M.tension*.3)},
+    tension:true},
+  spore2:{bpm:56,step(t,b,M){const E=M.eighth; // whole-tone dream with drifting bells
+      const WT=[60,62,64,66,68,70,72,74,76,78];
+      if(b%32===0){const r=pickR([0,2,4]);M.pad(t,[48+r,60+r,64+r,68+r],E*32,'sine',.018,1600);M.bassN(t,36+r,E*32,.04,true)}
+      if(b%2===0&&Math.random()<.35+M.tension*.3)M.box(t,pickR(WT)+12);
+      if(b%16===8&&Math.random()<.5)M.flute(t,pickR(WT),E*6);
+      if(Math.random()<.03)M.bell(t,pickR([86,90,94]))},
+    tension:true},
   campfire:{bpm:62,step(t,b,M){const E=M.eighth;
       const CH=[[50,57,61,66],[55,59,62,66],[47,54,57,62],[45,52,57,61]];
       const ci=Math.floor(b/16)%4;if(b%16===0){M.pad(t,CH[ci],E*16,'sine',.02,1200);M.bassN(t,CH[ci][0]-12,E*16,.05,true)}
@@ -134,13 +194,16 @@ const Music={enabled:true,started:false,tension:0,target:0,next:0,beat:0,last:3,
     dl.connect(dlf).connect(fb).connect(dl);const dg=AC.createGain();dg.gain.value=.4;dlf.connect(dg);dg.connect(m);dg.connect(rv);
     this.tb=AC.createGain();this.tb.gain.value=1;this.tb.connect(m);
     this.switchTo(this.want,true);setInterval(()=>this.tick(),90)},
-  play(name){this.want=name;if(this.started&&name!==this.track)this.switchTo(name)},
+  lockUntil:0,
+  play(name){this.want=name;if(this.started&&AC&&AC.currentTime<this.lockUntil)return;if(this.started&&name!==this.track)this.switchTo(name)},
+  hero(after){this.want=after;if(!this.started){this.want='hero';this.afterHero=after;return}this.switchTo('hero');this.lockUntil=AC.currentTime+72*this.eighth+.4},
   switchTo(name,first){const old=this.bus;if(old){old.gain.setTargetAtTime(0,AC.currentTime,.7);setTimeout(()=>{try{old.disconnect()}catch(e){}},5000)}
     const bus=AC.createGain();bus.gain.value=first?1:0;bus.connect(this.master);if(!first)bus.gain.setTargetAtTime(1,AC.currentTime+.4,.8);
-    this.bus=bus;this.track=name;this.beat=0;this.mi=null;this.motif=null;this.eighth=60/TRACKS[name].bpm/2;this.delay.delayTime.setTargetAtTime(this.eighth*3,AC.currentTime,.1);this.next=AC.currentTime+.25},
+    this.bus=bus;this.track=name;this.beat=0;this.fRest=0;this.heroMel=null;this.mi=null;this.motif=null;this.eighth=60/TRACKS[name].bpm/2;this.delay.delayTime.setTargetAtTime(this.eighth*3,AC.currentTime,.1);this.next=AC.currentTime+.25},
   setEnabled(v){this.enabled=v;this.applyVol()},
   applyVol(){if(this.master)this.master.gain.setTargetAtTime(this.enabled?.7*musicVol:0,AC.currentTime,.3)},
-  tick(){if(!AC||!this.started)return;if(this.next<AC.currentTime-1)this.next=AC.currentTime+.05;
+  tick(){if(!AC||!this.started)return;if(this.lockUntil&&AC.currentTime>=this.lockUntil){this.lockUntil=0;if(this.want!==this.track)this.switchTo(this.want)}
+    if(this.afterHero&&this.track==='hero'&&!this.lockUntil){this.lockUntil=AC.currentTime+72*this.eighth;this.want=this.afterHero;this.afterHero=null}if(this.next<AC.currentTime-1)this.next=AC.currentTime+.05;
     while(this.next<AC.currentTime+.35){if(this.enabled){const tr=TRACKS[this.track];tr.step(this.next,this.beat,this);if(tr.tension&&this.tension>.1){const b=this.beat;if(b%4===0||b%8===3)this.thump(this.next,this.tension);if(b%2===1)this.hat(this.next,this.tension)}}
       this.next+=this.eighth;this.beat++}},
   env(t,peak,att,dur,rel){const g=AC.createGain();g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(peak,t+att);g.gain.setValueAtTime(peak,t+Math.max(att,dur-.05));g.gain.linearRampToValueAtTime(.0001,t+dur+rel);return g},
@@ -150,8 +213,8 @@ const Music={enabled:true,started:false,tension:0,target:0,next:0,beat:0,last:3,
   pluck(t,scale,type,vol,dec){this.last=clamp(this.last+Math.floor(Math.random()*5)-2,0,scale.length-1);const o=AC.createOscillator(),g=AC.createGain();o.type=type;o.frequency.value=mtof(scale[this.last]);
     g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(vol,t+.01);g.gain.exponentialRampToValueAtTime(.0001,t+dec);o.connect(g);g.connect(this.bus);g.connect(this.delay);g.connect(this.rev);o.start(t);o.stop(t+dec+.1)},
   bell(t,n){const f=mtof(n);for(const [m,v] of [[1,.03],[2.76,.012],[5.4,.006]]){const o=AC.createOscillator(),g=AC.createGain();o.type='sine';o.frequency.value=f*m;g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.0001,t+3.5);o.connect(g);g.connect(this.rev);g.connect(this.bus);o.start(t);o.stop(t+3.6)}},
-  brass(t,n,dur){const f=AC.createBiquadFilter();f.type='lowpass';f.Q.value=2;f.frequency.setValueAtTime(500,t);f.frequency.linearRampToValueAtTime(2600,t+.08);f.frequency.linearRampToValueAtTime(1500,t+.3);
-    const g=this.env(t,.05,.04,dur,.18);f.connect(g);g.connect(this.bus);g.connect(this.rev);
+  brass(t,n,dur){const f=AC.createBiquadFilter();f.type='lowpass';f.Q.value=2;f.frequency.setValueAtTime(420,t);f.frequency.linearRampToValueAtTime(1900,t+.07);f.frequency.linearRampToValueAtTime(1100,t+.35);
+    const g=this.env(t,.042,.05,dur,.22);f.connect(g);g.connect(this.bus);g.connect(this.rev);
     for(const d of [-6,0,6]){const o=AC.createOscillator();o.type='sawtooth';o.frequency.value=mtof(n);o.detune.value=d;const vib=AC.createOscillator(),vg=AC.createGain();vib.frequency.value=5.5;vg.gain.value=dur>.6?4:0;vib.connect(vg).connect(o.detune);o.connect(f);o.start(t);vib.start(t);o.stop(t+dur+.25);vib.stop(t+dur+.25)}},
   timp(t,n,vol){const o=AC.createOscillator(),g=AC.createGain();o.type='sine';o.frequency.setValueAtTime(mtof(n)*1.05,t);o.frequency.exponentialRampToValueAtTime(mtof(n),t+.1);g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.0001,t+1.2);o.connect(g);g.connect(this.bus);g.connect(this.rev);o.start(t);o.stop(t+1.25)},
   snare(t,vol){const s=AC.createBufferSource(),f=AC.createBiquadFilter(),g=AC.createGain();s.buffer=noiseBuf();f.type='bandpass';f.frequency.value=2200;f.Q.value=.8;g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.0001,t+.12);s.connect(f).connect(g);g.connect(this.bus);g.connect(this.rev);s.start(t,Math.random());s.stop(t+.14)},
@@ -169,9 +232,15 @@ const Music={enabled:true,started:false,tension:0,target:0,next:0,beat:0,last:3,
   wind(t,dur){const s=AC.createBufferSource(),f=AC.createBiquadFilter(),g=this.env(t,.02,dur*.4,dur*.6,dur*.4);s.buffer=noiseBuf();s.loop=true;f.type='bandpass';f.Q.value=1.2;f.frequency.setValueAtTime(300,t);f.frequency.linearRampToValueAtTime(700,t+dur*.5);f.frequency.linearRampToValueAtTime(350,t+dur);s.connect(f).connect(g);g.connect(this.bus);g.connect(this.rev);s.start(t);s.stop(t+dur+.1)},
   box(t,n){for(const [m,v] of [[1,.03],[4,.006]]){const o=AC.createOscillator(),g=AC.createGain();o.type='sine';o.frequency.value=mtof(n)*m;g.gain.setValueAtTime(v,t);g.gain.exponentialRampToValueAtTime(.0001,t+(m===1?1.6:.3));o.connect(g);g.connect(this.bus);g.connect(this.rev);o.start(t);o.stop(t+1.7)}},
   crackle(t){for(let i=0;i<3;i++){const s=AC.createBufferSource(),f=AC.createBiquadFilter(),g=AC.createGain();s.buffer=noiseBuf();f.type='highpass';f.frequency.value=3000;const tt=t+i*.05*Math.random();g.gain.setValueAtTime(.02,tt);g.gain.exponentialRampToValueAtTime(.0001,tt+.02);s.connect(f).connect(g).connect(this.bus);s.start(tt,Math.random());s.stop(tt+.03)}},
+  cymbal(t,vol){const s=AC.createBufferSource(),f=AC.createBiquadFilter(),g=AC.createGain();s.buffer=noiseBuf();f.type='highpass';f.frequency.value=5000;g.gain.setValueAtTime(vol,t);g.gain.exponentialRampToValueAtTime(.0001,t+1.6);s.connect(f).connect(g);g.connect(this.bus);g.connect(this.rev);s.start(t,Math.random());s.stop(t+1.7)},
+  fmel(t,b,scale,prob){if(this.fRest>b)return;if(Math.random()>prob*.35){this.fRest=b+1;return}
+    this.fi=clamp((this.fi??3)+pickR([-2,-1,-1,1,1,2,0]),0,scale.length-1);const d=pickR([2,2,3,4,6]);this.flute(t,scale[this.fi],this.eighth*d*.95);this.fRest=b+d+(Math.random()<.3?4:0)},
   thump(t,ten){const o=AC.createOscillator(),g=AC.createGain();o.type='sine';o.frequency.setValueAtTime(95,t);o.frequency.exponentialRampToValueAtTime(42,t+.3);g.gain.setValueAtTime(.2*ten,t);g.gain.exponentialRampToValueAtTime(.0001,t+.35);o.connect(g).connect(this.tb);o.start(t);o.stop(t+.4)},
   hat(t,ten){const s=AC.createBufferSource(),f=AC.createBiquadFilter(),g=AC.createGain();s.buffer=noiseBuf();f.type='highpass';f.frequency.value=7000;g.gain.setValueAtTime(.025*ten,t);g.gain.exponentialRampToValueAtTime(.0001,t+.05);s.connect(f).connect(g).connect(this.tb);s.start(t,Math.random());s.stop(t+.06)}
 };
 const Ambient={g:null,init(){if(this.g||!AC)return;const s=AC.createBufferSource();s.buffer=noiseBuf();s.loop=true;const f=AC.createBiquadFilter();f.type='bandpass';f.frequency.value=900;f.Q.value=.5;this.g=AC.createGain();this.g.gain.value=0;s.connect(f).connect(this.g).connect(AC.destination);s.start()},
   set(v){if(this.g)this.g.gain.setTargetAtTime(muted?0:v*sfxVol,AC.currentTime,.25)}};
-const levelTrack=()=>({normal:'cave',hot:'desert',cold:'frost',moss:'grove',shroom:'spore'})[biome]||'cave';
+const TRACKSETS={normal:['cave','cave2','cave3'],hot:['desert','desert2'],cold:['frost','frost2'],moss:['grove','grove2'],shroom:['spore','spore2']};
+let levelMusic=null,lastLevelMusic=null;
+function pickLevelMusic(){const L=TRACKSETS[biome]||TRACKSETS.normal,opts=L.filter(n=>n!==lastLevelMusic);levelMusic=pickR(opts.length?opts:L);lastLevelMusic=levelMusic}
+const levelTrack=()=>levelMusic||(TRACKSETS[biome]||TRACKSETS.normal)[0];
