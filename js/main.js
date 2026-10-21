@@ -1,5 +1,5 @@
 /*
-  Arkeol v0.2 · Copyright (C) 2026 JP Hakoluoto
+  Arkeol v0.3 · Copyright (C) 2026 JP Hakoluoto
   Free software under the GNU GPL v3 or later, with an attribution term (see LICENSE and NOTICE).
 */
 'use strict';
@@ -10,7 +10,7 @@ function applyLang(){
   document.querySelectorAll('[data-wave]').forEach(el=>{const txt=el.textContent;el.setAttribute('aria-label',txt);el.innerHTML='';[...txt].forEach((c,i)=>{const sp=document.createElement('span');sp.textContent=c===' '?'\u00a0':c;sp.style.setProperty('--i',i);sp.setAttribute('aria-hidden','true');el.append(sp)})});
   document.querySelectorAll('[data-lang]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.lang===LANG)));
   updateBest();hudCache='';hbCache='';if(P)renderHotbar();
-  if(openPanel==='archive')renderArchive(curTab);if(openPanel==='achv')renderAch();
+  if(openPanel==='archive')renderArchive(curTab);if(openPanel==='achv')renderAch();if(openPanel==='wardrobe')renderWardrobe();
 }
 function setLang(l){LANG=l;try{localStorage.setItem('arkeol-lang',l)}catch(e){}applyLang()}
 document.querySelectorAll('[data-lang]').forEach(b=>b.addEventListener('click',()=>{ensureAudio();setLang(b.dataset.lang)}));
@@ -41,10 +41,8 @@ function togglePause(){
 }
 function toggleMute(){muted=!muted;$('muteBtn').setAttribute('aria-pressed',String(!muted));if(muted)Ambient.set(0)}
 function toggleMusic(){ensureAudio();Music.setEnabled(!Music.enabled);$('musicBtn').setAttribute('aria-pressed',String(Music.enabled))}
-function toMenu(){closePanel(true);for(const id of ['over','pause','modal','shop','howto','settings','credits','license'])$(id).hidden=true;state='menu';P=newPlayer();level=1;buildLevel();$('toast').classList.remove('on');$('hint').hidden=true;$('talk').hidden=true;$('menu').hidden=false;updateBest();Music.play('theme')}
-function updateBest(){const a=Object.keys(store.ach).length,l=Object.keys(store.lore).length+RELICS.filter(r=>store.relics[r.id]).length;
-  const rc=$('records');rc.dataset.title=t('recTitle');rc.innerHTML=`<div class="rec"><b>${store.best>0?fmt(store.best):'—'}</b><span>${esc(t('recBest'))}</span></div><div class="rec"><b>${store.bestDepth?store.bestDepth+' m':'—'}</b><span>${esc(t('recDepth'))}</span></div><div class="rec"><b>${store.runs||0}</b><span>${esc(t('recRuns'))}</span></div>`;
-  $('bestMenu').textContent=t('best',store.best>0?fmt(store.best):'',a,ACH.length,l,PAPERS.length+PHOTOS.length+RELICS.length)}
+function toMenu(){closePanel(true);for(const id of ['over','pause','modal','shop','howto','settings','credits','license'])$(id).hidden=true;state='menu';P=newPlayer();level=1;buildLevel();$('toast').classList.remove('on');$('hint').hidden=true;$('talk').hidden=true;$('menu').hidden=false;updateBest();Music.lockUntil=0;Music.afterHero=null;Music.play('theme')}
+function updateBest(){const rc=$('records');if(!store.runs){rc.hidden=true;return}rc.hidden=false;const it=(v,l)=>`<span class="rc"><b${v.length>7?' class="long"':''}>${esc(v)}</b><small>${esc(t(l))}</small></span>`;rc.innerHTML=it(store.best>0?fmt(store.best):'—','recBest')+it(store.bestDepth?store.bestDepth+' m':'—','recDepth')+it(String(store.runs),'recRuns')}
 $('startBtn').addEventListener('click',newGame);
 $('againBtn').addEventListener('click',newGame);
 $('toMenuBtn').addEventListener('click',toMenu);

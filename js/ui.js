@@ -1,5 +1,5 @@
 /*
-  Arkeol v0.2 · Copyright (C) 2026 JP Hakoluoto
+  Arkeol v0.3 · Copyright (C) 2026 JP Hakoluoto
   Free software under the GNU GPL v3 or later, with an attribution term (see LICENSE and NOTICE).
 */
 'use strict';
@@ -55,10 +55,10 @@ function showPhoto(i,found){openModal(`${found?`<p class="prog" style="text-alig
 function showRelic(rel,isNew,found){openModal(`<div class="relicView"><canvas id="rlc"></canvas><div><div class="era">${esc(tr(ERA))}${isNew&&found?' · '+esc(t('newFind')):''}</div><h2>${esc(tr(rel.name))}</h2><div class="val">${fmt(rel.value)}</div><p>${esc(tr(rel.desc))}</p></div></div>`);drawRelic(rel.id,$('rlc'))}
 function openScreen(id){if(openPanel)$(openPanel).hidden=true;openPanel=id;
   for(const s of ['menu','pause','over'])if(!$(s).hidden){$(s).dataset.was='1';$(s).hidden=true}
-  if(id==='archive')renderArchive(curTab);if(id==='achv')renderAch();$(id).hidden=false;const b=$(id).querySelector('.closeScreen');if(b)setTimeout(()=>b.focus(),30)}
+  if(id==='wardrobe')renderWardrobe();if(id==='archive')renderArchive(curTab);if(id==='achv')renderAch();$(id).hidden=false;const b=$(id).querySelector('.closeScreen');if(b)setTimeout(()=>b.focus(),30)}
 function closePanel(silent){if(!openPanel)return;$(openPanel).hidden=true;openPanel=null;
   for(const s of ['menu','pause','over']){if(!silent&&$(s).dataset.was)$(s).hidden=false;delete $(s).dataset.was}}
-document.querySelectorAll('[data-open]').forEach(b=>b.addEventListener('click',()=>{ensureAudio();openScreen(b.dataset.open)}));
+document.addEventListener('click',e=>{const b=e.target.closest('[data-open]');if(!b)return;ensureAudio();openScreen(b.dataset.open)});
 document.querySelectorAll('.closeScreen').forEach(b=>b.addEventListener('click',()=>closePanel()));
 let curTab='papers';
 document.querySelectorAll('.tab').forEach(b=>b.addEventListener('click',()=>{curTab=b.dataset.tab;renderArchive(curTab)}));
@@ -75,7 +75,8 @@ function renderArchive(tab){
   if(tab==='relics')RELICS.forEach(r=>mkItem(store.relics[r.id],tr(r.name),`${tr(ERA)} · ${fmt(r.value)}`,()=>showRelic(r),c=>drawRelic(r.id,c)));
 }
 function renderAch(){const g=$('achGrid');g.innerHTML='';let n=0;
-  for(const a of ACH){const got=!!store.ach[a.id];if(got)n++;const d=document.createElement('div');if(got)d.className='got';d.innerHTML=`<b>${esc(tr(a.n))}</b>${esc(tr(a.d))}`;g.appendChild(d)}
+  const list=[...ACH].sort((a,b)=>(store.ach[b.id]?1:0)-(store.ach[a.id]?1:0));
+  for(const a of list){const got=!!store.ach[a.id];if(got)n++;const d=document.createElement('div');d.className=got?'got':'locked';d.innerHTML=got?`<b>${esc(tr(a.n))}</b>${esc(tr(a.d))}`:`<b>???</b>${esc(t('achSecret'))}`;g.appendChild(d)}
   const s=store.stats;$('achProg').textContent=t('achProg',n,ACH.length,s.blocks,s.spiders,s.wolves,s.bombs)}
 
 /* =========================================================== shop */
@@ -99,12 +100,14 @@ const SHOP_ITEMS=[
  {id:'spring',n:{en:'Spring boots',fi:'Jousisaappaat'},d:{en:'You jump higher.',fi:'Hyppäät korkeammalle.'},p:1800,ic:'spring',once:true,ok:()=>P.jumpV<6,buy:()=>{P.jumpV=6.25}},
  {id:'soft',n:{en:'Soft soles',fi:'Pehmeät pohjat'},d:{en:'Falling no longer hurts.',fi:'Putoaminen ei enää satu.'},p:1400,ic:'soft',once:true,ok:()=>!P.softBoots,buy:()=>{P.softBoots=true}},
  {id:'mask',n:{en:'Diving mask',fi:'Sukellusmaski'},d:{en:'Twice the air underwater.',fi:'Kaksinkertainen happi veden alla.'},p:900,ic:'mask',once:true,ok:()=>P.maxBreath<200,buy:()=>{P.maxBreath=200;P.breath=200}},
+ {id:'fez',n:{en:'Fez',fi:'Fez'},d:{en:"A hat from Sabu's own collection. Only one in stock.",fi:'Hattu Sabun omasta kokoelmasta. Vain yksi varastossa.'},p:600,ic:'fez',once:true,ok:()=>!wOwn('h:fez'),buy:()=>gainCosmetic('h:fez')},
+ {id:'dye',n:{en:'Dye pouch',fi:'Väripussi'},d:{en:'A new colour for your clothes.',fi:'Uusi väri vaatteillesi.'},p:450,ic:'dye',ok:()=>!!randomCosmetic('d'),buy:()=>gainCosmetic(randomCosmetic('d'))},
  {id:'compass',n:{en:"Sabu's compass",fi:'Sabun kompassi'},d:{en:'An arrow points toward the door of the layer.',fi:'Nuoli osoittaa kerroksen oven suuntaan.'},p:1000,ic:'compass',once:true,ok:()=>!P.compass,buy:()=>{P.compass=true}}
 ];
 const SABU={hi:{en:['Welcome, digger. Sabu has traded in these tunnels longer than anyone remembers.','The sand remembers everything. So do I, especially debts.','Ah, an archaeologist! The last one of you bought a rope. He never came back, but it was a good rope.','Gold? Good. The pharaohs accepted gold, and so do I.','Professor Varjo always said my prices were too steep. She was right.'],fi:['Tervetuloa, kaivaja. Sabu on käynyt kauppaa näissä käytävissä kauemmin kuin kukaan muistaa.','Hiekka muistaa kaiken. Niin muistan minäkin, erityisesti velat.','Ah, arkeologi! Viimeinen teistä osti köyden. Hän ei palannut, mutta köysi oli hyvä.','Kultaa? Hyvä. Faaraot hyväksyivät kultaa, ja niin hyväksyn minäkin.','Professori Varjo sanoi aina, että hinnat ovat liian kovat. Hän oli oikeassa.']},
   buy:{en:['A wise choice.','That will serve you well, at least until the next layer.','A deal is a deal. Ra sees all.','Thank you. Your gold is safe with me.'],fi:['Viisas valinta.','Tuo palvelee sinua hyvin, ainakin seuraavaan kerrokseen asti.','Kauppa on kauppa. Ra näkee kaiken.','Kiitos. Kultasi on minulla turvassa.']},
   no:{en:['Your pockets are lighter than your judgement.','Come back when you have dug a little more.','Sabu does not give credit. Not for three thousand years.'],fi:['Taskusi ovat kevyemmät kuin harkintasi.','Tule takaisin, kun olet kaivanut enemmän.','Sabu ei anna velaksi. Ei ole antanut kolmeen tuhanteen vuoteen.']}};
-function makeStock(){const base=['heart','bombs','ropes',P.hasDrill?'fuel':'drill0',P.weapons.length?'arrows':'bow'];if(!P.rod)base.push('rod');const extras=SHOP_ITEMS.filter(i=>(i.once||i.id==='ammo')&&!base.includes(i.id)).map(i=>i.id).sort(()=>Math.random()-.5).slice(0,5);return {ids:[...base,...extras],sold:{}}}
+function makeStock(){const base=['heart','bombs','ropes',P.hasDrill?'fuel':'drill0',P.weapons.length?'arrows':'bow'];if(!P.rod)base.push('rod');const extras=SHOP_ITEMS.filter(i=>(i.once||i.id==='ammo'||i.id==='dye')&&!base.includes(i.id)).map(i=>i.id).sort(()=>Math.random()-.5).slice(0,5);return {ids:[...base,...extras],sold:{}}}
 function openShop(){if(!shop||state!=='play')return;state='shop';releaseAll();$('sabuSay').textContent=pickR(tr(SABU.hi));drawSabu($('sabu'));renderShop();$('shop').hidden=false;setTimeout(()=>$('shopClose').focus(),30)}
 function closeShop(){$('shop').hidden=true;if(state==='shop')state='play';releaseAll();renderHotbar()}
 $('shopClose').addEventListener('click',closeShop);

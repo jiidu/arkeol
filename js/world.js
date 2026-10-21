@@ -1,5 +1,5 @@
 /*
-  Arkeol v0.2 · Copyright (C) 2026 JP Hakoluoto
+  Arkeol v0.3 · Copyright (C) 2026 JP Hakoluoto
   Free software under the GNU GPL v3 or later, with an attribution term (see LICENSE and NOTICE).
 */
 'use strict';
@@ -256,12 +256,12 @@ function buildLevel(){
   const mu=foes.filter(f=>f.type==='mummy').length;
   fireballs=[];flies=[];levelTime=0;nextAmbient=frame+400;
   showToast(chapterName(level),level===1?t('b_'+biome):t('lvl',level,t('b_'+biome),sp,wo,mu,!!shop),t('chapterN',level));
-  if(state==='play'||state==='trans')Music.play(levelTrack());
+  pickLevelMusic();if(state==='play'||state==='trans')Music.play(levelTrack());
 }
 function newGame(){
   ensureAudio();closePanel(true);
   level=1;gemsTotal=0;relicsRun=0;runFinds=0;runKills={spider:0,wolf:0,mummy:0,snake:0};placedLore=new Set();store.runs=(store.runs||0)+1;save();
   P=newPlayer();state='play';buildLevel();
   for(const id of ['menu','over','pause','modal','shop','howto','settings','credits','license'])$(id).hidden=true;
-  releaseAll();renderHotbar();Music.play(levelTrack());
+  releaseAll();renderHotbar();Music.hero(levelTrack());
 }
