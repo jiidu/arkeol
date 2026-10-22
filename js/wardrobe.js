@@ -1,5 +1,5 @@
 /*
-  Arkeol v0.3 · Copyright (C) 2026 JP Hakoluoto
+  Arkeol v0.3.1 · Copyright (C) 2026 JP Hakoluoto
   SPDX-License-Identifier: GPL-3.0-or-later (with the additional attribution term in NOTICE)
   wardrobe.js – clothes, dyes and the wardrobe screen
 */

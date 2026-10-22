@@ -1,5 +1,5 @@
 /*
-  Arkeol v0.3 · Copyright (C) 2026 JP Hakoluoto
+  Arkeol v0.3.1 · Copyright (C) 2026 JP Hakoluoto
   Free software under the GNU GPL v3 or later, with an attribution term (see LICENSE and NOTICE).
 */
 /* Layout: full-bleed cave canvas; HUD strip top, toolbar bottom-centre, touch pads in the corners.
@@ -264,7 +264,7 @@ body.inMenu #ui{display:none}
 #status{gap:6px}
 .chip{font:600 12px var(--mono);padding:1px 6px;border-radius:2px;color:#1b1206}
 
-/* ---------- v0.3 main menu: the camp scene stays visible, a plain list of choices */
+/* ---------- v0.3.1 main menu: the camp scene stays visible, a plain list of choices */
 #menu{background:linear-gradient(180deg,rgba(8,5,3,.15) 0%,rgba(8,5,3,.35) 45%,rgba(8,5,3,.82) 100%);place-items:center}
 .menuCol{display:flex;flex-direction:column;align-items:center;text-align:center;padding:24px 16px;width:min(420px,100%)}
 #menu .kicker{color:#e8c890;font:500 12px/1 var(--serif);letter-spacing:.3em;margin:0 0 10px;text-shadow:0 1px 2px rgba(0,0,0,.8)}
@@ -338,3 +338,20 @@ body.inMenu #ui{display:none}
 .s1{left:6%;top:16%;animation-delay:.6s}.s2{left:58%;top:6%;animation-delay:2.2s;scale:.7}.s3{right:4%;bottom:22%;animation-delay:3.6s;scale:.85}
 @keyframes spark{0%,100%{opacity:0;transform:scale(.2) rotate(0)}8%{opacity:1;transform:scale(1) rotate(45deg)}18%{opacity:0;transform:scale(.3) rotate(90deg)}}
 @media (prefers-reduced-motion:reduce){#menu .logo::after,.spark{animation:none}}
+
+/* ---------- crafting */
+.craftStation{margin:4px 0 10px;font-size:13px;color:var(--muted)}
+.craftStation.on{color:#ffcf7a}
+.craftStation.on::before{content:"🔥︎ ";}
+.craftMats{display:flex;flex-wrap:wrap;gap:6px;margin-bottom:12px}
+.mat{display:flex;align-items:center;gap:5px;background:rgba(255,255,255,.05);border:1px solid var(--line);border-radius:3px;padding:4px 8px 4px 5px;font-size:12px}
+.mat img{width:20px;height:20px;image-rendering:pixelated}
+.mat b{font:700 15px var(--mono);color:var(--ink)}
+.mat small{color:var(--muted)}
+.mat.zero{opacity:.45}
+.craftPlace{margin:0 0 12px}
+.craftItem .needs{display:flex;flex-wrap:wrap;gap:4px;margin-top:5px}
+.craftItem .needs i{font-style:normal;display:inline-flex;align-items:center;gap:2px;font:12px var(--mono);padding:1px 5px 1px 2px;border-radius:2px;background:rgba(0,0,0,.25)}
+.craftItem .needs i img{width:14px;height:14px;image-rendering:pixelated}
+.craftItem .needs i.ok{color:#a8e88a}.craftItem .needs i.no{color:#e89a8a}
+.fireTag{font:600 10px var(--serif);font-style:normal;letter-spacing:.08em;text-transform:uppercase;color:#ffb347;border:1px solid rgba(255,179,71,.5);border-radius:2px;padding:0 4px;margin-left:4px;vertical-align:2px}

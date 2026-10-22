@@ -1,5 +1,5 @@
 /*
-  Arkeol v0.3 · Copyright (C) 2026 JP Hakoluoto
+  Arkeol v0.3.1 · Copyright (C) 2026 JP Hakoluoto
   Free software under the GNU GPL v3 or later, with an attribution term (see LICENSE and NOTICE).
 */
 'use strict';
@@ -32,6 +32,9 @@ const ACH=[
  {id:'fish10',n:{en:'Shaft Angler',fi:'Kuilun kalastaja'},d:{en:'Land 10 catches in total.',fi:'Nosta yhteensä 10 saalista.'}},
  {id:'mummy3',n:{en:'Unwrapped',fi:'Kääreet auki'},d:{en:'Put three mummies to rest.',fi:'Kaada kolme muumiota.'}},
  {id:'rockplate',n:{en:'Clever Archaeologist',fi:'Ovela arkeologi'},d:{en:'Set off an arrow trap with a thrown stone.',fi:'Laukaise nuoliansa heitetyllä kivellä.'}},
+ {id:'bat10',n:{en:'Night Shift',fi:'Yövuoro'},d:{en:'Take down 10 bats in total.',fi:'Kaada yhteensä 10 lepakkoa.'}},
+ {id:'mimic1',n:{en:'Not a Chest',fi:'Ei mikään arkku'},d:{en:'Defeat a mimic chest.',fi:'Voita matkija-arkku.'}},
+ {id:'worm1',n:{en:'Wyrm Slayer',fi:'Madonkaataja'},d:{en:'Defeat a burrowing worm.',fi:'Kaada kaivajamato.'}},
  {id:'sniper',n:{en:'Sharpshooter',fi:'Tarkka-ampuja'},d:{en:'Take down an enemy from afar with a bow, crossbow or pistol.',fi:'Kaada vihollinen kaukaa jousella, varsijousella tai pistoolilla.'}}
 ];
 function unlock(id){if(store.ach[id])return;const a=ACH.find(a=>a.id===id);if(!a)return;store.ach[id]=Date.now();save();sfx.ach();
@@ -102,12 +105,13 @@ const SHOP_ITEMS=[
  {id:'mask',n:{en:'Diving mask',fi:'Sukellusmaski'},d:{en:'Twice the air underwater.',fi:'Kaksinkertainen happi veden alla.'},p:900,ic:'mask',once:true,ok:()=>P.maxBreath<200,buy:()=>{P.maxBreath=200;P.breath=200}},
  {id:'fez',n:{en:'Fez',fi:'Fez'},d:{en:"A hat from Sabu's own collection. Only one in stock.",fi:'Hattu Sabun omasta kokoelmasta. Vain yksi varastossa.'},p:600,ic:'fez',once:true,ok:()=>!wOwn('h:fez'),buy:()=>gainCosmetic('h:fez')},
  {id:'dye',n:{en:'Dye pouch',fi:'Väripussi'},d:{en:'A new colour for your clothes.',fi:'Uusi väri vaatteillesi.'},p:450,ic:'dye',ok:()=>!!randomCosmetic('d'),buy:()=>gainCosmetic(randomCosmetic('d'))},
+ {id:'blueprint',n:{en:'Old blueprint',fi:'Vanha piirustus'},d:{en:'Teaches you a crafting recipe you do not know yet.',fi:'Opettaa käsityöreseptin, jota et vielä osaa.'},p:500,ic:'blueprint',ok:()=>lockedRecipes().length>0,buy:()=>learnRecipe(pickR(lockedRecipes()).id)},
  {id:'compass',n:{en:"Sabu's compass",fi:'Sabun kompassi'},d:{en:'An arrow points toward the door of the layer.',fi:'Nuoli osoittaa kerroksen oven suuntaan.'},p:1000,ic:'compass',once:true,ok:()=>!P.compass,buy:()=>{P.compass=true}}
 ];
 const SABU={hi:{en:['Welcome, digger. Sabu has traded in these tunnels longer than anyone remembers.','The sand remembers everything. So do I, especially debts.','Ah, an archaeologist! The last one of you bought a rope. He never came back, but it was a good rope.','Gold? Good. The pharaohs accepted gold, and so do I.','Professor Varjo always said my prices were too steep. She was right.'],fi:['Tervetuloa, kaivaja. Sabu on käynyt kauppaa näissä käytävissä kauemmin kuin kukaan muistaa.','Hiekka muistaa kaiken. Niin muistan minäkin, erityisesti velat.','Ah, arkeologi! Viimeinen teistä osti köyden. Hän ei palannut, mutta köysi oli hyvä.','Kultaa? Hyvä. Faaraot hyväksyivät kultaa, ja niin hyväksyn minäkin.','Professori Varjo sanoi aina, että hinnat ovat liian kovat. Hän oli oikeassa.']},
   buy:{en:['A wise choice.','That will serve you well, at least until the next layer.','A deal is a deal. Ra sees all.','Thank you. Your gold is safe with me.'],fi:['Viisas valinta.','Tuo palvelee sinua hyvin, ainakin seuraavaan kerrokseen asti.','Kauppa on kauppa. Ra näkee kaiken.','Kiitos. Kultasi on minulla turvassa.']},
   no:{en:['Your pockets are lighter than your judgement.','Come back when you have dug a little more.','Sabu does not give credit. Not for three thousand years.'],fi:['Taskusi ovat kevyemmät kuin harkintasi.','Tule takaisin, kun olet kaivanut enemmän.','Sabu ei anna velaksi. Ei ole antanut kolmeen tuhanteen vuoteen.']}};
-function makeStock(){const base=['heart','bombs','ropes',P.hasDrill?'fuel':'drill0',P.weapons.length?'arrows':'bow'];if(!P.rod)base.push('rod');const extras=SHOP_ITEMS.filter(i=>(i.once||i.id==='ammo'||i.id==='dye')&&!base.includes(i.id)).map(i=>i.id).sort(()=>Math.random()-.5).slice(0,5);return {ids:[...base,...extras],sold:{}}}
+function makeStock(){const base=['heart','bombs','ropes',P.hasDrill?'fuel':'drill0',P.weapons.length?'arrows':'bow'];if(!P.rod)base.push('rod');const extras=SHOP_ITEMS.filter(i=>(i.once||i.id==='ammo'||i.id==='dye'||i.id==='blueprint')&&!base.includes(i.id)).map(i=>i.id).sort(()=>Math.random()-.5).slice(0,5);return {ids:[...base,...extras],sold:{}}}
 function openShop(){if(!shop||state!=='play')return;state='shop';releaseAll();$('sabuSay').textContent=pickR(tr(SABU.hi));drawSabu($('sabu'));renderShop();$('shop').hidden=false;setTimeout(()=>$('shopClose').focus(),30)}
 function closeShop(){$('shop').hidden=true;if(state==='shop')state='play';releaseAll();renderHotbar()}
 $('shopClose').addEventListener('click',closeShop);

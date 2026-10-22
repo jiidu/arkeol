@@ -1,5 +1,5 @@
 /*
-  Arkeol v0.3 · Copyright (C) 2026 JP Hakoluoto
+  Arkeol v0.3.1 · Copyright (C) 2026 JP Hakoluoto
   Free software under the GNU GPL v3 or later, with an attribution term (see LICENSE and NOTICE).
 */
 'use strict';
@@ -16,7 +16,8 @@ addEventListener('keydown',e=>{
   ensureAudio();
   const modalOpen=!$('modal').hidden;
   if(e.code==='Tab'){e.preventDefault();if(state==='play')toggleMap();return}
-  if(e.code==='Escape'){e.preventDefault();if(state==='shop')closeShop();else if(modalOpen)closeModal();else if(openPanel)closePanel();else togglePause();return}
+  if(e.code==='KeyH'){if(state==='play')openCraft();else if(state==='craft')closeCraft();e.preventDefault();return}
+  if(e.code==='Escape'){e.preventDefault();if(state==='craft')closeCraft();else if(state==='shop')closeShop();else if(modalOpen)closeModal();else if(openPanel)closePanel();else togglePause();return}
   if(e.code==='KeyP'){togglePause();e.preventDefault();return}
   if(e.code==='KeyM'){toggleMute();return}
   if(e.code==='KeyN'){toggleMusic();return}
