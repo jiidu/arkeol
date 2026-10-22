@@ -1,14 +1,14 @@
 /*
-  Arkeol v0.3.1 · Copyright (C) 2026 JP Hakoluoto
+  Arkeol v0.3.2 · Copyright (C) 2026 JP Hakoluoto
   Free software under the GNU GPL v3 or later, with an attribution term (see LICENSE and NOTICE).
 */
 'use strict';
 /* =========================================================== constants */
 const T=16, MW=58, MH=54;
-const AIR=0,DIRT=1,STONE=2,BED=3,GOLD=4,DIAM=5,PLATE=6,TRAPL=7,TRAPR=8,WATER=9,BRICK=10,GLYPH=11,SHOPB=12,GRAN=13,LAVA=14,ICE=15,SAND=16;
-const HP=[0,2,4,Infinity,5,7,4,6,6,0,9,9,Infinity,7,0,3,1];
-const SOL=[0,1,1,1,1,1,1,1,1,0,1,1,1,1,0,1,1];
-const LIQ=[0,0,0,0,0,0,0,0,0,1,0,0,0,0,1,0,0];
+const AIR=0,DIRT=1,STONE=2,BED=3,GOLD=4,DIAM=5,PLATE=6,TRAPL=7,TRAPR=8,WATER=9,BRICK=10,GLYPH=11,SHOPB=12,GRAN=13,LAVA=14,ICE=15,SAND=16,VAULT=17,VDOOR=18;
+const HP=[0,2,4,Infinity,5,7,4,6,6,0,9,9,Infinity,7,0,3,1,Infinity,Infinity];
+const SOL=[0,1,1,1,1,1,1,1,1,0,1,1,1,1,0,1,1,1,1];
+const LIQ=[0,0,0,0,0,0,0,0,0,1,0,0,0,0,1,0,0,0,0];
 const $=id=>document.getElementById(id);
 const cv=$('game');let ctx=cv.getContext('2d');
 const lc=document.createElement('canvas'), lx=lc.getContext('2d');

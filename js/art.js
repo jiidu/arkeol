@@ -1,5 +1,5 @@
 /*
-  Arkeol v0.3.1 · Copyright (C) 2026 JP Hakoluoto
+  Arkeol v0.3.2 · Copyright (C) 2026 JP Hakoluoto
   Free software under the GNU GPL v3 or later, with an attribution term (see LICENSE and NOTICE).
 */
 'use strict';
@@ -58,6 +58,10 @@ const TEXB={normal:{[DIRT]:TEX[DIRT],[STONE]:TEX[STONE],[GRAN]:TEX[GRAN],[PLATE]
   shroom:biomeSet([82,66,96],[92,94,120],[62,56,84],[210,150,255],2800)};
 const bgSet=(b,seed)=>[0,1,2,3].map(v=>tex((px,r)=>{for(let y=0;y<T;y++)for(let x=0;x<T;x++)px(x,y,vary(b,r,4));for(let k=0;k<10;k++)px(r()*T,r()*T,add(b,-8));for(let x=0;x<T;x++)if(r()<.5)px(x,(v*5)%T,add(b,-5))},seed+v));
 TEX[ICE]=[0,1].map(v=>tex((px,r)=>{for(let y=0;y<T;y++)for(let x=0;x<T;x++)px(x,y,vary([168,212,238],r,6));for(let k=0;k<3;k++){let x=r()*T,y=r()*T;for(let j=0;j<6;j++){px(x,y,[236,250,255]);x++;y--}}for(let k=0;k<6;k++)px(r()*T,r()*T,[120,170,214])},2200+v));
+TEX[VAULT]=[0,1,2,3].map(v=>tex((px,r)=>{for(let y=0;y<T;y++)for(let x=0;x<T;x++){const edge=x===0||y===0,dk=x===T-1||y===T-1;px(x,y,edge?[92,98,110]:dk?[30,32,40]:vary([58,62,72],r,4))}
+  for(const [x,y] of [[2,2],[13,2],[2,13],[13,13]]){px(x,y,[150,156,168]);px(x+1,y+1,[24,26,32])}if(v===1)for(let x=4;x<12;x++)px(x,8,[44,46,56])},1700+v));
+TEX[VDOOR]=[0,1,2,3].map(v=>tex((px,r)=>{for(let y=0;y<T;y++)for(let x=0;x<T;x++){px(x,y,vary([74,66,52],r,4));if(x%4===0)px(x,y,[44,38,30])}
+  for(let x=0;x<T;x++){px(x,0,[120,108,80]);px(x,T-1,[30,26,20])}for(let y=3;y<T;y+=6)for(let x=1;x<T;x+=4)px(x,y,[170,150,90]);px(7,7,[200,160,60]);px(8,7,[200,160,60]);px(7,8,[140,110,40]);px(8,8,[140,110,40])},1800+v));
 TEX[SAND]=[0,1,2,3].map(v=>tex((px,r)=>{const b=[208,184,134];for(let y=0;y<T;y++)for(let x=0;x<T;x++)px(x,y,vary(b,r,6));for(let k=0;k<26;k++)px(r()*T,r()*T,r()<.5?[182,158,110]:[228,208,160]);for(let k=0;k<4;k++){const x=r()*T,y=r()*T;px(x,y,[150,130,96])}for(let x=0;x<T;x++)if(r()<.4)px(x,(v*4+7)%T,[196,170,122])},3300+v));
 const SNOW=[0,1,2,3].map(v=>{const c=mk(T,5),g=c.getContext('2d'),r=mulberry32(2300+v);for(let x=0;x<T;x++){const h=2+(r()*3|0);for(let y=0;y<h;y++){g.fillStyle=y===0?'#ffffff':(r()<.5?'#e6f0fa':'#cfdcec');g.fillRect(x,y,1,1)}}return c});
 const ASH=[0,1,2,3].map(v=>{const c=mk(T,3),g=c.getContext('2d'),r=mulberry32(2400+v);for(let x=0;x<T;x++){const h=1+(r()*2|0);for(let y=0;y<h;y++){g.fillStyle=r()<.12?'#ff8a3a':(r()<.5?'#3a2620':'#4a3028');g.fillRect(x,y,1,1)}}return c});
@@ -101,6 +105,9 @@ const ICON={};
   ICON.ladder=pixIcon(p=>{p(4,1,2,14,'#7a5230');p(10,1,2,14,'#7a5230');for(let y=3;y<15;y+=4)p(5,y,6,2,'#9a6a3a')});
   ICON.bandage=pixIcon(p=>{p(3,5,10,6,'#efe8dc');p(3,5,10,1,'#fff');p(7,6,2,4,'#e2483d');p(6,7,4,2,'#e2483d')});
   ICON.stew=pixIcon(p=>{p(3,8,10,5,'#5e6670');p(2,7,12,2,'#7a828c');p(4,8,8,1,'#c98a4a');p(6,4,1,3,'rgba(220,220,220,.6)');p(9,3,1,3,'rgba(220,220,220,.5)')});
+  ICON.meal_fried=pixIcon(p=>{p(2,9,12,3,'#5e6670');p(1,9,1,2,'#7a828c');p(14,10,2,1,'#3a3236');for(const [x,c] of [[3,'#d83a2a'],[6,'#c06a3a'],[9,'#d83a2a'],[11,'#c06a3a']]){p(x,7,3,2,c);p(x+1,6,1,1,'#efe8dc')}p(5,3,1,3,'rgba(220,220,220,.5)');p(9,2,1,3,'rgba(220,220,220,.4)')});
+  ICON.meal_pie=pixIcon(p=>{p(2,8,12,5,'#c49a52');p(1,8,14,1,'#e0b870');p(3,9,10,3,'#3a3a8a');for(let x=3;x<13;x+=3)p(x,9,2,1,'#e0b870');p(4,10,1,1,'#6a6ad8');p(9,11,1,1,'#6a6ad8');p(2,13,12,1,'#8a6a3a')});
+  ICON.meal_kukko=pixIcon(p=>{p(3,6,10,7,'#5a3a20');p(2,7,12,5,'#5a3a20');p(4,5,8,1,'#6b4426');p(4,6,7,1,'#8a5a30');p(5,8,3,1,'#7a4a28');p(9,10,2,1,'#7a4a28');p(3,13,10,1,'#3a2614')});
   ICON.blueprint=pixIcon(p=>{p(2,3,12,10,'#3d5fb8');p(2,3,12,1,'#6a8ad8');p(4,5,6,1,'#cfdcf0');p(4,7,4,1,'#cfdcf0');p(9,8,3,3,'#cfdcf0');p(10,9,1,1,'#3d5fb8')});
   ICON.none=pixIcon(p=>{for(let i=3;i<13;i+=2){p(i,i,1,1,'#5a4f55');p(15-i,i,1,1,'#5a4f55')}});
   ICON.whip=pixIcon((p,g)=>{g.strokeStyle='#8a5f34';g.lineWidth=1.5;g.beginPath();g.arc(9,8,4.5,0,Math.PI*1.7);g.stroke();g.beginPath();g.arc(9,8,2.2,0,Math.PI*1.8);g.stroke();p(2,11,4,2,'#4b3628');p(1,12,2,2,'#2a1e16')});

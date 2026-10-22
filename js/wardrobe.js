@@ -1,5 +1,5 @@
 /*
-  Arkeol v0.3.1 · Copyright (C) 2026 JP Hakoluoto
+  Arkeol v0.3.2 · Copyright (C) 2026 JP Hakoluoto
   SPDX-License-Identifier: GPL-3.0-or-later (with the additional attribution term in NOTICE)
   wardrobe.js – clothes, dyes and the wardrobe screen
 */
@@ -46,7 +46,9 @@ const NECKS=[
 ];
 const WCATS={d:DYES,h:HATS,t:TOPS,n:NECKS};
 const WALL=[...DYES.map(x=>'d:'+x.id),...HATS.map(x=>'h:'+x.id),...TOPS.map(x=>'t:'+x.id),...NECKS.map(x=>'n:'+x.id)];
-const WDEF={hat:'pith',hatC:'tan',top:'shirt',topC:'khaki',pants:'brown',neck:'bandana',neckC:'red'};
+const HAIRS=[{id:'brown',c:'#4a3020'},{id:'dark',c:'#1e1612'},{id:'blond',c:'#c8a050'},{id:'red',c:'#8a3a1a'},{id:'grey',c:'#9a948a'}];
+const hairC=id=>(HAIRS.find(h=>h.id===id)||HAIRS[0]).c;
+const WDEF={body:'m',hair:'brown',hat:'pith',hatC:'tan',top:'shirt',topC:'khaki',pants:'brown',neck:'bandana',neckC:'red'};
 store.wardrobe=store.wardrobe||{own:{},look:{}};
 (function(){try{const s=JSON.parse(localStorage.getItem(SKEY)||'null');if(s&&s.wardrobe)store.wardrobe=s.wardrobe}catch(e){}
   const w=store.wardrobe;w.own=w.own||{};w.look=Object.assign({},WDEF,w.look||{});
@@ -58,7 +60,7 @@ function shade(hex,f){const n=parseInt(hex.slice(1),16);let r=n>>16,g=n>>8&255,b
   if(f>0){r+=(255-r)*f;g+=(255-g)*f;b+=(255-b)*f}else{r*=1+f;g*=1+f;b*=1+f}
   return '#'+[r,g,b].map(v=>Math.round(v).toString(16).padStart(2,'0')).join('')}
 /* resolved colours for the current look */
-function look(){const L=store.wardrobe.look;return {hat:L.hat,hc:dyeC(L.hatC),top:L.top,tc:dyeC(L.topC),pc:dyeC(L.pants),neck:L.neck,nc:dyeC(L.neckC)}}
+function look(){const L=store.wardrobe.look;return {body:L.body||'m',hc2:hairC(L.hair),hat:L.hat,hc:dyeC(L.hatC),top:L.top,tc:dyeC(L.topC),pc:dyeC(L.pants),neck:L.neck,nc:dyeC(L.neckC)}}
 /* pick something not yet found; dyes are the most common find */
 function randomCosmetic(only){const pool=WALL.filter(k=>!wOwn(k)&&!wItem(k).shop&&(!only||only.includes(k[0])));if(!pool.length)return null;
   const w=pool.map(k=>k[0]==='d'?3:1),sum=w.reduce((a,b)=>a+b,0);let r=Math.random()*sum;for(let i=0;i<pool.length;i++){r-=w[i];if(r<=0)return pool[i]}return pool[0]}
@@ -70,7 +72,7 @@ function gainCosmetic(key,x,y){if(!key||wOwn(key))return false;store.wardrobe.ow
 /* ------------------------------------------------ drawing the outfit (origin at the feet, facing right) */
 function drawHat(o){const c=o.hc,d=shade(c,-.25),l=shade(c,.22);
   switch(o.hat){
-  case 'none':R(-4,-16,8,2,'#4a3020');R(-4,-14,2,2,'#4a3020');R(-3,-17,5,1,'#5a3a26');break;
+  case 'none':{const h=o.hc2;R(-4,-16,8,2,h);R(-4,-14,2,2,h);R(-3,-17,5,1,shade(h,.15));if(o.body==='f'){R(-5,-16,2,5,h);R(2,-16,2,1,h)}break}
   case 'fedora':R(-6,-16,12,1,d);R(-4,-19,8,3,c);R(-4,-19,8,1,l);R(-1,-19,2,1,d);R(-4,-17,8,1,'#2a1e16');break;
   case 'cap':R(-4,-18,8,3,c);R(-3,-19,6,1,c);R(-3,-19,6,1,l);R(3,-16,4,1,d);R(-1,-20,2,1,l);break;
   case 'hardhat':R(-5,-16,10,1,d);R(-4,-19,8,3,c);R(-3,-20,6,1,c);R(-1,-20,2,4,l);R(3,-18,2,2,'#fff6c0');break;
@@ -79,6 +81,7 @@ function drawHat(o){const c=o.hc,d=shade(c,-.25),l=shade(c,.22);
   case 'straw':R(-7,-16,14,1,'#d8bc6a');R(-6,-16,1,1,'#b89a4a');R(4,-16,1,1,'#b89a4a');R(-3,-19,6,3,'#e0c47a');R(-3,-19,6,1,'#f0dc9a');R(-3,-17,6,1,c);break;
   case 'fez':{R(-3,-20,6,5,c);R(-2,-21,4,1,c);R(-3,-20,1,5,d);R(2,-20,1,5,l);const sw=Math.round(Math.sin(frame*.12)*.6);R(-4+sw,-20,1,4,'#1a1410');R(-4+sw,-17,1,1,'#d6b04a');break}
   default:R(-6,-16,12,1,shade(c,-.15));R(-4,-18,8,2,c);R(-3,-19,6,1,c);R(-4,-18,8,1,l);R(-4,-16,8,1,'#5a3a22');R(3,-18,2,2,'#fff6c0')}}
+function drawHairBack(o){const h=o.hc2;if(o.body==='f'){const sw=Math.round(Math.sin(frame*.12)*.6);R(-6,-15,2,3,h);R(-7+sw,-12,2,4,h);R(-7+sw,-9,2,1,shade(h,-.2));R(-6,-13,1,1,'#b84a32')}else R(-5,-15,1,3,h)}
 function drawTop(o,moving){const c=o.tc,d=shade(c,-.2),l=shade(c,.2);
   switch(o.top){
   case 'vest':R(-5,-11,10,6,'#e6dcc4');R(-5,-11,10,1,'#f4ecda');R(-5,-11,4,6,c);R(1,-11,4,6,c);R(-5,-11,4,1,l);R(1,-11,4,1,l);R(-1,-9,1,1,d);R(-1,-7,1,1,d);R(-5,-6,10,1,'#5a3a22');R(-1,-6,2,1,'#c9a043');break;
@@ -108,6 +111,10 @@ function renderWardrobe(){const L=store.wardrobe.look,box=$('wRows');box.innerHT
       b.disabled=!have;b.setAttribute('aria-pressed',String(L[field]===it.id));
       b.addEventListener('click',()=>{L[field]=it.id;save();sfx.ui&&sfx.ui();renderWardrobe()});opts.append(b)}
     r.append(opts);box.append(r)};
+  {const r=document.createElement('div');r.className='wRow';r.innerHTML=`<span class="wLbl">${esc(t('wBody'))}</span>`;const op=document.createElement('div');op.className='wOpts';
+    for(const [id,k] of [['m','bodyM'],['f','bodyF']]){const b=document.createElement('button');b.type='button';b.className='wOpt';b.textContent=t(k);b.setAttribute('aria-pressed',String((L.body||'m')===id));b.addEventListener('click',()=>{L.body=id;save();renderWardrobe()});op.append(b)}r.append(op);box.append(r)}
+  {const r=document.createElement('div');r.className='wRow';r.innerHTML=`<span class="wLbl">${esc(t('wHairC'))}</span>`;const op=document.createElement('div');op.className='wOpts';
+    for(const hh of HAIRS){const b=document.createElement('button');b.type='button';b.className='sw';b.style.setProperty('--c',hh.c);b.setAttribute('aria-label',hh.id);b.setAttribute('aria-pressed',String((L.hair||'brown')===hh.id));b.addEventListener('click',()=>{L.hair=hh.id;save();renderWardrobe()});op.append(b)}r.append(op);box.append(r)}
   row('wHat','h',HATS,'hat');if(L.hat!=='none')row('wHatC','d',DYES,'hatC');
   row('wTop','t',TOPS,'top');row('wTopC','d',DYES,'topC');row('wPants','d',DYES,'pants');
   row('wNeck','n',NECKS,'neck');if(L.neck!=='none')row('wNeckC','d',DYES,'neckC');

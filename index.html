@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="Arkeol v0.3.1 – an open source archaeological mining game for the browser.">
+<meta name="description" content="Arkeol v0.3.2 – an open source archaeological mining game for the browser.">
 <title>Arkeol</title>
 <!--
-  Arkeol v0.3.1
+  Arkeol v0.3.2
   Copyright (C) 2026 JP Hakoluoto
 
   This program is free software: you can redistribute it and/or modify it under the terms of the
@@ -48,7 +48,7 @@
   <div id="achs"></div>
   <div id="talk" hidden></div>
   <div id="hint" hidden></div>
-  <div id="ver">v0.3.1</div>
+  <div id="ver">v0.3.2</div>
   <div id="toast"><div class="kick" id="toastKick"></div><div class="big" id="toastBig"></div><div class="small" id="toastSmall"></div></div>
   <div id="touch">
     <div class="pad l">
@@ -82,7 +82,7 @@
     </nav>
     <p class="records" id="records" hidden></p>
   </div>
-  <div class="menuVer">v0.3.1</div>
+  <div class="menuVer">v0.3.2</div>
 </div>
 
 <div id="wardrobe" class="screen" hidden>
@@ -197,6 +197,15 @@
   </div>
 </div>
 
+<div id="term" class="screen" hidden>
+  <div class="crt" role="dialog" aria-label="Terminal">
+    <pre id="termOut"></pre>
+    <div class="termIn"><span>&gt;</span><input id="termInput" type="text" inputmode="numeric" autocomplete="off" spellcheck="false" aria-label="Answer"></div>
+    <div class="termOpts" id="termOpts"></div>
+    <div class="termFoot"><button class="termBtn" id="termClose" type="button">[ESC] logout</button></div>
+  </div>
+</div>
+
 <div id="shop" class="screen" hidden>
   <div class="card wide">
     <div class="shopHead"><canvas id="sabu" width="32" height="32"></canvas><div><h2 data-i18n="shopTitle"></h2><div class="say" id="sabuSay"></div><div class="wallet" id="shopMoney"></div></div></div>
@@ -218,6 +227,9 @@
 <script src="js/ui.js"></script>
 <script src="js/render.js"></script>
 <script src="js/foes2.js"></script>
+<script src="js/junk.js"></script>
+<script src="js/secrets.js"></script>
+<script src="js/pad.js"></script>
 <script src="js/main.js"></script>
 </body>
 </html>

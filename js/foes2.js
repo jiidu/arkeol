@@ -1,5 +1,5 @@
 /*
-  Arkeol v0.3.1 · Copyright (C) 2026 JP Hakoluoto
+  Arkeol v0.3.2 · Copyright (C) 2026 JP Hakoluoto
   Free software under the GNU GPL v3 or later, with an attribution term (see LICENSE and NOTICE).
   foes2.js – bats, mimic chests, burrowing worms and will-o'-the-wisps
 */
@@ -11,6 +11,7 @@ Object.assign(sfx,{
   rumble:()=>{noise(1.1,.16,140);noise(.9,.06,320,'bandpass')},
   wormRoar:()=>{tone(80,.7,'sawtooth',.07,-30);noise(.6,.12,500,'bandpass')},
   wispSteal:()=>{tone(1300,.5,'sine',.035,-900);setTimeout(()=>tone(980,.6,'sine',.03,-700),120);setTimeout(()=>tone(700,.7,'triangle',.02,-400),260)},
+  croak:()=>{tone(150,.09,'square',.03,-50);setTimeout(()=>tone(120,.12,'square',.03,-40),110)},
   wispPop:()=>{tone(1800,.15,'sine',.04,600);noise(.15,.05,4000,'highpass')}
 });
 const soft=(tx,ty)=>{const tt=tileAt(tx,ty);return (tt===DIRT||tt===SAND||tt===STONE)&&!prot[idx(tx,ty)]};
@@ -20,23 +21,27 @@ const cellSolid=(x,y)=>isSolid(Math.floor(x/T),Math.floor(y/T));
 function mkBat(x,y){return {type:'bat',x:x-2,y,w:12,h:8,vx:0,vy:0,hx:x-2,hy:y,st:'sleep',hp:1,t:0,lost:0,anim:Math.random()*99,hurt:0,dead:false,face:1}}
 function mkMimic(x,y){return {type:'mimic',x,y,w:12,h:11,vx:0,vy:0,st:'disguise',hp:4,t:0,hop:20,lost:0,anim:Math.random()*999,hurt:0,dead:false,face:1}}
 function mkWorm(x,y){return {type:'worm',x,y,w:12,h:12,hx:x+6,hy:y+6,vx:0,vy:0,st:'lurk',hp:5,cd:240,t:0,trail:[],anim:0,hurt:0,dead:false,face:1}}
+function mkFrog(x,y,pz){return {type:'frog',x,y,w:10,h:7,vx:0,vy:0,st:'idle',hp:pz?1:2,hop:30+Math.random()*90,croak:0,anim:Math.random()*99,hurt:0,dead:false,face:Math.random()<.5?-1:1,pz}}
 function mkWisp(x,y){return {type:'wisp',x,y,w:8,h:8,hx:x,hy:y,vx:0,vy:0,st:'drift',hp:1,t:0,anim:Math.random()*99,hurt:0,dead:false,face:1,fade:1}}
 
 function spawnExtraFoes(lv,H){const {ri,r,airFloor,far,sy}=H;
   // bats roost in little groups under ceilings
   const nG=lv===1?1:Math.min(1+Math.floor(lv/3),3);let g=0;
   for(let a=0;a<2000&&g<nG;a++){const x=ri(3,MW-4),y=ri(sy+2,MH-5);
-    if(grid[idx(x,y)]!==AIR||!isSolid(x,y-1)||isSolid(x,y+1)||isSolid(x,y+2)||isWater(x,y)||!far(x,y,10))continue;
-    let n=0;for(let dx=-2;dx<=2&&n<2+ri(0,2);dx++){if(grid[idx(x+dx,y)]===AIR&&isSolid(x+dx,y-1)){foes.push(mkBat((x+dx)*T+4,y*T+.5));n++}}g++}
+    if(grid[idx(x,y)]!==AIR||prot[idx(x,y)]||!isSolid(x,y-1)||isSolid(x,y+1)||isSolid(x,y+2)||isWater(x,y)||!far(x,y,10))continue;
+    let n=0;for(let dx=-2;dx<=2&&n<2+ri(0,2);dx++){if(grid[idx(x+dx,y)]===AIR&&!prot[idx(x+dx,y)]&&isSolid(x+dx,y-1)){foes.push(mkBat((x+dx)*T+4,y*T+.5));n++}}g++}
   // a mimic sits where a chest would be
   if(lv>=3){const nM=(r()<.55?1:0)+(lv>=6&&r()<.35?1:0);let m=0;
     for(let a=0;a<1500&&m<nM;a++){const x=ri(2,MW-3),y=ri(sy+2,MH-3);if(!airFloor(x,y)||!far(x,y,10)||isWater(x,y))continue;foes.push(mkMimic(x*T+2,(y+1)*T-11.001));m++}}
   // one burrowing worm in soft ground
   if(lv>=3&&biome!=='cold'&&(lv>=5||r()<.55)){for(let a=0;a<1500;a++){const x=ri(4,MW-5),y=ri(Math.max(sy+6,MH*.35|0),MH-4);
     if(!soft(x,y)||!soft(x,y+1)||!far(x,y,16))continue;foes.push(mkWorm(x*T+2,y*T+2));break}}
+  // leaping frogs in damp, green places (the bright ones are poisonous)
+  {const nF=biome==='moss'?3+Math.floor(lv/3):biome==='normal'?1+(lv>2?1:0):biome==='shroom'?1:0;let fc=0;
+   for(let a=0;a<1500&&fc<nF;a++){const x=ri(2,MW-3),y=ri(sy+2,MH-3);if(!airFloor(x,y)||grid[idx(x,y-1)]!==AIR||!far(x,y,10))continue;foes.push(mkFrog(x*T+3,(y+1)*T-7.001,biome==='moss'&&r()<.4));fc++}}
   // will-o'-the-wisps in the deep
   if(lv>=4){const nW=1+(r()<.4?1:0);let w=0;for(let a=0;a<1500&&w<nW;a++){const x=ri(3,MW-4),y=ri(Math.max(sy+4,MH*.35|0),MH-4);
-    if(grid[idx(x,y)]!==AIR||isWater(x,y)||!far(x,y,14))continue;foes.push(mkWisp(x*T+4,y*T+4));w++}}
+    if(grid[idx(x,y)]!==AIR||prot[idx(x,y)]||isWater(x,y)||!far(x,y,14))continue;foes.push(mkWisp(x*T+4,y*T+4));w++}}
 }
 
 /* ------------------------------------------------ behaviour (each returns how much it adds to the music's tension) */
@@ -51,6 +56,7 @@ function updBat(f,dx,dy,dist,sees,fcx,fcy){const pcx=fcx+dx,pcy=fcy+dy;
   else if(f.st==='flee'){f.vx+=-Math.sign(dx)*.06;f.vy-=.05;if(f.t>110){f.st='fly';f.t=0}}
   else{const hx=f.hx-fcx,hy=f.hy-fcy,d=Math.hypot(hx,hy);f.vx+=hx/(d||1)*.08;f.vy+=hy/(d||1)*.08;if(d<3){f.x=f.hx;f.y=f.hy;f.st='sleep';f.lost=0;return 0}if(sees&&dist<5*T)f.st='fly'}
   const sp=Math.hypot(f.vx,f.vy),mx=f.st==='flee'?1.3:1.35;if(sp>mx){f.vx*=mx/sp;f.vy*=mx/sp}
+  if(shop){const nx=f.x+f.w/2+f.vx*4,ny=f.y+f.h/2+f.vy*4;if(nx>shop.x0*T&&nx<(shop.x0+shop.w)*T&&ny>shop.y0*T&&ny<(shop.y0+shop.h)*T){f.vx*=-1;f.vy*=-1;if(f.st==='fly'){f.st='flee';f.t=0}}}
   move(f);if(f.hitX)f.vx*=-.6;if(f.hitY)f.vy*=-.6;if(Math.abs(f.vx)>.1)f.face=Math.sign(f.vx);
   if(f.st==='fly'&&state==='play'&&overlap(P,f)){hurt(1,'cBat',fcx);f.st='flee';f.t=0}
   return f.st==='fly'?.3:0}
@@ -82,8 +88,8 @@ function updWorm(f,dx,dy,dist,sees,fcx,fcy){const pcx=fcx+dx,pcy=fcy+dy;f.anim++
 function updWisp(f,dx,dy,dist,sees,fcx,fcy){f.t++;const pcx=fcx+dx,pcy=fcy+dy;
   if(f.fade<1)f.fade=Math.min(1,f.fade+.02);
   if(f.st==='drift'){let tx=f.hx+Math.sin(f.t*.013+f.anim)*22,ty=f.hy+Math.cos(f.t*.019+f.anim)*12;
-    if(dist<7*T&&!P.dead){tx=pcx;ty=pcy-4}
-    const sp=dist<7*T?.42:.3;const a=Math.atan2(ty-fcy,tx-fcx),d=Math.hypot(tx-fcx,ty-fcy);if(d>1){f.x+=Math.cos(a)*Math.min(sp,d);f.y+=Math.sin(a)*Math.min(sp,d)}
+    if(dist<7*T&&!P.dead&&sees){tx=pcx;ty=pcy-4}
+    const sp=dist<7*T&&sees?.42:.3;const a=Math.atan2(ty-fcy,tx-fcx),d=Math.hypot(tx-fcx,ty-fcy);if(d>1){f.x+=Math.cos(a)*Math.min(sp,d);f.y+=Math.sin(a)*Math.min(sp,d)}
     if(state==='play'&&overlap(P,f)&&f.fade>=1){P.dark=720;sfx.wispSteal();floatText(fcx,f.y-8,t('lightStolen'),'#9fe8ff');f.st='flee';f.t=0;particle(fcx,fcy,['#c8fbff','#7fe8ff'],16,1.8,40,0,1)}}
   else{f.x+=-Math.sign(dx||1)*1.5;f.y-=.4;
     if(f.t>110){for(let a=0;a<200;a++){const x=1+Math.floor(Math.random()*(MW-2)),y=1+Math.floor(Math.random()*(MH-2));
@@ -91,9 +97,28 @@ function updWisp(f,dx,dy,dist,sees,fcx,fcy){f.t++;const pcx=fcx+dx,pcy=fcy+dy;
   if(frame%9===0)parts.push({x:f.x+4+rand(-2,2),y:f.y+4,vx:0,vy:-.15,life:30,max:30,col:'rgba(160,240,255,.7)',g:0,sz:1});
   return 0}
 
+function updFrog(f,dx,dy,dist,sees,fcx){
+  const wet=inWaterAt(fcx,f.y+f.h/2);f.vy=Math.min(f.vy+(wet?.12:.28),wet?1.6:7);
+  if(f.croak>0)f.croak--;else if(Math.random()<.004&&dist<12*T){f.croak=30;if(dist<9*T)sfx.croak()}
+  if(f.onGround||wet){f.vx*=.6;
+    if(--f.hop<=0){if(sees&&dist<7*T){f.face=Math.sign(dx)||f.face;f.vx=f.face*(1.8+Math.random()*.8);f.vy=-(3.8+Math.random()*1.2);f.hop=55+Math.random()*45;if(Math.random()<.5)sfx.croak()}
+      else{f.face=Math.random()<.5?-1:1;f.vx=f.face*1.1;f.vy=-2.6;f.hop=90+Math.random()*140}}}
+  move(f);if(f.hitX){f.vx*=-.5;f.face*=-1}if(f.hitY)f.vy=0;
+  if(state==='play'&&overlap(P,f)){if(P.vy>1&&P.y+P.h-f.y<6&&!P.climb){killFoe(f,'stomp');P.vy=-4.6;P.peak=P.y}
+    else{if(f.pz)poisonHit(1,'cFrog',fcx,360);else hurt(1,'cFrog',fcx);f.vx=-Math.sign(dx||1)*2;f.vy=-3;f.hop=80}}
+  return sees&&dist<6*T?.25:0}
+function drawFrog(f){const x=Math.round(f.x+f.w/2),y=Math.round(f.y+f.h),air=!f.onGround,hc=f.hurt>0&&(f.hurt>>1)%2;
+  const body=hc?'#fff':f.pz?'#2a7ad8':'#4a8a3a',belly=f.pz?'#f0a020':'#a8c870',dark=f.pz?'#1a3a7a':'#2e5a24';
+  ctx.save();ctx.translate(x,y);if(f.face<0)ctx.scale(-1,1);
+  if(air){R(-7,-3,4,2,dark);R(-9,-2,3,1,dark);R(3,-4,3,2,dark)}else{R(-6,-2,4,2,dark);R(2,-2,4,2,dark);R(-7,-1,2,1,dark);R(5,-1,2,1,dark)}
+  R(-5,-6,10,5,body);R(-4,-7,8,1,body);R(-3,-3,7,2,belly);if(f.pz){R(-3,-6,2,1,'#101820');R(1,-5,2,1,'#101820')}
+  R(0,-9,3,3,body);R(3,-9,3,3,body);R(1,-8,1,1,'#fff');R(4,-8,1,1,'#fff');R(2,-8,1,1,'#101010');R(5,-8,1,1,'#101010');R(4,-4,3,1,dark);
+  if(f.croak>0&&f.croak%10<7){ctx.fillStyle=f.pz?'#f0c040':'#d8e8a0';ctx.beginPath();ctx.arc(4,-3,2.5,0,7);ctx.fill()}
+  ctx.restore()}
 function onExtraHurt(f){if(f.type==='mimic'&&f.st==='disguise'){f.st='awake';f.hop=10;sfx.chomp()}if(f.type==='bat')wakeBat(f);if(f.type==='worm'&&f.st==='lurk')f.cd=0}
-const EXTRA_UPD={bat:updBat,mimic:updMimic,worm:updWorm,wisp:updWisp};
+const EXTRA_UPD={frog:updFrog,bat:updBat,mimic:updMimic,worm:updWorm,wisp:updWisp};
 const EXTRA_KILL={
+  frog:f=>{sfx.squish();particle(f.x+5,f.y+4,f.pz?['#2a7ad8','#f0a020']:['#4a8a3a','#a8c870'],12,1.8,30,.2,1);addMoney(20,f.x+5,f.y-4,'#c8e8a0')},
   bat:f=>{sfx.squish();particle(f.x+4,f.y+3,['#4a3a42','#2a2026','#a02b24'],10,1.8,30,.2,1);store.stats.bats=(store.stats.bats||0)+1;addMoney(15,f.x+4,f.y-4,'#d9c8d0');if(store.stats.bats>=10)unlock('bat10')},
   mimic:f=>{sfx.chomp();particle(f.x+6,f.y+5,['#a06a34','#8a5a2c','#f2c84b'],18,2.2,40,.2,1.5);addMoney(80,f.x+6,f.y-6,'#ffe08a');
     for(let k=0;k<3;k++)pickups.push({x:f.x+3,y:f.y,w:6,h:5,vx:rand(-1.4,1.4),vy:rand(-3,-1.5),kind:'gold',value:60+(Math.random()*5|0)*10,t:0});
@@ -125,7 +150,7 @@ function drawWorm(f){const N=11;
 function drawWisp(f){const x=f.x+4,y=f.y+4+Math.sin(frame*.06+f.anim)*1.5,a=f.fade,fl=.8+Math.sin(frame*.3+f.anim)*.2;
   const g=ctx.createRadialGradient(x,y,0,x,y,7);g.addColorStop(0,`rgba(255,255,255,${.95*a})`);g.addColorStop(.35,`rgba(170,245,255,${.7*a*fl})`);g.addColorStop(1,'rgba(90,200,255,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,7,0,7);ctx.fill();
   if(P&&Math.hypot(P.x-f.x,P.y-f.y)<4*T&&f.st==='drift'){ctx.fillStyle=`rgba(20,40,60,${.8*a})`;ctx.fillRect(x-2,y-1,1,1);ctx.fillRect(x+1,y-1,1,1)}}
-const EXTRA_DRAW={bat:drawBat,mimic:drawMimic,worm:drawWorm,wisp:drawWisp};
+const EXTRA_DRAW={frog:drawFrog,bat:drawBat,mimic:drawMimic,worm:drawWorm,wisp:drawWisp};
 function extraLight(hole,glows){for(const f of foes){if(f.dead)continue;
   if(f.type==='wisp'){hole(f.x+4,f.y+4,2.6*T*f.fade,.8);glows.push([f.x+4,f.y+4,2*T,`rgba(120,220,255,${.25*f.fade})`])}}}
 function extraEyes(f){if(f.type==='bat'&&f.st!=='sleep'){const x=Math.round(f.x+f.w/2),y=Math.round(f.y)+3;ctx.fillStyle='rgba(255,60,50,.9)';ctx.fillRect(x-1,y,1,1);ctx.fillRect(x+1,y,1,1)}

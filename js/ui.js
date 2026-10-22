@@ -1,5 +1,5 @@
 /*
-  Arkeol v0.3.1 · Copyright (C) 2026 JP Hakoluoto
+  Arkeol v0.3.2 · Copyright (C) 2026 JP Hakoluoto
   Free software under the GNU GPL v3 or later, with an attribution term (see LICENSE and NOTICE).
 */
 'use strict';
@@ -35,6 +35,8 @@ const ACH=[
  {id:'bat10',n:{en:'Night Shift',fi:'Yövuoro'},d:{en:'Take down 10 bats in total.',fi:'Kaada yhteensä 10 lepakkoa.'}},
  {id:'mimic1',n:{en:'Not a Chest',fi:'Ei mikään arkku'},d:{en:'Defeat a mimic chest.',fi:'Voita matkija-arkku.'}},
  {id:'worm1',n:{en:'Wyrm Slayer',fi:'Madonkaataja'},d:{en:'Defeat a burrowing worm.',fi:'Kaada kaivajamato.'}},
+ {id:'hacker',n:{en:'Root Access',fi:'Pääkäyttäjä'},d:{en:'Crack five old computers.',fi:'Murra viisi vanhaa tietokonetta.'}},
+ {id:'vault1',n:{en:'Open Sesame',fi:'Seesam aukene'},d:{en:'Open a sealed vault.',fi:'Avaa sinetöity holvi.'}},
  {id:'sniper',n:{en:'Sharpshooter',fi:'Tarkka-ampuja'},d:{en:'Take down an enemy from afar with a bow, crossbow or pistol.',fi:'Kaada vihollinen kaukaa jousella, varsijousella tai pistoolilla.'}}
 ];
 function unlock(id){if(store.ach[id])return;const a=ACH.find(a=>a.id===id);if(!a)return;store.ach[id]=Date.now();save();sfx.ach();
@@ -111,16 +113,20 @@ const SHOP_ITEMS=[
 const SABU={hi:{en:['Welcome, digger. Sabu has traded in these tunnels longer than anyone remembers.','The sand remembers everything. So do I, especially debts.','Ah, an archaeologist! The last one of you bought a rope. He never came back, but it was a good rope.','Gold? Good. The pharaohs accepted gold, and so do I.','Professor Varjo always said my prices were too steep. She was right.'],fi:['Tervetuloa, kaivaja. Sabu on käynyt kauppaa näissä käytävissä kauemmin kuin kukaan muistaa.','Hiekka muistaa kaiken. Niin muistan minäkin, erityisesti velat.','Ah, arkeologi! Viimeinen teistä osti köyden. Hän ei palannut, mutta köysi oli hyvä.','Kultaa? Hyvä. Faaraot hyväksyivät kultaa, ja niin hyväksyn minäkin.','Professori Varjo sanoi aina, että hinnat ovat liian kovat. Hän oli oikeassa.']},
   buy:{en:['A wise choice.','That will serve you well, at least until the next layer.','A deal is a deal. Ra sees all.','Thank you. Your gold is safe with me.'],fi:['Viisas valinta.','Tuo palvelee sinua hyvin, ainakin seuraavaan kerrokseen asti.','Kauppa on kauppa. Ra näkee kaiken.','Kiitos. Kultasi on minulla turvassa.']},
   no:{en:['Your pockets are lighter than your judgement.','Come back when you have dug a little more.','Sabu does not give credit. Not for three thousand years.'],fi:['Taskusi ovat kevyemmät kuin harkintasi.','Tule takaisin, kun olet kaivanut enemmän.','Sabu ei anna velaksi. Ei ole antanut kolmeen tuhanteen vuoteen.']}};
-function makeStock(){const base=['heart','bombs','ropes',P.hasDrill?'fuel':'drill0',P.weapons.length?'arrows':'bow'];if(!P.rod)base.push('rod');const extras=SHOP_ITEMS.filter(i=>(i.once||i.id==='ammo'||i.id==='dye'||i.id==='blueprint')&&!base.includes(i.id)).map(i=>i.id).sort(()=>Math.random()-.5).slice(0,5);return {ids:[...base,...extras],sold:{}}}
-function openShop(){if(!shop||state!=='play')return;state='shop';releaseAll();$('sabuSay').textContent=pickR(tr(SABU.hi));drawSabu($('sabu'));renderShop();$('shop').hidden=false;setTimeout(()=>$('shopClose').focus(),30)}
+function makeStock(){const base=['heart','bombs','ropes',...(P.hasDrill?['fuel']:[]),P.weapons.length?'arrows':'bow'];if(!P.rod)base.push('rod');const extras=SHOP_ITEMS.filter(i=>(i.once||i.id==='ammo'||i.id==='dye'||i.id==='blueprint')&&!base.includes(i.id)).map(i=>i.id).sort(()=>Math.random()-.5).slice(0,5);return {ids:[...base,...extras],sold:{}}}
+for(const id of ['pistol','gun','ammo','drill0','drill']){const i=SHOP_ITEMS.findIndex(x=>x.id===id);if(i>=0)SHOP_ITEMS.splice(i,1)}
+const shopTalk=()=>curShop===junk?REIJO:SABU;
+function openShop(which){const S=which||shop;if(!S||state!=='play')return;curShop=S;if(!S.stock)S.stock=S===junk?{ids:JUNK_ITEMS.map(i=>i.id),sold:{}}:makeStock();state='shop';releaseAll();$('sabuSay').textContent=pickR(tr(shopTalk().hi));if(S===junk)drawReijoPortrait($('sabu'));else drawSabu($('sabu'));
+  document.querySelector('#shop h2').textContent=S===junk?t('junkTitle'):t('shopTitle');$('shop').classList.toggle('junkShop',S===junk);renderShop();$('shop').hidden=false;setTimeout(()=>$('shopClose').focus(),30)}
 function closeShop(){$('shop').hidden=true;if(state==='shop')state='play';releaseAll();renderHotbar()}
 $('shopClose').addEventListener('click',closeShop);
 function renderShop(){const g=$('shopGrid');g.innerHTML='';$('shopMoney').textContent=t('wallet',fmt(P.money));
   const pr=it=>Math.round(it.p*(1+(level-2)*.06)/10)*10;
-  for(const id of shop.stock.ids){const it=SHOP_ITEMS.find(x=>x.id===id);if(!it)continue;const sold=shop.stock.sold[id]||(it.once&&!it.ok());
+  const LIST=curShop===junk?JUNK_ITEMS:SHOP_ITEMS;
+  for(const id of curShop.stock.ids){const it=LIST.find(x=>x.id===id);if(!it)continue;const sold=curShop.stock.sold[id]||(it.once&&!it.ok());
     const d=document.createElement('div');d.className='sitem'+(sold?' sold':'');
     d.innerHTML=`<img alt="" src="${ICON[it.ic]}"><div><b>${esc(tr(it.n))}</b><span>${esc(tr(it.d))}</span></div>`;
     const b=document.createElement('button');b.type='button';b.textContent=sold?t('sold'):fmt(pr(it));b.disabled=sold||!it.ok();
-    b.addEventListener('click',()=>{const price=pr(it);if(P.money<price){sfx.nope();$('sabuSay').textContent=pickR(tr(SABU.no));return}
-      P.money-=price;it.buy();if(it.once)shop.stock.sold[id]=true;store.stats.buys++;save();sfx.buy();$('sabuSay').textContent=pickR(tr(SABU.buy));checkAch();renderShop();renderHotbar()});
+    b.addEventListener('click',()=>{const price=pr(it);if(P.money<price){sfx.nope();$('sabuSay').textContent=pickR(tr(shopTalk().no));return}
+      P.money-=price;it.buy();if(it.once)curShop.stock.sold[id]=true;store.stats.buys++;save();sfx.buy();$('sabuSay').textContent=pickR(tr(shopTalk().buy));checkAch();renderShop();renderHotbar()});
     d.appendChild(b);g.appendChild(d)}}
