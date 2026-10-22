@@ -1,12 +1,12 @@
 /*
-  Arkeol v0.3 · Copyright (C) 2026 JP Hakoluoto
+  Arkeol v0.3.1 · Copyright (C) 2026 JP Hakoluoto
   Free software under the GNU GPL v3 or later, with an attribution term (see LICENSE and NOTICE).
 */
 'use strict';
 /* =========================================================== world state */
 let grid,dmgA,webA,seen,prot,skyA,level=1,state='menu',frame=0;
 let npcs=[],foods=[],gnats=[],drips=[],rocks=[],biome='normal',lastBiome='normal',shimC=null,P,foes,acids,puddles,arrows,bombs,shots,pickups,crates,pots,ropes,parts,texts,links,flashes,door,decos,springs,shop,levelKills=0,waterAwake=true;
-let surf=null,shaft=null,clouds=[];
+let surf=null,shaft=null,clouds=[],motes=[],pendingRopes=[];
 let cam={x:0,y:0},shake=0,gemsTotal=0,relicsRun=0,mapOn=false,underwaterT=0;
 const idx=(x,y)=>y*MW+x;
 const tileAt=(x,y)=>(x<0||y<0||x>=MW||y>=MH)?BED:grid[idx(x,y)];
@@ -28,7 +28,7 @@ const inWaterAt=(x,y)=>isWater(Math.floor(x/T),Math.floor(y/T));
 /* =========================================================== level generation */
 function newPlayer(){return {x:0,y:0,w:10,h:15,vx:0,vy:0,face:1,onGround:false,hp:4,maxHp:4,bombs:0,ropes:0,fuel:100,money:0,earned:0,inv:0,coy:0,jbuf:0,peak:0,climb:null,
   swing:0,swingCd:0,drilling:false,anim:0,acid:0,dead:false,cause:'',ang:0,aimAng:0,slot:5,pick:1,drill:1,hasDrill:false,weapons:[],wi:0,stones:0,arrows:0,ammo:0,rod:false,line:null,wcd:0,whip:0,
-  lampR:7.2,jumpV:5.3,softBoots:false,breath:100,maxBreath:100,compass:false,fuelWarn:false,inWater:false,safeFall:true}}
+  lampR:7.2,jumpV:5.3,softBoots:false,breath:100,maxBreath:100,compass:false,fuelWarn:false,inWater:false,safeFall:true,mats:{},torches:0,ladders:0,dark:0}}
 const NT=['coffee','fisher','harmonica','knitter','reader'];
 function genLevel(lv){
   const seed=(Math.random()*2**31)|0;
@@ -77,6 +77,8 @@ function genLevel(lv){
   // the drop shaft: two tiles wide, from the light down to the first cavern
   for(let y=(lv===1?0:0);y<sy;y++)for(const x of [sx,sx+1]){grid[idx(x,y)]=AIR;if(lv===1&&y<top[x])skyA[idx(x,y)]=1}
   for(let x=ex-2;x<=ex+2;x++)grid[idx(x,ey+1)]=STONE;
+  {let mv=true,n=0;while(mv&&n<MH){mv=false;n++;for(let y=MH-2;y>=1;y--)for(let x=1;x<MW-1;x++){const i=idx(x,y);if(grid[i]===SAND&&grid[idx(x,y+1)]===AIR){grid[idx(x,y+1)]=SAND;grid[i]=AIR;mv=true}}}
+   for(let y=0;y<sy;y++)for(const x of [sx,sx+1])if(grid[idx(x,y)]===SAND)grid[idx(x,y)]=AIR}
   surf=lv===1?{top,ground}:null;if(lv===1)firstGround=ground;
   shaft={x:sx,y0:lv===1?ground:0,y1:sy};
   const protRect=(x0,y0,x1,y1)=>{for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++)if(x>0&&y>=0&&x<MW-1&&y<MH-1)prot[idx(x,y)]=1};
@@ -187,6 +189,7 @@ function genLevel(lv){
     for(let a=0;a<1500&&sc<nS;a++){const x=ri(2,MW-3),y=ri(sy+2,MH-3);if(!airFloor(x,y)||!airFloor(x+1,y)||!far(x,y,12)||isWater(x,y))continue;foes.push(mkSnake(x*T+1,(y+1)*T-7.001));sc++}}
   if(lv>=2){const nM=Math.min((biome==='hot'?2:1)+Math.floor(lv/3),5);let mc=0;
     for(let a=0;a<1500&&mc<nM;a++){const x=ri(2,MW-3),y=ri(sy+2,MH-3);if(!airFloor(x,y)||grid[idx(x,y-1)]!==AIR||!far(x,y,15)||isWater(x,y))continue;foes.push(mkMummy(x*T+3,(y+1)*T-16.001));mc++}}
+  spawnExtraFoes(lv,{ri,r,airFloor,far,sy});
   drips=[];const nD=lv===1?6:biome==='cold'?9:biome==='hot'?2:4;
   for(let a=0;a<900&&drips.length<nD;a++){const x=ri(2,MW-3),y=ri(sy,MH-4);
     if(grid[idx(x,y)]!==AIR||!isSolid(x,y-1)||isSolid(x,y+1)||isSolid(x,y+2)||isSolid(x,y+3)||prot[idx(x,y)]||!far(x,y,6))continue;
@@ -219,6 +222,21 @@ function genLevel(lv){
     if(biome==='moss'&&isSolid(x,y-1)&&!isSolid(x,y+1)&&q<.2)decos.push({tx:x,ty:y,k:'vine',sx:0,sy:-1,v:1+(h>>>9)%3});
     if(biome==='shroom'&&isSolid(x,y+1)&&!isSolid(x,y-1)&&!isSolid(x,y-2)&&q<.06)decos.push({tx:x,ty:y,k:'bigmush',sx:0,sy:1,v:(h>>>9)%3});
     else if(biome==='shroom'&&isSolid(x,y+1)&&q<.16)decos.push({tx:x,ty:y,k:'mush',sx:0,sy:1,v:(h>>>9)&3})}
+  // ---- extra life: ferns, grass, glowing flowers, glow-worms, hanging vines and wall moss
+  const taken=new Set(decos.map(d=>d.tx+','+d.ty));motes=[];
+  for(let y=sy;y<MH-1;y++)for(let x=1;x<MW-1;x++){const i=idx(x,y);if(grid[i]!==AIR||prot[i]||taken.has(x+','+y)||isWater(x,y))continue;
+    const up=tileAt(x,y-1),dn=tileAt(x,y+1),h=hash(x*13+lv*7,y*29)>>>0,q=(h%1000)/1000,deep=y>MH*.4,lush=biome==='moss'||biome==='normal';
+    let k=null,sxx=0,syy=0,v=(h>>>10)&7;
+    if(SOL[dn]&&dn!==SAND){
+      if(lush&&(dn===DIRT||dn===STONE)&&q<.055)k='fern';else if(lush&&q<.12&&(dn===DIRT||dn===STONE))k='grass';
+      else if(deep&&biome!=='hot'&&q<.145)k='glowflower';else if(biome==='moss'&&q<.2)k='grass';syy=1}
+    else if(SOL[up]&&!isSolid(x,y+1)){
+      if(deep&&biome!=='hot'&&q<.05)k='glowworm';else if(biome!=='hot'&&biome!=='cold'&&q<(biome==='moss'?.32:lush?.24:.07)&&!isSolid(x,y+2)){k='hangvine';v=1+(h>>>12)%(isSolid(x,y+3)?2:4)}syy=-1}
+    else if((isSolid(x-1,y)||isSolid(x+1,y))&&lush&&q<(biome==='moss'?.32:.13)){k='wallmoss';sxx=isSolid(x-1,y)?-1:1}
+    const mp=biome==='moss'?.75:biome==='normal'?.32:biome==='shroom'?.14:0,h2=(hash(x*5+lv,y*11)>>>0)%1000/1000;
+    if(mp&&SOL[dn]&&dn!==SAND&&h2<mp)decos.push({tx:x,ty:y,k:'mosscarpet',sx:0,sy:1,v:(h2*997|0)&7});
+    if(mp&&SOL[up]&&up!==SAND&&h2>1-mp*.6)decos.push({tx:x,ty:y,k:'mossceil',sx:0,sy:-1,v:(h2*991|0)&7});
+    if(k){decos.push({tx:x,ty:y,k,sx:sxx,sy:syy,v});taken.add(x+','+y);if((k==='glowflower'||k==='fern')&&motes.length<16&&r()<.3)motes.push({x:x*T+8,y:y*T+2,r:6+r()*10,s:.01+r()*.02,p:r()*7})}}
   let bc=0;const ceilH=(x,y)=>{for(let h=1;h<=4;h++){if(isSolid(x,y-h))return h;if(prot[idx(x,y-h)])return 0}return 0};
   for(let a=0;a<2500&&bc<3+(lv%3);a++){const x=ri(2,MW-5),y=ri(sy,MH-3);
     if(![0,1,2].every(dx=>grid[idx(x+dx,y)]===AIR&&!prot[idx(x+dx,y)]&&isSolid(x+dx,y+1)))continue;
@@ -231,7 +249,27 @@ function genLevel(lv){
   gnats=[];for(let a=0;a<400&&gnats.length<3+ri(0,2);a++){const x=ri(2,MW-3),y=ri(sy,MH-3);if(!airFloor(x,y)||grid[idx(x,y-1)]!==AIR)continue;
     gnats.push({x:x*T+8,y:y*T+4,d:Array.from({length:5+ri(0,4)},()=>({a:r()*7,r:2+r()*5,s:.08+r()*.12}))})}
   let tc=0;for(let a=0;a<400&&tc<3+(lv>>1);a++){const x=ri(2,MW-3),y=ri(sy,MH-3);if(grid[idx(x,y)]!==AIR||prot[idx(x,y)])continue;const sd=isSolid(x-1,y)?-1:isSolid(x+1,y)?1:0;if(!sd||!isSolid(x,y+2))continue;decos.push({tx:x,ty:y,k:'torch',sx:sd,sy:0});tc++}
+  // ---- abandoned camps: a campfire that still works as a workbench, and maybe a recipe note
+  if(lv>1){let cc=0;const want=1+(r()<.45?1:0);for(let a=0;a<4000&&cc<want;a++){const x=ri(4,MW-5),y=ri(sy+2,MH-3);
+    if(![-1,0,1].every(dx=>airFloor(x+dx,y))||grid[idx(x,y-1)]!==AIR||!far(x,y,6)||isWater(x,y))continue;
+    if(decos.some(d=>d.tx===x&&d.ty===y&&!['grass','mosscarpet','fern','sprout'].includes(d.k)))continue;
+    decos=decos.filter(d=>!(Math.abs(d.tx-x)<=1&&d.ty===y&&['grass','mosscarpet','fern','sprout','mush'].includes(d.k)));
+    if(decos.some(d=>d.k==='campfire'&&Math.abs(d.tx-x)<14&&Math.abs(d.ty-y)<10))continue;
+    decos.push({tx:x,ty:y,k:'campfire',sx:0,sy:1});if(airFloor(x+2,y))decos.push({tx:x+2,ty:y,k:'bedroll',sx:0,sy:1,v:0});cc++}}
+  {const lk=lockedRecipes();if(lk.length&&r()<.6)for(let a=0;a<600;a++){const x=ri(2,MW-3),y=ri(sy,MH-3);if(!airFloor(x,y)||!far(x,y,9)||isWater(x,y))continue;
+    pickups.push({x:x*T+4,y:(y+1)*T-6.001,w:8,h:6,vx:0,vy:0,kind:'recipe',rid:lk[ri(0,lk.length-1)].id,value:0,t:99});break}}
+  // ---- old ropes and ladders left by earlier expeditions at natural drops
+  const natRopes=[];ropes=[];
+  for(let a=0;a<3000&&natRopes.length<3+ri(0,2);a++){const x=ri(3,MW-4),y=ri(sy+1,MH-8);
+    if(grid[idx(x,y)]!==AIR||prot[idx(x,y)]||isWater(x,y))continue;
+    const side=isSolid(x-1,y+1)&&!isSolid(x-1,y)?-1:isSolid(x+1,y+1)&&!isSolid(x+1,y)?1:0;if(!side)continue;   // a ledge to stand on beside the drop
+    let len=0;while(len<13&&!isSolid(x,y+len)&&!isWater(x,y+len))len++;if(len<5||len>12||!isSolid(x,y+len))continue;
+    if(natRopes.some(o=>Math.abs(o.tx-x)<7&&Math.abs(o.top-y)<10))continue;
+    let wall=0;for(let k=1;k<len;k++)if(isSolid(x-side,y+k)||isSolid(x+side,y+k))wall++;
+    const lad=wall>=len*.7&&r()<.75;natRopes.push({tx:x,top:y,len,cur:len,head:y*T,nat:!lad,lad,side})}
   door={x:ex*T,y:(ey+1)*T-24,w:16,h:24};
+  pendingRopes=natRopes;
+  for(let y=1;y<MH-1;y++)for(let x=1;x<MW-1;x++){const i=idx(x,y);if(grid[i]===SAND){const b=grid[idx(x,y+1)];if(b===AIR||LIQ[b])grid[i]=DIRT}}
   waterAwake=true;sandAwake=true;
   return {sx,sy};
 }
@@ -247,7 +285,7 @@ function chooseLore(){const pool=[];PAPERS.forEach((_,i)=>{const k='p'+i;if(!sto
   if(!pool.length)return null;const it=pickR(pool);placedLore.add(it.k);return it}
 function buildLevel(){
   const {sx}=genLevel(level);
-  acids=[];puddles=[];arrows=[];bombs=[];shots=[];ropes=[];parts=[];texts=[];flashes=[];levelKills=0;
+  acids=[];puddles=[];arrows=[];bombs=[];shots=[];ropes=pendingRopes.slice();parts=[];texts=[];flashes=[];levelKills=0;
   // drop in from above
   P.x=sx*T+T-P.w/2;P.y=(level===1?1:0)*T+2;P.vx=0;P.vy=.5;P.peak=P.y;P.climb=null;P.inv=30;P.breath=P.maxBreath;P.safeFall=true;P.line=null;
   cam.x=P.x-VW/2;cam.y=P.y-VH/2;clampCam();
@@ -260,7 +298,7 @@ function buildLevel(){
 }
 function newGame(){
   ensureAudio();closePanel(true);
-  level=1;gemsTotal=0;relicsRun=0;runFinds=0;runKills={spider:0,wolf:0,mummy:0,snake:0};placedLore=new Set();store.runs=(store.runs||0)+1;save();
+  level=1;gemsTotal=0;relicsRun=0;runFinds=0;runKills={spider:0,wolf:0,mummy:0,snake:0,bat:0,mimic:0,worm:0,wisp:0};placedLore=new Set();store.runs=(store.runs||0)+1;save();
   P=newPlayer();state='play';buildLevel();
   for(const id of ['menu','over','pause','modal','shop','howto','settings','credits','license'])$(id).hidden=true;
   releaseAll();renderHotbar();Music.hero(levelTrack());

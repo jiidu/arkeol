@@ -1,5 +1,5 @@
 /*
-  Arkeol v0.3 · Copyright (C) 2026 JP Hakoluoto
+  Arkeol v0.3.1 · Copyright (C) 2026 JP Hakoluoto
   Free software under the GNU GPL v3 or later, with an attribution term (see LICENSE and NOTICE).
 */
 'use strict';
@@ -14,10 +14,11 @@ function wakeWater(){waterAwake=true}
 function breakTile(tx,ty,quiet,byAcid){
   const i=idx(tx,ty),tt=tileAt(tx,ty);if(!SOL[tt]||tt===BED||tt===SHOPB)return;
   grid[i]=AIR;dmgA[i]=0;
-  const cx=tx*T+8,cy=ty*T+8;
+  const cx=tx*T+8,cy=ty*T+8;lastNoise={x:cx,y:cy,f:frame};
   particle(cx,cy,TILECOL[tt]||'#777',10,2.2,30,.2,2);
   if(tt===GOLD){const n=2+(Math.random()*2|0);for(let k=0;k<n;k++)pickups.push({x:cx-3,y:cy-3,w:6,h:5,vx:rand(-1.2,1.2),vy:rand(-2.5,-1),kind:'gold',value:50+(Math.random()*7|0)*10,t:0})}
   if(tt===DIAM)pickups.push({x:cx-3,y:cy-3,w:7,h:6,vx:rand(-1,1),vy:-2.4,kind:'gem',value:450+(Math.random()*6|0)*25,t:0});
+  if((tt===STONE&&biome==='hot'&&Math.random()<.07)||(tt===GRAN&&Math.random()<.035))dropMat('powder',cx,cy);
   if((tt===BRICK||tt===GLYPH)&&Math.random()<.12)pickups.push({x:cx-3,y:cy-3,w:6,h:5,vx:rand(-1,1),vy:-2,kind:'gold',value:120,t:0});
   if(tt===TRAPL||tt===TRAPR||tt===PLATE)links=links.filter(l=>!((l.tx===tx&&l.ty===ty)||(l.px===tx&&l.py===ty)));
   for(const p of puddles)if(p.tx===tx&&p.ty===ty){p.life=0;acids.push({x:cx,y:ty*T,vx:0,vy:.5,life:0})}
@@ -43,10 +44,12 @@ function damageFoe(f,dmg,fromX,how){
   if(fromX!==undefined){const d=Math.sign(f.x+f.w/2-fromX)||1;f.vx=d*(f.type==='wolf'?2.4:1.8);if(f.st==='hang')f.st='fall';else f.vy=Math.min(f.vy,-1.8)}
   if(f.type==='wolf'&&f.st!=='chase')f.st='chase';
   if(f.type==='mummy'&&f.st!=='chase'){f.st='chase';f.groan=200;sfx.groan()}
+  onExtraHurt(f);
   if(f.hp<=0)killFoe(f,how);else sfx.squish();
 }
 function killFoe(f,how){if(f.dead)return;f.dead=true;levelKills++;if(runKills[f.type]!==undefined)runKills[f.type]++;
-  if(f.type==='spider'){sfx.squish();particle(f.x+6,f.y+5,['#a6f03a','#2b3320','#6fb42a'],16,2.4,40,.2,1.5);store.stats.spiders++;addMoney(25,f.x+6,f.y-4,'#c9f58a')}
+  if(EXTRA_KILL[f.type])EXTRA_KILL[f.type](f);
+  else if(f.type==='spider'){sfx.squish();particle(f.x+6,f.y+5,['#a6f03a','#2b3320','#6fb42a'],16,2.4,40,.2,1.5);store.stats.spiders++;addMoney(25,f.x+6,f.y-4,'#c9f58a')}
   else if(f.type==='mummy'){sfx.groan(.5);particle(f.x+5,f.y+8,['#d8cca8','#a89878','#6a5a48'],22,2.4,50,.15,1.5);store.stats.mummies=(store.stats.mummies||0)+1;addMoney(200,f.x+5,f.y-4,'#efe4c0');if(Math.random()<.15){const rel=chooseRelic();pickups.push({x:f.x,y:f.y,w:8,h:8,vx:0,vy:-2,kind:'relic',rid:rel.id,value:rel.value,t:0})}}
   else{sfx.growl();particle(f.x+7,f.y+5,['#7d7f88','#4a4b52','#a02b24'],18,2.4,40,.2,1.5);store.stats.wolves++;addMoney(60,f.x+7,f.y-4,'#d9dbe2');
     if(Math.random()<.5)pickups.push({x:f.x+4,y:f.y,w:6,h:5,vx:rand(-1,1),vy:-2,kind:'gold',value:150,t:0,fang:true})}
@@ -83,8 +86,9 @@ function setFaceFromAim(a){const c=Math.cos(a.ang);if(Math.abs(c)>.2)P.face=c>0?
 function hitStuff(box,dmg,fromX,how){let any=false;
   for(const f of foes)if(!f.dead&&overlap(box,f)){damageFoe(f,dmg,fromX,how);any=true}
   for(const p of pots)if(!p.broken&&overlap(box,p)){breakPot(p);any=true}
+  if(how!=='ranged'&&harvestBox(box))any=true;
   const x0=Math.floor(box.x/T),x1=Math.floor((box.x+box.w)/T),y0=Math.floor(box.y/T),y1=Math.floor((box.y+box.h)/T);
-  for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){if(x<0||y<0||x>=MW||y>=MH)continue;const i=idx(x,y);if(webA[i]){webA[i]=0;any=true;sfx.cut();particle(x*T+8,y*T+6,'rgba(230,232,240,.8)',8,1.2,24,.03,1)}}
+  for(let y=y0;y<=y1;y++)for(let x=x0;x<=x1;x++){if(x<0||y<0||x>=MW||y>=MH)continue;const i=idx(x,y);if(webA[i]){webA[i]=0;any=true;sfx.cut();particle(x*T+8,y*T+6,'rgba(230,232,240,.8)',8,1.2,24,.03,1);if(Math.random()<.6)dropMat('silk',x*T+8,y*T+8)}}
   return any}
 function breakPot(p){if(p.broken)return;p.broken=true;sfx.pot();particle(p.x+5,p.y+5,['#a8643a','#7a4428','#c98a5a'],12,2,30,.2,2);
   if(Math.random()<.04&&gainCosmetic(randomCosmetic(),p.x+5,p.y-6))return;
@@ -120,7 +124,8 @@ function explode(x,y){
   for(const p of pots)if(!p.broken&&Math.hypot(p.x+5-x,p.y+5-y)<R)breakPot(p);
   save();
 }
-function openCrate(c){c.open=true;sfx.crate();particle(c.x+6,c.y+5,['#a8743c','#7a5228'],10,2,30,.2,2);
+function openCrate(c){c.open=true;sfx.crate();particle(c.x+6,c.y+5,['#a8743c','#7a5228'],10,2,30,.2,2);dropMat('wood',c.x+6,c.y+4,1+(Math.random()<.5?1:0));if(Math.random()<.25)dropMat('scrap',c.x+6,c.y+4);
+  if(Math.random()<.12){const lk=lockedRecipes();if(lk.length){pickups.push({x:c.x+2,y:c.y,w:8,h:6,vx:0,vy:-2,kind:'recipe',rid:pickR(lk).id,value:0,t:0});return}}
   if(Math.random()<.16&&gainCosmetic(randomCosmetic(),c.x+6,c.y-6)){renderHotbar();return}
   const r=Math.random();let txt;
   if(!P.hasDrill&&r<.14){P.hasDrill=true;P.fuel=60;txt=t('foundDrill');sfx.relic()}else if(!P.weapons.length&&r<.3){giveWeapon('bow');P.slot=1;P.arrows+=6;txt=t('foundBow');sfx.relic()}
@@ -246,7 +251,8 @@ function updatePlayer(){
     hintTxt=coarse?t('hintShopT'):t('hintShop');if(!shop.greeted){shop.greeted=true;floatText(shop.merchant.x+7,shop.merchant.y-6,t('welcome'),'#f3dfb0')}
     if(hit.act)openShop()}
   for(const n of npcs){if(Math.abs(n.x-cx)<1.8*T&&Math.abs(n.y-(p.y+p.h))<1.2*T){hintTxt=coarse?t('hintTalkT',n.name):t('hintTalk',n.name);if(hit.act)talkTo(n);break}}
-  if(!hintTxt){const fd=foods.find(f=>Math.abs(f.x+5-cx)<12&&Math.abs(f.y+5-(p.y+p.h-4))<14);if(fd){hintTxt=coarse?t('hintEatT',tr(FOOD[fd.kind])):t('hintEat',tr(FOOD[fd.kind]));if(hit.act){eatFood(fd);hit.act=false}}}
+  for(const f of foods)if(f.kind==='mushP'){if(f.cd>0)f.cd--;else if(Math.hypot(f.x+5-cx,f.y+5-(p.y+p.h/2))<1.7*T&&!p.dead)puffSpores(f)}
+  if(!hintTxt){const fd=foods.find(f=>f.kind!=='mushP'&&Math.abs(f.x+5-cx)<12&&Math.abs(f.y+5-(p.y+p.h-4))<14);if(fd){hintTxt=coarse?t('hintEatT',tr(FOOD[fd.kind])):t('hintEat',tr(FOOD[fd.kind]));if(hit.act){eatFood(fd);hit.act=false}}}
   if(!hintTxt&&p.stones<8){const nr=rocks.find(r=>!r.thrown&&Math.abs(r.x+3-cx)<12&&Math.abs(r.y-(p.y+p.h-3))<14);if(nr){hintTxt=coarse?t('hintRockT'):t('hintRock');if(hit.act)pickRock(nr)}}
   const hint=$('hint');if(hintTxt){hint.hidden=false;if(hint.textContent!==hintTxt)hint.textContent=hintTxt}else hint.hidden=true;
   for(const c of crates)if(!c.open&&overlap(p,c))openCrate(c);
@@ -254,7 +260,7 @@ function updatePlayer(){
   addFeet(p,'p');for(const r of rocks)addFeet(r,r.byPlayer?'r':'o');for(const f of foes)if(!f.dead&&f.type!=='spider')addFeet(f,'o');
   for(const l of links){const k=l.px+','+l.py,byP=pressedAt.has(k+',p'),byR=pressedAt.has(k+',r'),on=byP||byR||pressedAt.has(k+',o');
     if(on&&!l.pressed){l.anim=20;sfx.click();const tt=tileAt(l.tx,l.ty);
-      if(tt===TRAPL||tt===TRAPR){arrows.push({x:l.dir<0?l.tx*T-1:l.tx*T+T+1,y:l.ty*T+8,vx:l.dir*7,stuck:false,life:240,sx:0,sy:0,trap:byP,hp0:P.hp});setTimeout(sfx.arrow,40);if(byR&&!byP)unlock('rockplate')}}
+      if((tt===TRAPL||tt===TRAPR)&&!l.spent){l.spent=true;arrows.push({x:l.dir<0?l.tx*T-1:l.tx*T+T+1,y:l.ty*T+8,vx:l.dir*7,stuck:false,life:240,sx:0,sy:0,trap:byP,hp0:P.hp});setTimeout(sfx.arrow,40);if(byR&&!byP)unlock('rockplate')}}
     l.pressed=on;if(l.anim>0)l.anim--}
   if(p.y>MH*T)hurt(9,'cFall');
   for(const s of springs){const sx=s.tx*T+5;if(cx>sx-2&&cx<sx+8&&p.y>s.ty*T){const bot=fallBottom(s);if(p.y<bot){unlock('shower');if(frame%30===0)particle(cx,p.y,'#cfeaff',3,1,14,.1,1)}}}
@@ -265,19 +271,23 @@ function enterDoor(){
   setTimeout(()=>{level++;P.fuel=Math.min(100,P.fuel+25);P.fuelWarn=false;buildLevel();state='play';$('fade').classList.remove('on');checkAch();renderHotbar()},420);
 }
 const FOOD={mushR:{en:'the red mushroom',fi:'punainen sieni'},mushP:{en:'the purple mushroom',fi:'violetti sieni'},berryR:{en:'the red berries',fi:'punaiset marjat'},berryB:{en:'the blue berries',fi:'siniset marjat'}};
+function puffSpores(f){f.cd=720;const x=f.x+5,y=f.y+3;noise(.6,.07,700,'bandpass');setTimeout(()=>tone(520,.6,'sine',.02,-260),60);
+  for(let k=0;k<34;k++)parts.push({x:x+rand(-3,3),y:y+rand(-2,2),vx:rand(-.7,.7),vy:rand(-.9,-.1),life:70+Math.random()*50|0,max:120,col:pickR(['rgba(200,150,255,.7)','rgba(150,240,220,.6)','rgba(255,170,230,.6)']),g:-.004,sz:2});
+  P.trip=Math.max(P.trip||0,900);floatText(x,y-10,t('fxTrip'),'#d8a0ff')}
 function eatFood(f){foods=foods.filter(x=>x!==f);const cx=P.x+P.w/2;sfx.eat();
   if(f.kind==='mushR'){P.haste=1200;floatText(cx,P.y-10,t('fxHaste'),'#ffb347');particle(cx,P.y+4,['#ffb347','#fff1b0'],12,1.8,24,0,1)}
   else if(f.kind==='mushP'){P.trip=900;floatText(cx,P.y-10,t('fxTrip'),'#d8a0ff');particle(cx,P.y+4,['#d8a0ff','#7ff0d8','#ffb0e0'],16,2,30,0,1)}
   else if(f.kind==='berryR'){if(P.hp<8){P.hp++;P.maxHp=Math.max(P.maxHp,P.hp)}floatText(cx,P.y-10,t('plusHeart'),'#ff8a7a')}
   else{floatText(cx,P.y-10,t('fxBitter'),'#7aa0ff');P.inv=0;hurt(1,'cBerry',f.x+5)}}
 function drawFood(f){const x=Math.round(f.x),y=Math.round(f.y);
-  if(f.kind==='mushR'||f.kind==='mushP'){const cap=f.kind==='mushR'?'#d83a2a':'#9a5ad8';R(x+4,y+5,2,4,'#efe8dc');R(x+1,y+3,8,2,cap);R(x+2,y+2,6,1,cap);R(x+3,y+1,4,1,cap);R(x+3,y+3,1,1,'#fff');R(x+6,y+2,1,1,'#fff')}
+  if(f.kind==='mushP'){const spent=f.cd>0,cap=spent?'#6a4a8a':'#9a5ad8',sw=spent?0:Math.round(Math.sin(frame*.05+f.ph));R(x+4,y+5,2,4,'#efe8dc');R(x+1,y+3+(spent?1:0),8,2,cap);R(x+2,y+2+(spent?1:0)+sw*0,6,1,cap);if(!spent){R(x+3,y+1,4,1,cap);R(x+3,y+3,1,1,'#e8c8ff');R(x+6,y+2,1,1,'#e8c8ff');if((frame+f.ph*40|0)%50===0)parts.push({x:x+5,y:y+1,vx:rand(-.15,.15),vy:-.25,life:40,max:40,col:'rgba(200,150,255,.7)',g:0,sz:1})}}
+  else if(f.kind==='mushR'){const cap='#d83a2a';R(x+4,y+5,2,4,'#efe8dc');R(x+1,y+3,8,2,cap);R(x+2,y+2,6,1,cap);R(x+3,y+1,4,1,cap);R(x+3,y+3,1,1,'#fff');R(x+6,y+2,1,1,'#fff')}
   else{const b=f.kind==='berryR'?'#e2483d':'#3a5ad8';R(x,y+5,10,4,'#3e6a2a');R(x+1,y+4,8,2,'#4f7a32');R(x+4,y+3,2,2,'#5e9238');for(const [bx,by] of [[1,5],[4,6],[7,5],[3,4],[8,7]])R(x+bx,y+by,1,1,b)}}
 function clickInteract(){
   const m=mouseWorld(),cx=P.x+P.w/2;
   if(shop){const mm=shop.merchant;if(m.x>mm.x-4&&m.x<mm.x+mm.w+4&&m.y>mm.y-6&&m.y<mm.y+mm.h&&Math.hypot(mm.x+7-cx,mm.y+9-P.y)<4*T){openShop();return true}}
   if(overlap(P,door)&&m.x>door.x-4&&m.x<door.x+20&&m.y>door.y-4&&m.y<door.y+28){enterDoor();return true}
-  for(const f of foods)if(Math.abs(m.x-(f.x+5))<9&&Math.abs(m.y-(f.y+5))<9&&Math.hypot(f.x-cx,f.y-P.y)<3*T){eatFood(f);return true}
+  for(const f of foods)if(f.kind!=='mushP'&&Math.abs(m.x-(f.x+5))<9&&Math.abs(m.y-(f.y+5))<9&&Math.hypot(f.x-cx,f.y-P.y)<3*T){eatFood(f);return true}
   for(const r of rocks)if(!r.thrown&&P.stones<8&&Math.abs(m.x-(r.x+3))<8&&Math.abs(m.y-(r.y+2))<8&&Math.hypot(r.x-cx,r.y-P.y)<3*T){pickRock(r);return true}
   for(const n of npcs)if(Math.abs(m.x-n.x)<10&&m.y>n.y-24&&m.y<n.y+2&&Math.hypot(n.x-cx,n.y-(P.y+P.h))<3*T){talkTo(n);return true}
   return false;
@@ -285,7 +295,7 @@ function clickInteract(){
 function fallBottom(s){const x=s.tx;let y=s.ty+1;while(y<MH&&!isSolid(x,y)&&!isWater(x,y))y++;return y*T}
 
 function updateFoes(){
-  const pcx=P.x+P.w/2,pcy=P.y+P.h/2;let threat=0;
+  const pcx=P.x+P.w/2,pcy=P.y+P.h/2;let threat=0;if(P.dark>0)P.dark--;
   for(const f of foes){if(f.dead)continue;f.anim++;f.cd--;if(f.hurt>0)f.hurt--;
     const fcx=f.x+f.w/2,fcy=f.y+f.h/2,dx=pcx-fcx,dy=pcy-fcy,dist=Math.hypot(dx,dy);
     const sees=!P.dead&&dist<9*T&&los(fcx,fcy,pcx,pcy);
@@ -308,7 +318,7 @@ function updateFoes(){
       if(state==='play'&&overlap(P,f)){
         if(P.vy>1&&P.y+P.h-f.y<9&&!P.climb){killFoe(f,'stomp');P.vy=-4.6;P.peak=P.y}
         else poisonHit(1,'cBite',fcx,420)}
-    }else if(f.type==='snake'){updSnake(f,dx,dy,dist,sees,fcx);if(f.st!=='slither')threat+=.4}else if(f.type==='mummy'){updMummy(f,dx,dy,dist,sees,fcx);if(f.st==='chase')threat+=.7}else{
+    }else if(EXTRA_UPD[f.type]){threat+=EXTRA_UPD[f.type](f,dx,dy,dist,sees,fcx,fcy)||0}else if(f.type==='snake'){updSnake(f,dx,dy,dist,sees,fcx);if(f.st!=='slither')threat+=.4}else if(f.type==='mummy'){updMummy(f,dx,dy,dist,sees,fcx);if(f.st==='chase')threat+=.7}else{
       const wet=inWaterAt(fcx,fcy);
       f.vy=Math.min(f.vy+(wet?.1:.33),wet?1.6:7.5);f.jcd--;
       if(f.st==='watch'){ // a wolf first stands its ground and growls
@@ -322,19 +332,19 @@ function updateFoes(){
           const ahead=Math.floor((f.face>0?f.x+f.w+1:f.x-1)/T),row=Math.floor((f.y+f.h-2)/T);
           if(isSolid(ahead,row)||!isSolid(ahead,row+1)||f.turn<=0){f.face*=-1;f.turn=90+Math.random()*120}}
       }else{
-        if(!sees){f.lost++;if(f.lost>260){f.st='idle';f.lost=0}}else f.lost=0;
+        if(!sees){f.lost++;if(f.lost>180){f.st='idle';f.lost=0}}else f.lost=0;
         const tg=Math.abs(dx)>4?Math.sign(dx):f.face;f.face=tg;threat+=sees?.6:.25;
         if(f.onGround){
-          if(f.cd<=0&&sees&&Math.abs(dx)<2.8*T&&Math.abs(dy)<T*1.2){f.vx=tg*3.2;f.vy=-2.4;f.cd=95;sfx.growl()}
-          else{f.vx=clamp(f.vx+tg*.2,-1.6,1.6);
+          if(f.cd<=0&&sees&&Math.abs(dx)<2.2*T&&Math.abs(dy)<T*1.2){f.vx=tg*2.4;f.vy=-1.5;f.cd=160;sfx.growl()}
+          else{const back=f.cd>100;f.vx=clamp(f.vx+(back?-tg*.12:tg*.14),-1.2,1.2);
             const ahead=Math.floor((tg>0?f.x+f.w+2:f.x-2)/T),row=Math.floor((f.y+f.h-2)/T);
-            if(isSolid(ahead,row)&&f.jcd<=0&&(!isSolid(ahead,row-1)||!isSolid(ahead,row-2))){f.vy=-5.6;f.jcd=25}
-            else if(dy<-T*1.5&&Math.abs(dx)<3.5*T&&f.jcd<=0){f.vy=-6.1;f.jcd=45}}}
+            if(isSolid(ahead,row)&&f.jcd<=0&&!isSolid(ahead,row-1)){f.vy=-4.4;f.jcd=40}
+            else if(dy<-T*1.2&&dy>-T*2.2&&Math.abs(dx)<2.5*T&&f.jcd<=0){f.vy=-4.8;f.jcd=70}}}
       }
       move(f);if(f.hitX){f.vx=0;if(f.st==='idle')f.face*=-1}if(f.hitY)f.vy=0;
       if(state==='play'&&overlap(P,f)){
         if(P.vy>1&&P.y+P.h-f.y<8&&!P.climb){damageFoe(f,1.5,pcx,'stomp');P.vy=-5;P.peak=P.y}
-        else hurt(1,'cWolf',fcx)}
+        else{hurt(1,'cWolf',fcx);f.cd=Math.max(f.cd,170);f.vx=-Math.sign(dx||1)*1.6}}
     }
     if(f.y>MH*T)f.dead=true;
     if(!f.dead&&tileAt(Math.floor(fcx/T),Math.floor((f.y+f.h-3)/T))===LAVA){sfx.sizzle();killFoe(f,'lava')}
@@ -367,7 +377,7 @@ let lastEnemyShot=-999;
 function onScreen(x,y){return x>cam.x+6&&x<cam.x+VW-6&&y>cam.y+6&&y<cam.y+VH-6}
 /* fireballs leap from lava and bounce along the floor in the scorching layers */
 let fireballs=[],flies=[],firstGround=8,levelTime=0,nextAmbient=600,inputMode='mouse';
-let runKills={spider:0,wolf:0,mummy:0,snake:0},runFinds=0;
+let runKills={spider:0,wolf:0,mummy:0,snake:0,bat:0,mimic:0,worm:0,wisp:0},runFinds=0;
 function curDepth(){return P?Math.max(0,Math.floor((level-1)*MH-firstGround+(P.y+P.h)/T)):0}
 function updateFireballs(){
   if(biome==='hot'&&state==='play'&&levelTime>480&&frame%40===0&&fireballs.length<7){const px=Math.floor((P.x+P.w/2)/T),py=Math.floor(P.y/T);let done=false;
@@ -434,9 +444,11 @@ function spit(s){
    stays put, so settled pools never jitter. The whole pass sleeps until something nearby changes. */
 /* sand settles: a sand tile with air (or water) under it drops one tile at a time, never into the player */
 let sandAwake=true;
-function sandStep(){if(!sandAwake)return;let moved=false;const px0=Math.floor(P.x/T),px1=Math.floor((P.x+P.w-.01)/T),py0=Math.floor(P.y/T),py1=Math.floor((P.y+P.h-.01)/T);
+function sandStep(){if(!sandAwake)return;let moved=false;const occ=new Set();const mark=e=>{for(let yy=Math.floor(e.y/T);yy<=Math.floor((e.y+e.h-.01)/T);yy++)for(let xx=Math.floor(e.x/T);xx<=Math.floor((e.x+e.w-.01)/T);xx++)occ.add(xx+yy*MW)};
+  for(const n of npcs)mark({x:n.x-6,y:n.y-16,w:12,h:16});for(const f of foes)if(!f.dead&&f.type!=='bat'&&f.type!=='wisp'&&f.type!=='worm')mark(f);for(const c of crates)mark(c);for(const q of pots)if(!q.broken)mark(q);
+  const px0=Math.floor(P.x/T),px1=Math.floor((P.x+P.w-.01)/T),py0=Math.floor(P.y/T),py1=Math.floor((P.y+P.h-.01)/T);
   for(let y=MH-2;y>=1;y--)for(let x=1;x<MW-1;x++){const i=idx(x,y);if(grid[i]!==SAND)continue;const b=idx(x,y+1),bt=grid[b];
-    if((bt===AIR||bt===WATER)&&!(x>=px0&&x<=px1&&y+1>=py0&&y+1<=py1)){grid[b]=SAND;grid[i]=bt;dmgA[b]=0;dmgA[i]=0;moved=true;if(!isSolid(x,y+2)&&Math.random()<.3)particle(x*T+8,(y+1)*T,['#d0b886','#e4d0a0'],2,.6,14,.1,1);
+    if((bt===AIR||bt===WATER)&&!(x>=px0&&x<=px1&&y+1>=py0&&y+1<=py1)&&!occ.has(b)){grid[b]=SAND;grid[i]=bt;dmgA[b]=0;dmgA[i]=0;moved=true;if(!isSolid(x,y+2)&&Math.random()<.3)particle(x*T+8,(y+1)*T,['#d0b886','#e4d0a0'],2,.6,14,.1,1);
       if(isSolid(x,y+2)&&Math.random()<.5)sfx.sandLand()}}
   if(!moved)sandAwake=false}
 function waterStep(){
@@ -527,6 +539,8 @@ function updateWorld(){
   if(frame%10===0&&AC&&P){let best=0;const pcx=P.x+P.w/2,pcy=P.y+P.h/2;for(const s of springs){const d=Math.hypot(s.tx*T+8-pcx,(s.ty*T+fallBottom(s))/2-pcy);best=Math.max(best,clamp(1-d/(9*T),0,1))}Ambient.set(state==='play'?best*.09:0)}
 }
 function collect(p){p.got=true;const cx=p.x+3,cy=p.y-4;
+  if(p.kind==='mat'){gainMat(p.mat,1,cx,cy);return}
+  if(p.kind==='recipe'){if(!learnRecipe(p.rid,cx,cy-4))addMoney(150,cx,cy,'#efe4d2');return}
   if(p.kind==='parrow'){P.arrows++;floatText(cx,cy,t('plusArrow'),'#e6e0d0');sfx.click();renderHotbar();return}
   if(p.kind==='fish'){store.stats.fish++;save();unlock('fish1');sfx.gold();addMoney(p.value,cx,cy-6,'#cfeaff');floatText(cx,cy+4,tr(p.fname),p.col);checkAch();return}
   if(p.kind==='gem'){gemsTotal++;sfx.gem();particle(cx,cy+6,['#e8ffff','#6ef2ff'],10,1.6,26,0,1);addMoney(p.value,cx,cy,'#a8f6ff');unlock('first_gem')}

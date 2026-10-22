@@ -1,5 +1,5 @@
 /*
-  Arkeol v0.3 · Copyright (C) 2026 JP Hakoluoto
+  Arkeol v0.3.1 · Copyright (C) 2026 JP Hakoluoto
   Free software under the GNU GPL v3 or later, with an attribution term (see LICENSE and NOTICE).
 */
 'use strict';
@@ -89,6 +89,19 @@ const ICON={};
   ICON.drill=pixIcon(drill('#5e6670','#b9c3cc'));ICON.drill2=pixIcon(drill('#7a5a20','#f2c84b'));
   ICON.fez=pixIcon(p=>{p(5,4,6,9,'#b8322a');p(4,12,8,1,'#8a1e18');p(6,3,4,1,'#b8322a');p(10,4,1,9,'#d85a4a');p(4,4,1,6,'#1a1410');p(4,10,1,1,'#d6b04a')});
   ICON.dye=pixIcon(p=>{p(4,6,8,8,'#8a6a44');p(5,5,6,1,'#a8845a');p(6,3,4,2,'#6a4a2a');p(5,8,2,2,'#b8322a');p(8,8,2,2,'#2f4470');p(6,11,2,2,'#c99a2a');p(9,11,2,2,'#3c6a34')});
+  const matIcon=(c,shape)=>pixIcon(p=>shape(p,c));
+  ICON.m_fiber=pixIcon(p=>{for(let i=0;i<4;i++){p(4+i*2,3+i,1,10-i,'#5f8a40');p(5+i*2,4,1,9,'#7aa652')}p(3,11,10,2,'#c8b070')});
+  ICON.m_wood=pixIcon(p=>{p(2,6,12,5,'#7a5230');p(2,6,12,1,'#9a6a3a');p(12,6,2,5,'#c49a62');p(12,7,1,3,'#8a6a44');p(4,8,5,1,'#5e3e22')});
+  ICON.m_silk=pixIcon(p=>{for(let i=0;i<5;i++)p(3+i*2,3,1,10,'rgba(230,232,240,.85)');for(let j=0;j<4;j++)p(3,4+j*3,9,1,'rgba(230,232,240,.6)')});
+  ICON.m_bone=pixIcon(p=>{p(4,7,8,2,'#efe8d8');p(2,6,3,2,'#efe8d8');p(2,8,3,2,'#efe8d8');p(11,6,3,2,'#efe8d8');p(11,8,3,2,'#efe8d8');p(4,9,8,1,'#c8bfa8')});
+  ICON.m_scrap=pixIcon(p=>{p(3,8,6,4,'#8f99a3');p(7,5,5,4,'#6b747d');p(4,8,2,1,'#c8d0d8');p(9,10,3,2,'#a0522d');p(5,11,2,1,'#5e6670')});
+  ICON.m_powder=pixIcon(p=>{p(4,9,8,4,'#d8d0c0');p(5,8,6,1,'#d8d0c0');p(6,7,4,1,'#e8e2d4');p(4,12,8,1,'#a89c86');p(7,9,1,1,'#fff')});
+  ICON.m_spores=pixIcon(p=>{p(7,8,2,6,'#e8e0d0');p(4,5,8,3,'#58e0d0');p(5,4,6,1,'#7fe8d8');p(6,5,1,1,'#fff');p(3,3,1,1,'#7fe8d8');p(12,4,1,1,'#7fe8d8')});
+  ICON.torch=pixIcon(p=>{p(7,7,2,8,'#5a3a20');p(6,4,4,4,'#ffb347');p(7,2,2,3,'#fff1b0')});
+  ICON.ladder=pixIcon(p=>{p(4,1,2,14,'#7a5230');p(10,1,2,14,'#7a5230');for(let y=3;y<15;y+=4)p(5,y,6,2,'#9a6a3a')});
+  ICON.bandage=pixIcon(p=>{p(3,5,10,6,'#efe8dc');p(3,5,10,1,'#fff');p(7,6,2,4,'#e2483d');p(6,7,4,2,'#e2483d')});
+  ICON.stew=pixIcon(p=>{p(3,8,10,5,'#5e6670');p(2,7,12,2,'#7a828c');p(4,8,8,1,'#c98a4a');p(6,4,1,3,'rgba(220,220,220,.6)');p(9,3,1,3,'rgba(220,220,220,.5)')});
+  ICON.blueprint=pixIcon(p=>{p(2,3,12,10,'#3d5fb8');p(2,3,12,1,'#6a8ad8');p(4,5,6,1,'#cfdcf0');p(4,7,4,1,'#cfdcf0');p(9,8,3,3,'#cfdcf0');p(10,9,1,1,'#3d5fb8')});
   ICON.none=pixIcon(p=>{for(let i=3;i<13;i+=2){p(i,i,1,1,'#5a4f55');p(15-i,i,1,1,'#5a4f55')}});
   ICON.whip=pixIcon((p,g)=>{g.strokeStyle='#8a5f34';g.lineWidth=1.5;g.beginPath();g.arc(9,8,4.5,0,Math.PI*1.7);g.stroke();g.beginPath();g.arc(9,8,2.2,0,Math.PI*1.8);g.stroke();p(2,11,4,2,'#4b3628');p(1,12,2,2,'#2a1e16')});
   ICON.gun=pixIcon(p=>{p(3,6,12,2,'#3d3f48');p(3,6,12,1,'#7a7e8a');p(1,7,5,4,'#7a4a24');p(1,8,2,4,'#5e3618');p(7,8,2,2,'#2a2228');p(8,8,4,1,'#3d3f48')});

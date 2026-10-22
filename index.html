@@ -3,10 +3,10 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="Arkeol v0.3 – an open source archaeological mining game for the browser.">
+<meta name="description" content="Arkeol v0.3.1 – an open source archaeological mining game for the browser.">
 <title>Arkeol</title>
 <!--
-  Arkeol v0.3
+  Arkeol v0.3.1
   Copyright (C) 2026 JP Hakoluoto
 
   This program is free software: you can redistribute it and/or modify it under the terms of the
@@ -36,6 +36,7 @@
     <div class="grp" id="fuelGrp"><span class="lbl" data-i18n="lblDrill"></span><span class="bar"><i id="fuel"></i></span></div>
     <div class="grp"><span class="lbl" data-i18n="lblDepth"></span><b id="depth">40 m</b></div>
     <span class="spacer"></span>
+    <button class="hbtn" id="craftBtn" type="button" data-i18n="btnCraft"></button>
     <button class="hbtn" id="mapBtn" type="button" aria-pressed="false" data-i18n="btnMap"></button>
     <button class="hbtn" id="musicBtn" type="button" aria-pressed="true" data-i18n="btnMusic"></button>
     <button class="hbtn" id="muteBtn" type="button" aria-pressed="true" data-i18n="btnSound"></button>
@@ -47,7 +48,7 @@
   <div id="achs"></div>
   <div id="talk" hidden></div>
   <div id="hint" hidden></div>
-  <div id="ver">v0.3</div>
+  <div id="ver">v0.3.1</div>
   <div id="toast"><div class="kick" id="toastKick"></div><div class="big" id="toastBig"></div><div class="small" id="toastSmall"></div></div>
   <div id="touch">
     <div class="pad l">
@@ -81,7 +82,7 @@
     </nav>
     <p class="records" id="records" hidden></p>
   </div>
-  <div class="menuVer">v0.3</div>
+  <div class="menuVer">v0.3.1</div>
 </div>
 
 <div id="wardrobe" class="screen" hidden>
@@ -184,6 +185,18 @@
   </div>
 </div>
 
+<div id="craft" class="screen" hidden>
+  <div class="card wide">
+    <h2 data-i18n="craft"></h2>
+    <p class="craftStation" id="craftStation"></p>
+    <div class="craftMats" id="craftMats"></div>
+    <div class="row craftPlace" id="craftPlace" hidden></div>
+    <div class="shopGrid" id="craftGrid"></div>
+    <p class="prog" id="craftProg"></p>
+    <div class="row" style="margin-top:12px"><button class="btn2" id="craftClose" type="button" data-i18n="close"></button><span class="best only-keys" data-i18n="escCloses"></span></div>
+  </div>
+</div>
+
 <div id="shop" class="screen" hidden>
   <div class="card wide">
     <div class="shopHead"><canvas id="sabu" width="32" height="32"></canvas><div><h2 data-i18n="shopTitle"></h2><div class="say" id="sabuSay"></div><div class="wallet" id="shopMoney"></div></div></div>
@@ -197,12 +210,14 @@
 <script src="js/art.js"></script>
 <script src="js/lore.js"></script>
 <script src="js/wardrobe.js"></script>
+<script src="js/craft.js"></script>
 <script src="js/audio.js"></script>
 <script src="js/input.js"></script>
 <script src="js/world.js"></script>
 <script src="js/game.js"></script>
 <script src="js/ui.js"></script>
 <script src="js/render.js"></script>
+<script src="js/foes2.js"></script>
 <script src="js/main.js"></script>
 </body>
 </html>
