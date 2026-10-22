@@ -1,5 +1,5 @@
 /*
-  Arkeol v0.3.1 · Copyright (C) 2026 JP Hakoluoto
+  Arkeol v0.3.2 · Copyright (C) 2026 JP Hakoluoto
   Free software under the GNU GPL v3 or later, with an attribution term (see LICENSE and NOTICE).
 */
 /* Layout: full-bleed cave canvas; HUD strip top, toolbar bottom-centre, touch pads in the corners.
@@ -264,7 +264,7 @@ body.inMenu #ui{display:none}
 #status{gap:6px}
 .chip{font:600 12px var(--mono);padding:1px 6px;border-radius:2px;color:#1b1206}
 
-/* ---------- v0.3.1 main menu: the camp scene stays visible, a plain list of choices */
+/* ---------- v0.3.2 main menu: the camp scene stays visible, a plain list of choices */
 #menu{background:linear-gradient(180deg,rgba(8,5,3,.15) 0%,rgba(8,5,3,.35) 45%,rgba(8,5,3,.82) 100%);place-items:center}
 .menuCol{display:flex;flex-direction:column;align-items:center;text-align:center;padding:24px 16px;width:min(420px,100%)}
 #menu .kicker{color:#e8c890;font:500 12px/1 var(--serif);letter-spacing:.3em;margin:0 0 10px;text-shadow:0 1px 2px rgba(0,0,0,.8)}
@@ -355,3 +355,22 @@ body.inMenu #ui{display:none}
 .craftItem .needs i img{width:14px;height:14px;image-rendering:pixelated}
 .craftItem .needs i.ok{color:#a8e88a}.craftItem .needs i.no{color:#e89a8a}
 .fireTag{font:600 10px var(--serif);font-style:normal;letter-spacing:.08em;text-transform:uppercase;color:#ffb347;border:1px solid rgba(255,179,71,.5);border-radius:2px;padding:0 4px;margin-left:4px;vertical-align:2px}
+
+#fade.iris{transition:none;opacity:1}
+.junkShop .card{border-color:#5a6a7a}
+.junkShop h2{color:#9ec0d8}
+.eatBtn{border-color:rgba(255,179,71,.5)}
+
+/* ---------- old green-on-black console */
+#term{background:rgba(0,0,0,.82)}
+.crt{position:relative;width:min(640px,100%);max-height:88vh;display:flex;flex-direction:column;background:#020a04;border:10px solid #2a2820;border-radius:18px;box-shadow:inset 0 0 60px rgba(0,255,90,.08),0 0 0 3px #4a463a,0 30px 80px rgba(0,0,0,.7);padding:18px 20px;color:#33ff66;font:20px/1.15 var(--type);text-shadow:0 0 6px rgba(51,255,102,.55);overflow:hidden}
+.crt::after{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(0,0,0,.22) 0 1px,transparent 1px 3px);border-radius:8px}
+#termOut{margin:0;white-space:pre-wrap;word-break:break-word;font:inherit;overflow:auto;min-height:200px;max-height:52vh}
+.termIn{display:flex;gap:8px;align-items:center;margin-top:6px}
+.termIn input{flex:1;background:transparent;border:0;outline:none;color:#33ff66;font:inherit;text-shadow:inherit;caret-color:#33ff66}
+.termIn input:disabled{opacity:.4}
+.termOpts{display:flex;flex-wrap:wrap;gap:6px 14px;margin-top:8px}
+.termBtn{background:transparent;border:1px solid rgba(51,255,102,.35);color:#33ff66;font:inherit;text-shadow:inherit;padding:2px 8px;cursor:pointer}
+.termBtn:hover,.termBtn:focus-visible{background:#33ff66;color:#020a04;outline:none;text-shadow:none}
+.termFoot{margin-top:10px}
+@media (max-width:520px){.crt{font-size:16px;border-width:6px;padding:12px}}

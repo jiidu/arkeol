@@ -1,5 +1,5 @@
 /*
-  Arkeol v0.3.1 · Copyright (C) 2026 JP Hakoluoto
+  Arkeol v0.3.2 · Copyright (C) 2026 JP Hakoluoto
   Free software under the GNU GPL v3 or later, with an attribution term (see LICENSE and NOTICE).
 */
 'use strict';
@@ -22,13 +22,13 @@ function move(e){
   if(!e.onGround&&e.vy>=0&&boxHits(e.x,e.y+1,e.w,e.h))e.onGround=true;
 }
 const overlap=(a,b)=>a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y;
-function los(x0,y0,x1,y1){const d=Math.hypot(x1-x0,y1-y0),n=Math.ceil(d/4);for(let i=1;i<n;i++){const x=x0+(x1-x0)*i/n,y=y0+(y1-y0)*i/n;if(isSolid(Math.floor(x/T),Math.floor(y/T)))return false}return true}
+function los(x0,y0,x1,y1){const d=Math.hypot(x1-x0,y1-y0),n=Math.ceil(d/3);for(let i=1;i<n;i++){const x=x0+(x1-x0)*i/n,y=y0+(y1-y0)*i/n;if(isSolid(Math.floor(x/T),Math.floor(y/T)))return false}return true}
 const inWaterAt=(x,y)=>isWater(Math.floor(x/T),Math.floor(y/T));
 
 /* =========================================================== level generation */
 function newPlayer(){return {x:0,y:0,w:10,h:15,vx:0,vy:0,face:1,onGround:false,hp:4,maxHp:4,bombs:0,ropes:0,fuel:100,money:0,earned:0,inv:0,coy:0,jbuf:0,peak:0,climb:null,
   swing:0,swingCd:0,drilling:false,anim:0,acid:0,dead:false,cause:'',ang:0,aimAng:0,slot:5,pick:1,drill:1,hasDrill:false,weapons:[],wi:0,stones:0,arrows:0,ammo:0,rod:false,line:null,wcd:0,whip:0,
-  lampR:7.2,jumpV:5.3,softBoots:false,breath:100,maxBreath:100,compass:false,fuelWarn:false,inWater:false,safeFall:true,mats:{},torches:0,ladders:0,dark:0}}
+  lampR:7.2,jumpV:5.3,softBoots:false,breath:100,maxBreath:100,compass:false,fuelWarn:false,inWater:false,safeFall:true,mats:{},torches:0,ladders:0,dark:0,wdur:{},meals:{}}}
 const NT=['coffee','fisher','harmonica','knitter','reader'];
 function genLevel(lv){
   const seed=(Math.random()*2**31)|0;
@@ -39,7 +39,7 @@ function genLevel(lv){
   // the surface (layer 1) or a ceiling with a light shaft (deeper layers)
   const sx=ri(6,MW-7);
   const top=new Int16Array(MW);
-  if(lv===1){for(let x=0;x<MW;x++)top[x]=8+Math.round((nz2(x/10,3.3)-.5)*4);const c=sx-4;if(c>4){const h=top[c];for(let x=c-4;x<=c+2;x++)top[x]=h}}else top.fill(1);
+  if(lv===1){for(let x=0;x<MW;x++)top[x]=8+Math.round((nz2(x/10,3.3)-.5)*4);const c=sx-4;if(c>4){const h=top[c];for(let x=c-4;x<=sx-1;x++)top[x]=h;top[sx]=Math.max(top[sx],h);top[sx+1]=Math.max(top[sx+1],h)}}else top.fill(1);
   const ground=Math.max(top[sx],top[sx+1]);
   const sy=lv===1?ground+6:5;
   let cave=new Uint8Array(MW*MH);
@@ -87,7 +87,7 @@ function genLevel(lv){
   const far=(x,y,d)=>Math.hypot(x-sx,y-sy)>d;
   const freeRect=(x0,y0,w,h)=>{for(let y=y0-2;y<y0+h+2;y++)for(let x=x0-2;x<x0+w+2;x++){if(x<1||y<1||x>=MW-1||y>=MH-1||prot[idx(x,y)])return false}return true};
 
-  decos=[];springs=[];foes=[];crates=[];pots=[];pickups=[];links=[];shop=null;npcs=[];
+  decos=[];springs=[];foes=[];crates=[];pots=[];pickups=[];links=[];shop=null;junk=null;npcs=[];
   if(lv===1){ // a little dig camp on the surface
     const camp=sx-4;if(camp>4){decos.push({tx:camp,ty:top[camp]-1,k:'tent',sx:0,sy:1});decos.push({tx:camp-3,ty:top[camp]-1,k:'campfire',sx:0,sy:1})}
     decos.push({tx:sx,ty:ground-1,k:'derrick',sx:0,sy:0});
@@ -105,7 +105,21 @@ function genLevel(lv){
       const mx=x0+Math.floor(w/2);
       shop={x0,y0,w,h,merchant:{x:mx*T+1,y:(y0+h-1)*T-18,w:14,h:18},stock:null,greeted:false};
       decos.push({tx:x0+2,ty:y0+1,k:'lantern',sx:0,sy:-1},{tx:x0+w-3,ty:y0+1,k:'lantern',sx:0,sy:-1},{tx:mx,ty:y0+1,k:'banner',sx:0,sy:-1});
-      decos.push({tx:mx-2,ty:y0+h-2,k:'jar',sx:0,sy:1},{tx:mx+2,ty:y0+h-2,k:'rugpile',sx:0,sy:1},{tx:x0+1,ty:y0+h-2,k:'barrel',sx:0,sy:1},{tx:x0+w-2,ty:y0+h-2,k:'barrel',sx:0,sy:1});
+      decos.push({tx:mx-2,ty:y0+h-2,k:'jar',sx:0,sy:1},{tx:mx+2,ty:y0+h-2,k:'rugpile',sx:0,sy:1},{tx:x0+1,ty:y0+h-2,k:'sarcoph',sx:0,sy:1},{tx:x0+w-2,ty:y0+h-2,k:'barrel',sx:0,sy:1});
+      decos.push({tx:mx-4,ty:y0+h-2,k:'candle',sx:0,sy:1,v:0},{tx:mx+4,ty:y0+h-2,k:'candle',sx:0,sy:1,v:1},{tx:x0+3,ty:y0+h-2,k:'skulls',sx:0,sy:1},{tx:x0+1,ty:y0+1,k:'cweb',sx:-1,sy:-1},{tx:x0+w-2,ty:y0+1,k:'cweb',sx:1,sy:-1});
+      break}
+  }
+  spawnSecrets(lv,{ri,r,airFloor:(x,y)=>grid[idx(x,y)]===AIR&&isSolid(x,y+1)&&!prot[idx(x,y)],far:(x,y,d)=>Math.hypot(x-sx,y-sy)>d,sy,freeRect,protRect});
+  // Reijo's scrap stall: a low nook with an oil-drum fire
+  if(lv>=2&&r()<.5){
+    for(let a=0;a<300;a++){const w=9,h=5,x0=ri(3,MW-w-3),y0=ri(9,MH-h-6);if(!freeRect(x0,y0,w,h))continue;if(shop&&Math.abs(x0-shop.x0)<18&&Math.abs(y0-shop.y0)<10)continue;
+      for(let y=y0;y<y0+h;y++)for(let x=x0;x<x0+w;x++){const wall=y===y0||y===y0+h-1||x===x0||x===x0+w-1;grid[idx(x,y)]=wall?(y===y0+h-1?STONE:DIRT):AIR}
+      for(const dx of [0,w-1])for(const dy of [h-3,h-2])grid[idx(x0+dx,y0+dy)]=AIR;
+      for(let k=1;k<=3;k++)for(const dy of [h-3,h-2]){for(const xx of [x0-k,x0+w-1+k])if(grid[idx(xx,y0+dy)]!==BED&&!prot[idx(xx,y0+dy)])grid[idx(xx,y0+dy)]=AIR}
+      for(let k=1;k<=3;k++){for(const xx of [x0-k,x0+w-1+k]){const yy=y0+h-1;if(grid[idx(xx,yy)]===AIR)grid[idx(xx,yy)]=STONE}}
+      protRect(x0-4,y0-1,x0+w+3,y0+h);
+      const mx=x0+3;junk={x0,y0,w,h,merchant:{x:mx*T+1,y:(y0+h-1)*T-18,w:14,h:18},stock:null,greeted:false};
+      decos.push({tx:x0+1,ty:y0+h-2,k:'junkpile',sx:0,sy:1,v:0},{tx:x0+w-2,ty:y0+h-2,k:'junkpile',sx:0,sy:1,v:1},{tx:x0+w-3,ty:y0+h-2,k:'junkpile',sx:0,sy:1,v:2},{tx:x0+2,ty:y0+1,k:'tarp',sx:0,sy:-1});
       break}
   }
   // sealed relic chamber
@@ -268,6 +282,7 @@ function genLevel(lv){
     let wall=0;for(let k=1;k<len;k++)if(isSolid(x-side,y+k)||isSolid(x+side,y+k))wall++;
     const lad=wall>=len*.7&&r()<.75;natRopes.push({tx:x,top:y,len,cur:len,head:y*T,nat:!lad,lad,side})}
   door={x:ex*T,y:(ey+1)*T-24,w:16,h:24};
+  if(lv===1){let len=0;while(len<sy&&!isSolid(sx,ground-1+len))len++;if(len>2)natRopes.push({tx:sx,top:ground-1,len,cur:len,head:(ground-1)*T,lad:true})}
   pendingRopes=natRopes;
   for(let y=1;y<MH-1;y++)for(let x=1;x<MW-1;x++){const i=idx(x,y);if(grid[i]===SAND){const b=grid[idx(x,y+1)];if(b===AIR||LIQ[b])grid[i]=DIRT}}
   waterAwake=true;sandAwake=true;
@@ -285,7 +300,7 @@ function chooseLore(){const pool=[];PAPERS.forEach((_,i)=>{const k='p'+i;if(!sto
   if(!pool.length)return null;const it=pickR(pool);placedLore.add(it.k);return it}
 function buildLevel(){
   const {sx}=genLevel(level);
-  acids=[];puddles=[];arrows=[];bombs=[];shots=[];ropes=pendingRopes.slice();parts=[];texts=[];flashes=[];levelKills=0;
+  acids=[];puddles=[];arrows=[];bombs=[];shots=[];tossed=[];fishSpots={};ropes=pendingRopes.slice();parts=[];texts=[];flashes=[];levelKills=0;
   // drop in from above
   P.x=sx*T+T-P.w/2;P.y=(level===1?1:0)*T+2;P.vx=0;P.vy=.5;P.peak=P.y;P.climb=null;P.inv=30;P.breath=P.maxBreath;P.safeFall=true;P.line=null;
   cam.x=P.x-VW/2;cam.y=P.y-VH/2;clampCam();
@@ -293,13 +308,13 @@ function buildLevel(){
   const sp=foes.filter(f=>f.type==='spider').length,wo=foes.filter(f=>f.type==='wolf').length;
   const mu=foes.filter(f=>f.type==='mummy').length;
   fireballs=[];flies=[];levelTime=0;nextAmbient=frame+400;
-  showToast(chapterName(level),level===1?t('b_'+biome):t('lvl',level,t('b_'+biome),sp,wo,mu,!!shop),t('chapterN',level));
+  showToast(chapterName(level),level===1?t('b_'+biome):t('lvl',level,t('b_'+biome),!!shop,!!junk),t('chapterN',level));
   pickLevelMusic();if(state==='play'||state==='trans')Music.play(levelTrack());
 }
 function newGame(){
   ensureAudio();closePanel(true);
-  level=1;gemsTotal=0;relicsRun=0;runFinds=0;runKills={spider:0,wolf:0,mummy:0,snake:0,bat:0,mimic:0,worm:0,wisp:0};placedLore=new Set();store.runs=(store.runs||0)+1;save();
+  level=1;gemsTotal=0;relicsRun=0;runFinds=0;runKills={spider:0,wolf:0,mummy:0,snake:0,frog:0,bat:0,mimic:0,worm:0,wisp:0};placedLore=new Set();store.runs=(store.runs||0)+1;save();
   P=newPlayer();state='play';buildLevel();
   for(const id of ['menu','over','pause','modal','shop','howto','settings','credits','license'])$(id).hidden=true;
-  releaseAll();renderHotbar();Music.hero(levelTrack());
+  releaseAll();renderHotbar();Music.hero(levelTrack());if(level===1)startAtTent();
 }

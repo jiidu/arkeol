@@ -1,5 +1,5 @@
 /*
-  Arkeol v0.3.1 · Copyright (C) 2026 JP Hakoluoto
+  Arkeol v0.3.2 · Copyright (C) 2026 JP Hakoluoto
   Free software under the GNU GPL v3 or later, with an attribution term (see LICENSE and NOTICE).
 */
 'use strict';
@@ -185,6 +185,13 @@ const TRACKS={
       if(b%16===8&&Math.random()<.5)M.flute(t,pickR(WT),E*6);
       if(Math.random()<.03)M.bell(t,pickR([86,90,94]))},
     tension:true},
+  // ---- inside Sabu's shop: a low drone, a far-off bell and something whispering
+  crypt:{bpm:50,step(t,b,M){const E=M.eighth;
+      if(b%32===0){M.pad(t,[38,45,50],E*32,'sawtooth',.006,380);M.pad(t,[62,63],E*32,'sine',.006,900);M.bassN(t,26,E*32,.05,true)}
+      if(b%16===8&&Math.random()<.6)M.bell(t,pickR([74,75,79]));
+      if(Math.random()<.05)M.wind(t,E*6);
+      if(b%32===20&&Math.random()<.5)M.oud(t,pickR([50,51,55]))},
+    tension:false},
   campfire:{bpm:62,step(t,b,M){const E=M.eighth;
       const CH=[[50,57,61,66],[55,59,62,66],[47,54,57,62],[45,52,57,61]];
       const ci=Math.floor(b/16)%4;if(b%16===0){M.pad(t,CH[ci],E*16,'sine',.02,1200);M.bassN(t,CH[ci][0]-12,E*16,.05,true)}
@@ -207,12 +214,16 @@ const Music={enabled:true,started:false,tension:0,target:0,next:0,beat:0,last:3,
   hero(after){this.want=after;if(!this.started){this.want='hero';this.afterHero=after;return}this.switchTo('hero');this.lockUntil=AC.currentTime+TRACKS.hero.len*this.eighth+.3},
   switchTo(name,first){const old=this.bus;if(old){old.gain.setTargetAtTime(0,AC.currentTime,.7);setTimeout(()=>{try{old.disconnect()}catch(e){}},5000)}
     const bus=AC.createGain();bus.gain.value=first?1:0;bus.connect(this.master);if(!first)bus.gain.setTargetAtTime(1,AC.currentTime+.4,.8);
-    this.bus=bus;this.track=name;this.beat=0;this.fRest=0;this.heroMel=null;this.campMel=null;this.mi=null;this.motif=null;this.eighth=60/TRACKS[name].bpm/2;this.delay.delayTime.setTargetAtTime(this.eighth*3,AC.currentTime,.1);this.next=AC.currentTime+.25},
+    this.bus=bus;this.track=name;this.beat=0;this.resting=false;this.fRest=0;this.heroMel=null;this.campMel=null;this.mi=null;this.motif=null;this.eighth=60/TRACKS[name].bpm/2;this.delay.delayTime.setTargetAtTime(this.eighth*3,AC.currentTime,.1);this.next=AC.currentTime+.25},
   setEnabled(v){this.enabled=v;this.applyVol()},
   applyVol(){if(this.master)this.master.gain.setTargetAtTime(this.enabled?.7*musicVol:0,AC.currentTime,.3)},
-  tick(){if(!AC||!this.started)return;if(this.lockUntil&&AC.currentTime>=this.lockUntil){this.lockUntil=0;if(this.want!==this.track)this.switchTo(this.want)}
+  restAt:0,restUntil:0,resting:false,
+  tick(){if(!AC||!this.started)return;{const now=AC.currentTime,lvl=TRACKS[this.track]&&TRACKS[this.track].tension&&state==='play';
+      if(!this.restAt)this.restAt=now+80+Math.random()*70;
+      if(!this.resting&&lvl&&now>this.restAt&&this.tension<.3){this.resting=true;this.restUntil=now+18+Math.random()*24;if(this.bus)this.bus.gain.setTargetAtTime(0,now,2.2)}
+      else if(this.resting&&(now>this.restUntil||!lvl||this.tension>.5)){this.resting=false;this.restAt=now+90+Math.random()*80;if(this.bus)this.bus.gain.setTargetAtTime(1,now,2.5)}}if(this.lockUntil&&AC.currentTime>=this.lockUntil){this.lockUntil=0;if(this.want!==this.track)this.switchTo(this.want)}
     if(this.afterHero&&this.track==='hero'&&!this.lockUntil){this.lockUntil=AC.currentTime+TRACKS.hero.len*this.eighth;this.want=this.afterHero;this.afterHero=null}if(this.next<AC.currentTime-1)this.next=AC.currentTime+.05;
-    while(this.next<AC.currentTime+.35){if(this.enabled){const tr=TRACKS[this.track];tr.step(this.next,this.beat,this);if(tr.tension&&this.tension>.1){const b=this.beat;if(b%4===0||b%8===3)this.thump(this.next,this.tension);if(b%2===1)this.hat(this.next,this.tension)}}
+    while(this.next<AC.currentTime+.35){if(this.enabled&&!this.resting){const tr=TRACKS[this.track];tr.step(this.next,this.beat,this);if(tr.tension&&this.tension>.1){const b=this.beat;if(b%4===0||b%8===3)this.thump(this.next,this.tension);if(b%2===1)this.hat(this.next,this.tension)}}
       this.next+=this.eighth;this.beat++}},
   env(t,peak,att,dur,rel){const g=AC.createGain();g.gain.setValueAtTime(.0001,t);g.gain.linearRampToValueAtTime(peak,t+att);g.gain.setValueAtTime(peak,t+Math.max(att,dur-.05));g.gain.linearRampToValueAtTime(.0001,t+dur+rel);return g},
   pad(t,notes,dur,type,vol,cut){const f=AC.createBiquadFilter();f.type='lowpass';f.frequency.value=cut;const g=this.env(t,vol,Math.min(2.4,dur*.3),dur,2.5);f.connect(g);g.connect(this.bus);g.connect(this.rev);

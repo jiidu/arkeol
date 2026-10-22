@@ -1,5 +1,5 @@
 /*
-  Arkeol v0.3.1 · Copyright (C) 2026 JP Hakoluoto
+  Arkeol v0.3.2 · Copyright (C) 2026 JP Hakoluoto
   Free software under the GNU GPL v3 or later, with an attribution term (see LICENSE and NOTICE).
 */
 'use strict';
@@ -17,6 +17,16 @@ const PAPERS=[
  {who:{en:'Diary, Prof. Elina Varjo',fi:'Päiväkirja, prof. Elina Varjo'},body:{en:'2.4.2009\nWe found a chamber whose bricks are older than any dynasty we know. Inside, of all things, was a cassette player. The mural shows a digger wearing a hat just like mine.',fi:'2.4.2009\nLöysimme kammion, jonka tiilet ovat vanhempia kuin yksikään tuntemamme dynastia. Sisällä oli silti kasettisoitin. Seinämaalauksessa on kaivaja, jolla on hattu kuin minulla.'}},
  {who:{en:'Train ticket',fi:'Junalippu'},body:{en:'Northern Line\nHelsinki → Vaskikylä\nDep. 12.6. 07:40\nCar 3, seat 41\nKEEP THIS TICKET FOR THE JOURNEY',fi:'Pohjoinen rata\nHelsinki → Vaskikylä\nMeno 12.6. klo 7.40\nVaunu 3, paikka 41\nTALLETA LIPPU MATKAN AJAN'}},
  {who:{en:'Diary, Prof. Elina Varjo',fi:'Päiväkirja, prof. Elina Varjo'},body:{en:'The guide says the shaft has no bottom, only the next layer. He says this cheerfully.\nI leave this note for the next digger. For you.',fi:'Opas sanoo, että kuilulla ei ole pohjaa, vain seuraava kerros. Hän sanoo tämän iloisesti.\nJätän tämän muistiinpanon seuraavalle kaivajalle. Sinulle.'}}
+,
+ {who:{en:'Field notebook, J.H.',fi:'Kenttämuistikirja, J.H.'},body:{en:'Day 1.\nLeft Kuopio on the morning train. The ice on Kallavesi was still grey at the edges. Mother packed rye bread and told me to keep my scarf on underground. As if it is cold down there.',fi:'Päivä 1.\nLähdin Kuopiosta aamujunalla. Kallaveden jää oli vielä reunoilta harmaata. Äiti pakkasi ruisleipää ja käski pitää kaulahuivin kaulassa maan alla. Ihan kuin siellä olisi kylmä.'}},
+ {who:{en:'Field notebook, J.H.',fi:'Kenttämuistikirja, J.H.'},body:{en:'Day 9.\nFrom the top of Puijo tower you can count a hundred lakes. Down here I count layers instead. Eleven so far. Elina says I am the only one who still takes photographs.',fi:'Päivä 9.\nPuijon tornista voi laskea sata järveä. Täällä alhaalla lasken kerroksia. Yksitoista tähän mennessä. Elina sanoo, että olen ainoa, joka vielä valokuvaa.'}},
+ {who:{en:'Postcard from Kuopio',fi:'Postikortti Kuopiosta'},body:{en:'Greetings from the market square!\nBought a kalakukko from the old lady by the clock. It is in my rucksack, wrapped in newspaper. Do NOT tell the professor, she will want half.\n– J.',fi:'Terveisiä torilta!\nOstin kalakukon kellon vierestä siltä vanhalta rouvalta. Se on repussa sanomalehteen käärittynä. ÄLÄ kerro professorille, hän haluaa puolet.\n– J.'}},
+ {who:{en:"Recipe card, J.H.'s grandmother",fi:'Reseptikortti, J.H:n mummo'},body:{en:'KALAKUKKO\nVendace and a little fat pork inside a thick rye crust. Bake slowly, five or six hours, until the crust knocks like a door.\nKeeps for days. Good for long journeys.',fi:'KALAKUKKO\nMuikkuja ja vähän läskiä paksun ruiskuoren sisään. Paista hitaasti viisi kuusi tuntia, kunnes kuori kopisee kuin ovi.\nSäilyy päiviä. Hyvää pitkille matkoille.'},unlock:'kalakukko'},
+ {who:{en:'Letter, J.H. to Elina Varjo',fi:'Kirje, J.H. Elina Varjolle'},body:{en:'Elina,\nthe guide asked me about Kuopio today. He knew the name of my street, and that the lake steamer leaves at nine. I never told him where I am from.\nI am keeping the camera loaded.',fi:'Elina,\nopas kysyi minulta tänään Kuopiosta. Hän tiesi kotikatuni nimen, ja että laivat lähtevät satamasta yhdeksältä. En ole koskaan kertonut hänelle, mistä olen kotoisin.\nPidän kameran ladattuna.'}},
+ {who:{en:'Ticket, lake steamer',fi:'Lippu, järvilaiva'},body:{en:'Kuopio harbour → Rauhalahti\nSummer cruise 2007\nAdult 1 · Coffee included\nPLEASE KEEP YOUR TICKET UNTIL THE END OF THE CRUISE',fi:'Kuopion satama → Rauhalahti\nKesäristeily 2007\nAikuinen 1 · Kahvi sisältyy\nSÄILYTÄ LIPPU RISTEILYN LOPPUUN ASTI'}},
+ {who:{en:'Newspaper clipping, a Kuopio local paper',fi:'Lehtileike, kuopiolainen paikallislehti'},body:{en:'DANCE FESTIVAL FILLS THE MARKET SQUARE\nThousands gathered under the summer sky. The organisers promise even more next year, "unless the sky has other plans", joked the festival director.',fi:'TANSSIJUHLAT TÄYTTIVÄT TORIN\nTuhannet kokoontuivat kesäisen taivaan alle. Järjestäjät lupaavat ensi vuonna vielä enemmän, "ellei taivaalla ole muita suunnitelmia", vitsaili festivaalin johtaja.'}},
+ {who:{en:'Field notebook, J.H. (last page)',fi:'Kenttämuistikirja, J.H. (viimeinen sivu)'},body:{en:'If you are reading this, you made it further than I did.\nTell my mother in Kuopio that I kept my scarf on. Tell Elina the photographs are under the third lantern.\nThe guide is not a man.',fi:'Jos luet tätä, pääsit pidemmälle kuin minä.\nKerro äidilleni Kuopioon, että pidin kaulahuivin kaulassa. Kerro Elinalle, että valokuvat ovat kolmannen lyhdyn alla.\nOpas ei ole ihminen.'}},
+ {who:{en:'Scrap of paper, in pencil',fi:'Paperinpala, lyijykynällä'},body:{en:'Reijo the scrap man says he came down here to look for his lost car keys in 2008. He found the keys. He just never found the way back up. "Not that I looked very hard," he says.',fi:'Romu-Reijo sanoo tulleensa tänne etsimään hukattuja autonavaimiaan vuonna 2008. Avaimet löytyivät. Tietä takaisin ylös ei. "En kyllä kovin tosissani etsinytkään", hän sanoo.'}}
 ];
 const PHOTOS=[
  {cap:{en:'Summer 2004, the cabin jetty',fi:'Kesä 2004, mökkilaituri'},draw:'pier'},
@@ -26,7 +36,11 @@ const PHOTOS=[
  {cap:{en:'The lighthouse, last summer',fi:'Majakka, viimeinen kesä'},draw:'lighthouse'},
  {cap:{en:'The expedition and the guide, 2009',fi:'Retkikunta ja opas, 2009'},draw:'expedition'},
  {cap:{en:'The pyramid at dawn',fi:'Pyramidi aamulla'},draw:'pyramid'},
- {cap:{en:'The fairground',fi:'Huvipuisto'},draw:'wheel'}
+ {cap:{en:'The fairground',fi:'Huvipuisto'},draw:'wheel'},
+ {cap:{en:'Puijo tower, J.H. 2006',fi:'Puijon torni, J.H. 2006'},draw:'puijo'},
+ {cap:{en:'Steamer on Kallavesi',fi:'Höyrylaiva Kallavedellä'},draw:'steamer'},
+ {cap:{en:'Kuopio market square, Saturday',fi:'Kuopion tori, lauantai'},draw:'market'},
+ {cap:{en:'J.H. with the camera, layer 3',fi:'J.H. ja kamera, kerros 3'},draw:'jh'}
 ];
 const ERA={en:'2000s',fi:'2000-luku'};
 const RELICS=[
@@ -48,6 +62,15 @@ function drawPhoto(kind,c){
   const sep=v=>{v=clamp(v,0,1);return `rgb(${43+193*v|0},${32+188*v|0},${22+160*v|0})`};
   const R=(x,y,w,h,v)=>{g.fillStyle=sep(v);g.fillRect(x,y,w,h)};
   const sky=(a,b,h)=>{for(let y=0;y<h;y++)R(0,y,W,1,a+(b-a)*y/h)};
+  if(kind==='puijo'){sky(.9,.7,40);R(0,40,W,24,.5);for(let y=42;y<64;y+=3)R((y*11)%50,y,22,1,.66);
+    g.fillStyle=sep(.28);g.beginPath();g.moveTo(0,44);g.quadraticCurveTo(40,14,96,40);g.lineTo(96,44);g.fill();for(let i=0;i<30;i++){const x=r()*90,y=26+r()*14;R(x,y,3,5,.18)}
+    R(46,4,4,22,.12);R(43,2,10,5,.1);R(44,3,8,1,.7);R(47,0,2,2,.15)}
+  if(kind==='steamer'){sky(.88,.7,30);R(0,30,W,34,.5);for(let y=32;y<64;y+=3)R((y*13)%60,y,24,1,.68);R(0,28,W,3,.3);
+    R(18,36,58,8,.15);R(22,32,40,5,.85);R(24,33,36,1,.4);for(let x=26;x<58;x+=5)R(x,34,2,2,.3);R(46,20,5,13,.12);R(46,20,5,2,.6);g.fillStyle=sep(.7);for(let i=0;i<4;i++){g.beginPath();g.arc(50-i*5,14-i*3,3+i,0,7);g.fill()}R(16,44,62,2,.3)}
+  if(kind==='market'){sky(.85,.68,30);R(0,30,W,34,.55);R(30,6,36,26,.3);R(34,10,8,8,.6);R(54,10,8,8,.6);R(44,0,8,8,.25);g.fillStyle=sep(.85);g.beginPath();g.arc(48,4,3,0,7);g.fill();
+    for(let i=0;i<5;i++){const x=4+i*19;R(x,36,15,3,.85-(i%2)*.4);R(x+1,39,13,8,.35);R(x,39,1,9,.2);R(x+14,39,1,9,.2)}for(let i=0;i<9;i++){const x=r()*90;R(x,52+r()*6,2,6,.12);R(x,50+r()*6,2,2,.2)}}
+  if(kind==='jh'){sky(.4,.25,64);g.fillStyle=sep(.75);g.beginPath();g.arc(48,30,22,0,7);g.fill();sky;R(36,40,24,24,.25);R(40,22,16,16,.68);R(38,18,20,5,.2);R(36,22,24,2,.15);
+    R(42,28,4,4,.12);R(50,28,4,4,.12);R(46,34,4,2,.4);R(44,44,10,7,.1);R(47,46,4,3,.8);R(30,40,6,2,.55);R(26,42,8,14,.6)}
   if(kind==='pier'){sky(.9,.72,34);g.fillStyle=sep(.98);g.beginPath();g.arc(70,20,7,0,7);g.fill();
     for(let x=0;x<W;x+=6)R(x,26+Math.sin(x)*1.5|0,7,8,.25);R(0,34,W,30,.45);for(let y=36;y<64;y+=3)R((y*7)%40,y,18,1,.62);
     for(let i=0;i<14;i++)R(2+i*3,40+i,30-i*1.5,3,.2);R(40,52,30,3,.18);for(let x=42;x<70;x+=6)R(x,55,2,9,.12);R(58,44,4,8,.08);R(64,45,4,7,.1);R(58,41,4,4,.12);R(64,42,4,4,.12)}
