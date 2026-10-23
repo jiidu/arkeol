@@ -1,11 +1,11 @@
 /*
-  Arkeol v0.3.3 · Copyright (C) 2026 JP Hakoluoto
+  Arkeol v0.3.4 · Copyright (C) 2026 JP Hakoluoto
   Free software under the GNU GPL v3 or later, with an attribution term (see LICENSE and NOTICE).
 */
 'use strict';
 /* =========================================================== input */
 const KEYMAP={ArrowLeft:'left',KeyA:'left',ArrowRight:'right',KeyD:'right',ArrowUp:'up',KeyW:'up',ArrowDown:'down',KeyS:'down',
-  Space:'jump',KeyZ:'jump',KeyX:'dig',KeyJ:'dig',KeyV:'use',KeyC:'drill',KeyK:'drill',KeyF:'weapon',KeyB:'bomb',KeyL:'bomb',KeyR:'rope',KeyI:'rope',KeyE:'act',KeyQ:'cycle',KeyG:'fish',KeyT:'throw'};
+  Space:'jump',KeyZ:'jump',KeyX:'dig',KeyJ:'dig',KeyV:'use',KeyC:'drill',KeyK:'drill',KeyF:'weapon',KeyB:'bomb',KeyL:'bomb',KeyR:'rope',KeyI:'rope',KeyE:'act',KeyG:'fish',KeyT:'throw'};
 const held={}, hit={};
 let useSrc='key';
 const mouse={x:0,y:0,seen:false,inside:false};
@@ -18,14 +18,15 @@ addEventListener('keydown',e=>{
   if(introT>0&&state==='play'&&e.code!=='Escape'&&e.code!=='KeyP'){skipIntro();e.preventDefault();return}
   const modalOpen=!$('modal').hidden;
   if(e.code==='Tab'){e.preventDefault();if(state==='play')toggleMap();return}
-  if(e.code==='KeyH'){if(state==='play')openCraft();else if(state==='craft')closeCraft();e.preventDefault();return}
+  if(e.code==='End'){if(state==='play'&&nearTent())openDebugRoom();e.preventDefault();return}
+  if(e.code==='KeyQ'){if(state==='play')openCraft();else if(state==='craft')closeCraft();e.preventDefault();return}
   if(e.code==='Escape'){e.preventDefault();if(state==='craft')closeCraft();else if(state==='shop')closeShop();else if(modalOpen)closeModal();else if(openPanel)closePanel();else togglePause();return}
   if(e.code==='KeyP'){togglePause();e.preventDefault();return}
   if(e.code==='KeyM'){toggleMute();return}
   if(e.code==='KeyN'){toggleMusic();return}
   if(e.code==='Enter'){if(modalOpen){closeModal();e.preventDefault()}else if((state==='menu'||state==='over')&&!openPanel){newGame();e.preventDefault()}return}
   if(modalOpen&&(e.code==='KeyE'||e.code==='Space')){closeModal();e.preventDefault();return}
-  if(/^Digit[1-7]$/.test(e.code)&&state==='play'){const s=slotAtPos(+e.code[5]-1);pickSlot(s);return}
+  if(/^Digit[1-9]$/.test(e.code)&&state==='play'){const s=slotAtPos(+e.code[5]-1);pickSlot(s);return}
   const a=KEYMAP[e.code];if(a){if(a==='use')useSrc='key';if(['dig','drill','weapon','use','fish','bomb','rope','throw'].includes(a))inputMode='key';press(a);if(state==='play')e.preventDefault()}
 });
 addEventListener('keyup',e=>{const a=KEYMAP[e.code];if(a)release(a)});

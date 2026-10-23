@@ -1,5 +1,5 @@
 /*
-  Arkeol v0.3.3 · Copyright (C) 2026 JP Hakoluoto
+  Arkeol v0.3.4 · Copyright (C) 2026 JP Hakoluoto
   Free software under the GNU GPL v3 or later, with an attribution term (see LICENSE and NOTICE).
 */
 'use strict';
@@ -55,14 +55,14 @@ function openModal(html,wide){$('modalBody').innerHTML=html;$('modalCard').class
 function closeModal(){$('modal').hidden=true;if(state==='modal')state='play';releaseAll()}
 $('modalClose').addEventListener('click',closeModal);
 const loreCount=c=>Object.keys(store.lore).filter(k=>k[0]===c).length;
-function paperHTML(i){const p=PAPERS[i];return `<div class="paper"><div class="meta">${esc(tr(p.who))}</div><p>${esc(tr(p.body))}</p>${p.red?`<p class="red">${esc(tr(p.red))}</p>`:''}</div>`}
+function paperHTML(i){const p=PAPERS[i];return `<div class="paper${p.al?' alienPaper':''}"><div class="meta">${esc(tr(p.who))}</div>${p.al?`<img class="alien" alt="" src="${alienImg(p.al)}">`:''}<p dir="auto">${esc(tr(p.body))}</p>${p.red?`<p class="red">${esc(tr(p.red))}</p>`:''}</div>`}
 function showPaper(i,found){openModal(`${found?`<p class="prog" style="text-align:center;margin:0 0 10px">${esc(t('foundPaper',loreCount('p'),PAPERS.length))}</p>`:''}${paperHTML(i)}`)}
 function showPhoto(i,found){openModal(`${found?`<p class="prog" style="text-align:center;margin:0 0 10px">${esc(t('foundPhoto',loreCount('f'),PHOTOS.length))}</p>`:''}<div class="polaroid"><canvas id="phc"></canvas><div class="cap">${esc(tr(PHOTOS[i].cap))}</div></div>`);drawPhoto(PHOTOS[i].draw,$('phc'))}
 function showRelic(rel,isNew,found){openModal(`<div class="relicView"><canvas id="rlc"></canvas><div><div class="era">${esc(tr(ERA))}${isNew&&found?' · '+esc(t('newFind')):''}</div><h2>${esc(tr(rel.name))}</h2><div class="val">${fmt(rel.value)}</div><p>${esc(tr(rel.desc))}</p></div></div>`);drawRelic(rel.id,$('rlc'))}
 function openScreen(id){if(openPanel)$(openPanel).hidden=true;openPanel=id;
   for(const s of ['menu','pause','over'])if(!$(s).hidden){$(s).dataset.was='1';$(s).hidden=true}
   if(id==='wardrobe')renderWardrobe();if(id==='archive')renderArchive(curTab);if(id==='achv')renderAch();$(id).hidden=false;const b=$(id).querySelector('.closeScreen');if(b)setTimeout(()=>b.focus(),30)}
-function closePanel(silent){if(!openPanel)return;$(openPanel).hidden=true;openPanel=null;
+function closePanel(silent){if(!openPanel)return;$(openPanel).hidden=true;openPanel=null;if(state==='modal'&&inTent){state='play';releaseAll()}
   for(const s of ['menu','pause','over']){if(!silent&&$(s).dataset.was)$(s).hidden=false;delete $(s).dataset.was}}
 document.addEventListener('click',e=>{const b=e.target.closest('[data-open]');if(!b)return;ensureAudio();openScreen(b.dataset.open)});
 document.querySelectorAll('.closeScreen').forEach(b=>b.addEventListener('click',()=>closePanel()));
@@ -117,18 +117,18 @@ const SABU={hi:{en:['Welcome, digger. Sabu has traded in these tunnels longer th
   no:{en:['Your pockets are lighter than your judgement.','Come back when you have dug a little more.','Sabu does not give credit. Not for three thousand years.'],fi:['Taskusi ovat kevyemmät kuin harkintasi.','Tule takaisin, kun olet kaivanut enemmän.','Sabu ei anna velaksi. Ei ole antanut kolmeen tuhanteen vuoteen.']}};
 function makeStock(){const base=['heart','bombs','ropes',...(P.hasDrill?['fuel']:[]),P.weapons.length?'arrows':'bow'];if(!P.rod)base.push('rod');const extras=SHOP_ITEMS.filter(i=>(i.once||i.id==='ammo'||i.id==='dye'||i.id==='blueprint')&&!base.includes(i.id)).map(i=>i.id).sort(()=>Math.random()-.5).slice(0,5);return {ids:[...base,...extras],sold:{}}}
 for(const id of ['pistol','gun','ammo','drill0','drill']){const i=SHOP_ITEMS.findIndex(x=>x.id===id);if(i>=0)SHOP_ITEMS.splice(i,1)}
-const shopTalk=()=>curShop===junk?REIJO:SABU;
-function openShop(which){const S=which||shop;if(!S||state!=='play')return;curShop=S;if(!S.stock)S.stock=S===junk?{ids:JUNK_ITEMS.map(i=>i.id),sold:{}}:makeStock();state='shop';releaseAll();$('sabuSay').textContent=pickR(tr(shopTalk().hi));if(S===junk)drawReijoPortrait($('sabu'));else drawSabu($('sabu'));
-  document.querySelector('#shop h2').textContent=S===junk?t('junkTitle'):t('shopTitle');$('shop').classList.toggle('junkShop',S===junk);renderShop();$('shop').hidden=false;setTimeout(()=>$('shopClose').focus(),30)}
+const shopTalk=()=>curShop===junk?REIJO:curShop&&curShop.kind==='bake'?BAKER:SABU;
+function openShop(which){const S=which||shop;if(!S||state!=='play')return;curShop=S;if(!S.stock)S.stock=S===junk?{ids:JUNK_ITEMS.map(i=>i.id),sold:{}}:S.kind==='bake'?{ids:BAKE_ITEMS.map(i=>i.id),sold:{}}:makeStock();state='shop';releaseAll();shopSay(pickR(tr(shopTalk().hi)));if(S===junk)drawReijoPortrait($('sabu'));else if(S.kind==='bake')drawBakerPortrait($('sabu'));else drawSabu($('sabu'));
+  document.querySelector('#shop h2').textContent=S===junk?t('junkTitle'):S.kind==='bake'?t('bakeTitle'):t('shopTitle');$('shop').classList.toggle('junkShop',S===junk);$('shop').classList.toggle('bakeShop',S.kind==='bake');renderShop();$('shop').hidden=false;setTimeout(()=>$('shopClose').focus(),30)}
 function closeShop(){$('shop').hidden=true;if(state==='shop')state='play';releaseAll();renderHotbar()}
 $('shopClose').addEventListener('click',closeShop);
 function renderShop(){const g=$('shopGrid');g.innerHTML='';$('shopMoney').textContent=t('wallet',fmt(P.money));
   const pr=it=>Math.round(it.p*(1+(level-2)*.06)/10)*10;
-  const LIST=curShop===junk?JUNK_ITEMS:SHOP_ITEMS;
+  const LIST=curShop===junk?JUNK_ITEMS:curShop.kind==='bake'?BAKE_ITEMS:SHOP_ITEMS;
   for(const id of curShop.stock.ids){const it=LIST.find(x=>x.id===id);if(!it)continue;const sold=curShop.stock.sold[id]||(it.once&&!it.ok());
     const d=document.createElement('div');d.className='sitem'+(sold?' sold':'');
     d.innerHTML=`<img alt="" src="${ICON[it.ic]}"><div><b>${esc(tr(it.n))}</b><span>${esc(tr(it.d))}</span></div>`;
     const b=document.createElement('button');b.type='button';b.textContent=sold?t('sold'):fmt(pr(it));b.disabled=sold||!it.ok();
-    b.addEventListener('click',()=>{const price=pr(it);if(P.money<price){sfx.nope();$('sabuSay').textContent=pickR(tr(shopTalk().no));return}
-      P.money-=price;it.buy();if(it.once)curShop.stock.sold[id]=true;store.stats.buys++;save();sfx.buy();$('sabuSay').textContent=pickR(tr(shopTalk().buy));checkAch();renderShop();renderHotbar()});
+    b.addEventListener('click',()=>{const price=pr(it);if(P.money<price){sfx.nope();shopSay(pickR(tr(shopTalk().no)));return}
+      P.money-=price;it.buy();if(it.once)curShop.stock.sold[id]=true;store.stats.buys++;save();sfx.buy();shopSay(pickR(tr(shopTalk().buy)));checkAch();renderShop();renderHotbar()});
     d.appendChild(b);g.appendChild(d)}}

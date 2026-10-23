@@ -1,5 +1,5 @@
 /*
-  Arkeol v0.3.3 · Copyright (C) 2026 JP Hakoluoto
+  Arkeol v0.3.4 · Copyright (C) 2026 JP Hakoluoto
   Free software under the GNU GPL v3 or later, with an attribution term (see LICENSE and NOTICE).
   deep.js – coloured gems, the dragon, layers out of time, the darkness that grows with depth,
             keepsakes found with letters (with rarities), campfires and pan coffee
@@ -66,11 +66,11 @@ function spawnDeep(lv,H){const {ri,r,airFloor,far,sy}=H;era=null;if(inVoid){spaw
     if(where==='floor'){if(!airFloor(x,y))continue;if(k==='column'||k==='armor'||k==='holo'){if(grid[idx(x,y-1)]!==AIR)continue}decos.push({tx:x,ty:y,k,sx:0,sy:1,v:ri(0,3),...extra});return true}
     const s=isSolid(x-1,y)?-1:isSolid(x+1,y)?1:0;if(!s)continue;decos.push({tx:x,ty:y,k,sx:s,sy:0,v:ri(0,3),...extra});return true}return false};
   // a layer that has slipped out of its own time
-  if(lv>=3&&r()<.4){era=pickR(ERAS);const n=8+ri(0,6);for(let i=0;i<n;i++){const [k,w]=pickR(ERADECO[era]);put(w,k)}for(let i=0;i<1+(r()<.5?1:0);i++)put('floor','rift')}
+  if((DBG&&DBG.era)||lv>=3&&r()<.4){era=(DBG&&DBG.era)||pickR(ERAS);const n=8+ri(0,6);for(let i=0;i<n;i++){const [k,w]=pickR(ERADECO[era]);put(w,k)}for(let i=0;i<1+(r()<.5?1:0);i++)put('floor','rift')}
   // the deeper you go, the worse it gets
   if(lv>=5){const n=lv===5?3:lv===6?6:9+ri(0,4);for(let i=0;i<n;i++){const k=pickR(lv>=7?['blood','blood','hand','scrawl','scrawl','tally']:['blood','tally','scrawl']);put('wall',k,{txt:ri(0,8)})}}
   // the dragon sleeps only far below
-  if(lv>=7&&r()<(lv>=10?.45:.28)){for(let a=0;a<2000;a++){const x=ri(4,MW-8),y=ri(sy+4,MH-4);if(!far(x,y,18))continue;let ok=true;
+  if((DBG&&DBG.dragon)||lv>=7&&r()<(lv>=10?.45:.28)){for(let a=0;a<2000;a++){const x=ri(4,MW-8),y=ri(sy+4,MH-4);if(!far(x,y,18))continue;let ok=true;
       for(let yy=y-3;yy<=y&&ok;yy++)for(let xx=x-1;xx<=x+3&&ok;xx++)if(grid[idx(xx,yy)]!==AIR||prot[idx(xx,yy)])ok=false;
       for(let xx=x-1;xx<=x+3&&ok;xx++)if(!isSolid(xx,y+1))ok=false;if(!ok)continue;foes.push(mkDragon(x*T,(y+1)*T-20.001));break}}}
 

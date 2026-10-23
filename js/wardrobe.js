@@ -1,5 +1,5 @@
 /*
-  Arkeol v0.3.3 · Copyright (C) 2026 JP Hakoluoto
+  Arkeol v0.3.4 · Copyright (C) 2026 JP Hakoluoto
   SPDX-License-Identifier: GPL-3.0-or-later (with the additional attribution term in NOTICE)
   wardrobe.js – clothes, dyes and the wardrobe screen
 */
@@ -48,7 +48,7 @@ const WCATS={d:DYES,h:HATS,t:TOPS,n:NECKS};
 const WALL=[...DYES.map(x=>'d:'+x.id),...HATS.map(x=>'h:'+x.id),...TOPS.map(x=>'t:'+x.id),...NECKS.map(x=>'n:'+x.id)];
 const HAIRS=[{id:'brown',c:'#4a3020'},{id:'dark',c:'#1e1612'},{id:'blond',c:'#c8a050'},{id:'red',c:'#8a3a1a'},{id:'grey',c:'#9a948a'}];
 const hairC=id=>(HAIRS.find(h=>h.id===id)||HAIRS[0]).c;
-const WDEF={body:'m',hair:'brown',hat:'pith',hatC:'tan',top:'shirt',topC:'khaki',pants:'brown',neck:'bandana',neckC:'red'};
+const WDEF={body:'m',skin:'#e2b48a',hair:'brown',hat:'pith',hatC:'tan',top:'shirt',topC:'khaki',pants:'brown',neck:'bandana',neckC:'red'};
 store.wardrobe=store.wardrobe||{own:{},look:{}};
 (function(){try{const s=JSON.parse(localStorage.getItem(SKEY)||'null');if(s&&s.wardrobe)store.wardrobe=s.wardrobe}catch(e){}
   const w=store.wardrobe;w.own=w.own||{};w.look=Object.assign({},WDEF,w.look||{});
@@ -60,7 +60,9 @@ function shade(hex,f){const n=parseInt(hex.slice(1),16);let r=n>>16,g=n>>8&255,b
   if(f>0){r+=(255-r)*f;g+=(255-g)*f;b+=(255-b)*f}else{r*=1+f;g*=1+f;b*=1+f}
   return '#'+[r,g,b].map(v=>Math.round(v).toString(16).padStart(2,'0')).join('')}
 /* resolved colours for the current look */
-function look(){const L=store.wardrobe.look;return {body:L.body||'m',hc2:hairC(L.hair),hat:L.hat,hc:dyeC(L.hatC),top:L.top,tc:dyeC(L.topC),pc:dyeC(L.pants),neck:L.neck,nc:dyeC(L.neckC)}}
+const SKINS=['#f6dccb','#efc8a4','#e2b48a','#d8a47a','#c98f68','#a86c48','#8a5a3a','#6a4028','#4a2c1c'];
+Object.assign(STR.en,{wSkin:'Skin',wSkinPick:'Any colour'});Object.assign(STR.fi,{wSkin:'Iho',wSkinPick:'Mikä tahansa väri'});
+function look(){const L=store.wardrobe.look;return {sk:/^#[0-9a-f]{6}$/i.test(L.skin||'')?L.skin:'#e2b48a',body:L.body||'m',hc2:hairC(L.hair),hat:L.hat,hc:dyeC(L.hatC),top:L.top,tc:dyeC(L.topC),pc:dyeC(L.pants),neck:L.neck,nc:dyeC(L.neckC)}}
 /* pick something not yet found; dyes are the most common find */
 function randomCosmetic(only){const pool=WALL.filter(k=>!wOwn(k)&&!wItem(k).shop&&(!only||only.includes(k[0])));if(!pool.length)return null;
   const w=pool.map(k=>k[0]==='d'?3:1),sum=w.reduce((a,b)=>a+b,0);let r=Math.random()*sum;for(let i=0;i<pool.length;i++){r-=w[i];if(r<=0)return pool[i]}return pool[0]}
@@ -113,6 +115,10 @@ function renderWardrobe(){const L=store.wardrobe.look,box=$('wRows');box.innerHT
     r.append(opts);box.append(r)};
   {const r=document.createElement('div');r.className='wRow';r.innerHTML=`<span class="wLbl">${esc(t('wBody'))}</span>`;const op=document.createElement('div');op.className='wOpts';
     for(const [id,k] of [['m','bodyM'],['f','bodyF']]){const b=document.createElement('button');b.type='button';b.className='wOpt';b.textContent=t(k);b.setAttribute('aria-pressed',String((L.body||'m')===id));b.addEventListener('click',()=>{L.body=id;save();renderWardrobe()});op.append(b)}r.append(op);box.append(r)}
+  {const r=document.createElement('div');r.className='wRow';r.innerHTML=`<span class="wLbl">${esc(t('wSkin'))}</span>`;const op=document.createElement('div');op.className='wOpts';
+    for(const c of SKINS){const b=document.createElement('button');b.type='button';b.className='sw';b.style.setProperty('--c',c);b.setAttribute('aria-label',c);b.setAttribute('aria-pressed',String((L.skin||'#e2b48a').toLowerCase()===c));b.addEventListener('click',()=>{L.skin=c;save();renderWardrobe()});op.append(b)}
+    const lab=document.createElement('label');lab.className='wPick';lab.title=t('wSkinPick');const inp=document.createElement('input');inp.type='color';inp.value=L.skin||'#e2b48a';inp.setAttribute('aria-label',t('wSkinPick'));
+    inp.addEventListener('input',()=>{L.skin=inp.value;save();wardrobePreview()});inp.addEventListener('change',()=>renderWardrobe());lab.append(inp,document.createTextNode(t('wSkinPick')));op.append(lab);r.append(op);box.append(r)}
   {const r=document.createElement('div');r.className='wRow';r.innerHTML=`<span class="wLbl">${esc(t('wHairC'))}</span>`;const op=document.createElement('div');op.className='wOpts';
     for(const hh of HAIRS){const b=document.createElement('button');b.type='button';b.className='sw';b.style.setProperty('--c',hh.c);b.setAttribute('aria-label',hh.id);b.setAttribute('aria-pressed',String((L.hair||'brown')===hh.id));b.addEventListener('click',()=>{L.hair=hh.id;save();renderWardrobe()});op.append(b)}r.append(op);box.append(r)}
   row('wHat','h',HATS,'hat');if(L.hat!=='none')row('wHatC','d',DYES,'hatC');

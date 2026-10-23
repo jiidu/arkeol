@@ -1,5 +1,5 @@
 /*
-  Arkeol v0.3.3 · Copyright (C) 2026 JP Hakoluoto
+  Arkeol v0.3.4 · Copyright (C) 2026 JP Hakoluoto
   Free software under the GNU GPL v3 or later, with an attribution term (see LICENSE and NOTICE).
   craft.js – materials, recipes, campfires as workbenches and placeable torches and ladders
 */
@@ -33,6 +33,7 @@ const RECIPES=[
  {id:'kalakukko',n:{en:'Kalakukko',fi:'Kalakukko'},d:{en:"Grandma's fish pasty from the lake country. Keeps for days. Eat later: +3 hearts and cures poison.",fi:'Mummon kalakukko Savosta. Säilyy päiviä. Syö myöhemmin: +3 sydäntä ja parantaa myrkytyksen.'},need:{fish:2,wood:1,berry:1},ic:'meal_kukko',station:1,meal:1,special:1},
  {id:'stew',meal:1,n:{en:'Mushroom stew',fi:'Sienimuhennos'},d:{en:'Keeps in your pack. Eat later: +2 hearts.',fi:'Säilyy repussa. Syö myöhemmin: +2 sydäntä.'},need:{spores:3,bone:1},ic:'stew',station:1,make:()=>{P.hp=Math.min(8,P.hp+2);P.maxHp=Math.max(P.maxHp,P.hp)}},
  {id:'bomb',n:{en:'Bomb',fi:'Pommi'},d:{en:'Saltpetre packed in a scrap shell. +1 bomb.',fi:'Salpietaria romukuoressa. +1 pommi.'},need:{powder:2,scrap:1},ic:'bomb',station:1,make:()=>{P.bombs++}},
+ {id:'souls',n:{en:'Soul shards',fi:'Sielusirpaleet'},d:{en:'Ammunition for demon weapons, ground from a single bone. +8.',fi:'Ammuksia demoniaseisiin, jauhettu yhdestä luusta. +8.'},need:{bone:1},ic:'souls',start:1,make:()=>{P.souls=(P.souls||0)+8}},
  {id:'ammo',n:{en:'Hand-loaded rounds',fi:'Itse ladatut patruunat'},d:{en:'+4 rounds for the pistol and shotgun.',fi:'+4 patruunaa pistooliin ja haulikkoon.'},need:{powder:1,scrap:2},ic:'ammo',station:1,make:()=>{P.ammo+=4}}
 ];
 RECIPES.find(r=>r.id==='silkrope').make=()=>{P.ropes++};
@@ -85,7 +86,7 @@ function renderCraft(){const at=nearStation();
   const mr=$('craftMats');mr.innerHTML='';for(const k of MATKEYS){const s=document.createElement('span');s.className='mat'+((P.mats[k]||0)?'':' zero');s.innerHTML=`<img alt="" src="${ICON['m_'+k]}"><b>${P.mats[k]||0}</b><small>${esc(tr(MATS[k].n))}</small>`;mr.append(s)}
   const pl=$('craftPlace');pl.innerHTML='';
   for(const id of Object.keys(MEALS)){const n=P.meals[id]||0;if(!n)continue;const r=RECIPES.find(q=>q.id===id),b=document.createElement('button');b.type='button';b.className='btn2 eatBtn';b.textContent=t('eatMeal',tr(r.n),n);b.addEventListener('click',()=>{eatMeal(id);renderCraft()});pl.append(b)}
-  for(const [id,cnt,fn] of [['fire',P.fires||0,placeFire],['torch',P.torches||0,placeTorch],['ladder',P.ladders||0,placeLadder]]){if(!cnt)continue;const b=document.createElement('button');b.type='button';b.className='btn2';b.textContent=t('place_'+id,cnt);
+  for(const [id,cnt,fn] of [['ladder',P.ladders||0,placeLadder]]){if(!cnt)continue;const b=document.createElement('button');b.type='button';b.className='btn2';b.textContent=t('place_'+id,cnt);
     b.addEventListener('click',()=>{closeCraft();if(!fn()){sfx.nope();floatText(P.x+5,P.y-8,t('cantPlace'),'#ffb0a0')}});pl.append(b)}
   pl.hidden=!pl.children.length;
   const g=$('craftGrid');g.innerHTML='';const known=RECIPES.filter(r=>knowsRecipe(r.id)).length;$('craftProg').textContent=t('recipesKnown',known,RECIPES.length);

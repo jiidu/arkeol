@@ -1,6 +1,6 @@
 # Developing Arkeol
 
-*Version 0.3.3 · Arkeol by JP Hakoluoto · GPL-3.0-or-later with an attribution term (see `LICENSE` and `NOTICE`)*
+*Version 0.3.4 · Arkeol by JP Hakoluoto · GPL-3.0-or-later with an attribution term (see `LICENSE` and `NOTICE`)*
 
 This document is for people who want to read, modify or extend the code. It describes the architecture,
 conventions and the usual extension points. It does not explain the story or the game's secrets. Where a file
@@ -57,13 +57,19 @@ it. Calls made later, at runtime, can go in any direction.
 | 11 | `ui.js` | Achievements, menus and panels, archive, shop screen |
 | 12 | `render.js` | Drawing: tiles, decorations, entities, player, lighting, minimap, HUD |
 | 13 | `foes2.js` | Additional enemy types, plugged in through the `EXTRA_*` tables |
-| 14 | `junk.js` | Second trader, wearable weapons, fishing spots, start-of-run setup, iris transitions |
-| 15 | `secrets.js` | Interactive hidden content **(contains spoilers)** |
-| 16 | `deep.js` | Late-layer content: gem types, keepsakes, campfires, layer themes, depth atmosphere **(contains spoilers)** |
-| 17 | `surface.js` | The world above: seasons, time of day, sun/moon, weather and its sounds |
-| 18 | `void.js` | World snapshots for side trips, special weapons, wooden blocks, the main trader's look **(contains spoilers)** |
-| 19 | `pad.js` | Gamepad support (standard mapping) |
-| 20 | `main.js` | Language switching, the main loop, menu wiring, settings |
+| 14 | `bugs.js` | Ant columns and scorpions (also registered through `EXTRA_*`) |
+| 15 | `vents.js` | Steam vents in floors, walls and ceilings (`spawnVents`, `updVents`, `drawVent`); strong ones launch the player (`P.launch`) |
+| 16 | `junk.js` | Second trader, wearable weapons, fishing spots, start-of-run setup, iris transitions |
+| 17 | `secrets.js` | Interactive hidden content **(contains spoilers)** |
+| 18 | `deep.js` | Late-layer content: gem types, keepsakes, campfires, layer themes, depth atmosphere **(contains spoilers)** |
+| 19 | `beasts.js` | Era creatures: raptors and a tyrant lizard (dinosaur era, `ERAS` gets `'dino'`), knights, a mammoth and a dragon (medieval era); `spawnEraFoes` |
+| 20 | `surface.js` | The world above: seasons, time of day, sun/moon, weather and its sounds |
+| 21 | `void.js` | World snapshots for side trips, special weapons, wooden blocks, the main trader's look, the short "horror moments" (`startHorror`, `updHorror`, `drawHorror`), the other side seeping into layers 9+ (`spawnCorruption`, `corA`) and `resetAtmosphere()`, called whenever a layer is built **(contains spoilers)** |
+| 22 | `folk.js` | Character voices and typewriter speech (`showTalk`, `shopSay`, `VOICE`), extra dialogue, the tea philosopher, the bakery (`BAKE_ITEMS`), visible fish (`fishes`), the small crafting reminder beside the hotbar (`updCraftTip`); defines the final `talkTo` |
+| 23 | `debug.js` | Hidden test hall: press **End** at the tent on the surface. Doors to every layer, biome, era, trader, the dragon and the other side (`buildDebugRoom`, `goLayer`, forced options in `DBG`) |
+| 24 | `tent.js` | Inside the camp tent (E at the tent): calm music (`TRACKS.tent`), relic shelf, photo board, wardrobe trunk, a cot, and the layer album (`store.shots`, `store.maxLayer`, `openAlbum`) for jumping to any layer already reached |
+| 25 | `pad.js` | Gamepad support (standard mapping) |
+| 26 | `main.js` | Language switching, the main loop, menu wiring, settings |
 
 Every file starts with the same GPL header and `'use strict';`. Keep both in new files.
 
@@ -93,7 +99,8 @@ Entities are plain objects with an axis-aligned box `{x, y, w, h}` in world pixe
 | Array | Contents |
 | --- | --- |
 | `foes` | Enemies (`type` selects the behaviour) |
-| `npcs` | Friendly characters |
+| `npcs` | Friendly characters (`type` keys into `NPCD`; the baker carries her shop state in `n.shop`) |
+| `fishes` | Decorative fish in water pools (`folk.js`) |
 | `pickups` | Collectibles (`kind`: `gold`, `gem`, `relic`, `lore`, `mat`, `recipe`, …) |
 | `decos` | Decorations and static props (`k` = kind, `tx`, `ty`, `sx`/`sy` = the support direction) |
 | `crates`, `pots`, `rocks`, `ropes`, `bombs`, `shots`, `arrows`, `fireballs` | What their names say |
@@ -208,8 +215,19 @@ EXTRA_KILL.ghost = f => { addMoney(50, f.x, f.y); };
 
 - `sees` is already line-of-sight checked. `dx`/`dy` point to the **last known** player position (seen, heard or felt), not the live one, and are 0 if the enemy has never noticed the player. Use `rdx`-style real distances only for proximity, never for tracking.
 - Use `hurt(n, causeKey, fromX)` or `poisonHit(...)` to damage the player.
-- Spawn from `spawnExtraFoes()` with the generation helpers.
+- Spawn from `spawnExtraFoes()` (or a function like `spawnBugs()` called right after it) with the generation helpers.
 - Add a kill counter to `runKills` (both places), a recap phrase in `STR.*.recap` and a cause-of-death string.
+
+### Add a talking character
+
+- Add an entry to `NPCD` with `names`, bilingual `lines` and a `gift()` for the first conversation, and a voice in `VOICE` (`folk.js`): a base pitch and an oscillator type.
+- Draw it in `FOLK_DRAW[type]`; `drawNpc()` uses that before its built-in characters.
+- Spawning happens in the dwellers section of `genLevel()` (`want` list).
+- Speech goes through `showTalk(name, text, voiceKey)` and shop lines through `shopSay(text)`; both type the text out and babble.
+
+### Melee
+
+Swings call `startMelee(side, reach, dmg, how)`, which keeps a generous box on that side of the player active for a few frames (`updMelee()`). Each enemy is hit once per swing, so timing and aim only need to be roughly right.
 
 ### Add a decoration
 
@@ -232,6 +250,8 @@ Push `{tx, ty, k:'mykind', sx, sy}` into `decos` during generation, and add a `c
 - Main trader: add an entry to `SHOP_ITEMS` (`ui.js`), with `ok()` (whether it can be bought now), `buy()`,
   `once` and `ic` (icon).
 - Second trader: add an entry to `JUNK_ITEMS` (`junk.js`).
+- Bakery: add an entry to `BAKE_ITEMS` (`folk.js`). Pastry effects are run-long and stored on the player (`P.bake`, plus modifiers such as `P.digK`, `P.goldK`, `P.poisonK`, `P.fallPlus`).
+- The shop screen picks the item list, portrait and speaker from the open shop: `junk`, an object with `kind:'bake'`, or the main trader.
 - `makeStock()` decides what the main trader offers on a given layer.
 
 ### Add a tile
@@ -267,6 +287,10 @@ Add `{id, n:{en,fi}, d:{en,fi}}` to `ACH` (`ui.js`) and call `unlock(id)` where 
 ---
 
 ## Testing
+
+For manual testing there is a hidden **debug hall**: start a run, stand at the tent and press **End**. Each door builds a
+fresh layer with forced options (`DBG.biome`, `DBG.era`, `DBG.shop`, `DBG.junk`, `DBG.bake`, `DBG.dragon`), so you can
+jump straight to the content you are working on. The other side's door returns you to the hall.
 
 There is no automated test suite in the repository. A practical approach that has worked well during
 development is a headless browser (for example Playwright with Chromium):
