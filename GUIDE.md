@@ -1,6 +1,6 @@
 # Arkeol – Player's Guide
 
-*Version 0.3.3 · Arkeol by JP Hakoluoto · Spoiler-free*
+*Version 0.3.4 · Arkeol by JP Hakoluoto · Spoiler-free*
 
 Arkeol is an open source browser game about digging. You play an archaeologist who climbs down through a
 procedurally generated underground world, one layer at a time. Each layer is new: dig, gather treasure and
@@ -34,14 +34,14 @@ Money, materials and equipment are lost when an expedition ends.
 | Dig with the pickaxe | X or J (aim with W/S for up/down) | Left button (aims at the cursor) |
 | Use the selected tool or weapon | V | Right button |
 | Interact (doors, people, shops, objects) | E (or W at a door) | Click the target |
-| Select hotbar slot | 1–6 | Scroll wheel |
-| Cycle weapons | Q | |
+| Select hotbar slot | 1–8 | Scroll wheel |
+| Cycle weapons | Press the weapon's number again | |
 | Drill | C or K | |
 | Bomb | B or L | |
 | Throw a rope | R or I | |
 | Throw a stone | T | |
 | Fish | G | |
-| Crafting | H | Middle button |
+| Crafting | Q | Middle button |
 | Map | Tab | |
 | Pause | P or Esc | |
 | Sound / music on–off | M / N | |
@@ -80,6 +80,8 @@ In menus, move with the D-pad or stick, confirm with **A** and go back with **B*
   some overgrown, and some are stranger than that. A short title card names the chapter as you arrive.
 - **The door.** Every layer has one door leading deeper. Finding it is up to you.
 - **Depth.** The depth meter shows how far below the surface you are right now.
+- **Steam.** Some cracks in the rock hiss and then blow steam. Most just give you a push, but a few are strong
+  enough to throw you through the air. Listen for the hiss.
 - **Health.** Hearts show your health. Long falls, hazards and hostile creatures cost hearts. Some food and
   remedies restore them.
 - **Light.** Your headlamp lights the way. Torches, glowing plants and fires help too.
@@ -99,6 +101,8 @@ only once you have it. The hotbar keeps items in the order you got them.
 - **The drill** bores through rock quickly and runs on fuel.
 - **The fishing rod** works in underground pools. A spot only has a few fish in it.
 - **Ranged and melee weapons** have their own strengths. Not all of them are built to last.
+- **Swinging** is forgiving: swing toward the side an enemy is on, at roughly the right moment, and it connects.
+  You do not need to aim the mouse at the enemy itself.
 
 ---
 
@@ -110,23 +114,43 @@ more than others. Deeper layers tend to hide richer finds.
 Now and then you will come across traders deep underground. Each has their own stock and their own
 personality. Their prices rise slightly the deeper you go.
 
+Some layers have a small bakery. Its pastries are not just food: each one changes you a little for the rest of
+the run, and each can be bought once.
+
+## People underground
+
+Other people live down here: they brew coffee, fish, knit, read and play music. Walk up to them and talk (E or
+click). Everyone has their own voice and plenty to say, and a first conversation often comes with a small gift.
+If you meet someone sipping herbal tea and thinking about life, stop for a cup. You will feel better.
+
+Along the way you will also find notes and diaries from many places and many people. Not all of them were
+written on this planet, or in a script anyone can read.
+
 ---
 
 ## Crafting, campfires and food
 
-Hit plants, bones, webs, old equipment and wild food with the pickaxe to collect **materials**. Press **H** (or
+Hit plants, bones, webs, old equipment and wild food with the pickaxe to collect **materials**. Press **Q** (or
 the middle mouse button, or **View** on a controller) to open the crafting screen.
 
 - **Small things** such as rope, torches and bandages can be made anywhere.
 - **Bigger things** marked with a flame need a **campfire**. Some can be found, and you can also build your own.
 - **Food** gathered in the caves can be eaten raw, or cooked at a fire into meals that keep in your pack for later.
   The crafting screen shows the stored meals you can eat.
-- **Torches, ladders and campfires** you have made are placed from the crafting screen.
+- **Campfires and torches** you have made go to the hotbar: select one and press Use to set it down.
+- **Ladders** are placed from the crafting screen.
+- A small note beside the hotbar tells you when you have enough materials to make something.
 - You start out knowing only a few recipes. Others are waiting to be discovered.
 
 Recipes you learn are kept between expeditions. Materials are not.
 
 ---
+
+## The tent
+
+At the camp you can step inside the tent (E at the tent). It is quiet and warm in there, with its own music. You can
+look at the relics and photographs you have found, change clothes, rest on the cot, and leaf through the
+**layer album**.
 
 ## Wardrobe, archive and achievements
 

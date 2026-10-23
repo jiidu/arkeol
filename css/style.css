@@ -1,5 +1,5 @@
 /*
-  Arkeol v0.3.3 · Copyright (C) 2026 JP Hakoluoto
+  Arkeol v0.3.4 · Copyright (C) 2026 JP Hakoluoto
   Free software under the GNU GPL v3 or later, with an attribution term (see LICENSE and NOTICE).
 */
 /* Layout: full-bleed cave canvas; HUD strip top, toolbar bottom-centre, touch pads in the corners.
@@ -264,7 +264,7 @@ body.inMenu #ui{display:none}
 #status{gap:6px}
 .chip{font:600 12px var(--mono);padding:1px 6px;border-radius:2px;color:#1b1206}
 
-/* ---------- v0.3.3 main menu: the camp scene stays visible, a plain list of choices */
+/* ---------- v0.3.4 main menu: the camp scene stays visible, a plain list of choices */
 #menu{background:linear-gradient(180deg,rgba(8,5,3,.15) 0%,rgba(8,5,3,.35) 45%,rgba(8,5,3,.82) 100%);place-items:center}
 .menuCol{display:flex;flex-direction:column;align-items:center;text-align:center;padding:24px 16px;width:min(420px,100%)}
 #menu .kicker{color:#e8c890;font:500 12px/1 var(--serif);letter-spacing:.3em;margin:0 0 10px;text-shadow:0 1px 2px rgba(0,0,0,.8)}
@@ -359,12 +359,14 @@ body.inMenu #ui{display:none}
 #fade.iris{transition:none;opacity:1}
 .junkShop .card{border-color:#5a6a7a}
 .junkShop h2{color:#9ec0d8}
+.bakeShop .card{border-color:#c8884a;background:linear-gradient(#3a2418,#2a1a12)}
+.bakeShop h2{color:#ffd9a8}
 .eatBtn{border-color:rgba(255,179,71,.5)}
 
 /* ---------- old green-on-black console */
 #term{background:rgba(0,0,0,.82)}
-.crt{position:relative;width:min(640px,100%);max-height:88vh;display:flex;flex-direction:column;background:#020a04;border:10px solid #2a2820;border-radius:18px;box-shadow:inset 0 0 60px rgba(0,255,90,.08),0 0 0 3px #4a463a,0 30px 80px rgba(0,0,0,.7);padding:18px 20px;color:#33ff66;font:20px/1.15 var(--type);text-shadow:0 0 6px rgba(51,255,102,.55);overflow:hidden}
-.crt::after{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(0,0,0,.22) 0 1px,transparent 1px 3px);border-radius:8px}
+.crt{position:relative;width:min(640px,100%);max-height:88vh;display:flex;flex-direction:column;background:#020a04;border:10px solid #2a2820;border-radius:18px;box-shadow:inset 0 0 60px rgba(0,255,90,.08),0 0 0 3px #4a463a,0 30px 80px rgba(0,0,0,.7);padding:18px 20px;color:#33ff66;font:500 17px/1.3 "IBM Plex Mono",ui-monospace,Menlo,Consolas,monospace;text-shadow:0 0 3px rgba(51,255,102,.4);overflow:hidden}
+.crt::after{content:"";position:absolute;inset:0;pointer-events:none;background:repeating-linear-gradient(0deg,rgba(0,0,0,.12) 0 1px,transparent 1px 4px);border-radius:8px}
 #termOut{margin:0;white-space:pre-wrap;word-break:break-word;font:inherit;overflow:auto;min-height:200px;max-height:52vh}
 .termIn{display:flex;gap:8px;align-items:center;margin-top:6px}
 .termIn input{flex:1;background:transparent;border:0;outline:none;color:#33ff66;font:inherit;text-shadow:inherit;caret-color:#33ff66}
@@ -373,7 +375,7 @@ body.inMenu #ui{display:none}
 .termBtn{background:transparent;border:1px solid rgba(51,255,102,.35);color:#33ff66;font:inherit;text-shadow:inherit;padding:2px 8px;cursor:pointer}
 .termBtn:hover,.termBtn:focus-visible{background:#33ff66;color:#020a04;outline:none;text-shadow:none}
 .termFoot{margin-top:10px}
-@media (max-width:520px){.crt{font-size:16px;border-width:6px;padding:12px}}
+@media (max-width:520px){.crt{font-size:14px;border-width:6px;padding:12px}}
 
 /* ---------- rarity flourish */
 .rareFx{position:fixed;inset:0;z-index:30;display:grid;place-items:center;pointer-events:none;opacity:0;transition:opacity .4s}
@@ -389,3 +391,23 @@ body.inMenu #ui{display:none}
 @keyframes shine{from{text-shadow:0 0 8px var(--rc)}to{text-shadow:0 0 26px var(--rc),0 0 4px #fff}}
 .aitem.rar b{color:var(--rc)}
 @media (prefers-reduced-motion:reduce){.rareFx .rays{animation:none}}
+
+.paper img.alien{display:block;width:100%;max-width:420px;margin:4px auto 10px;image-rendering:auto;background:#0e1a16;border-radius:3px;padding:6px;box-sizing:border-box}
+.alienPaper{background:linear-gradient(#1a2a24,#14201c)!important;color:#c8f0dc!important}
+.alienPaper .meta{color:#8ff0c8!important}
+#craftTip{position:absolute;display:flex;align-items:center;gap:5px;padding:4px 7px;background:var(--panel);border:1px solid var(--line);border-radius:4px;color:#c8bfa8;font:600 10px/1.2 var(--mono);cursor:pointer;pointer-events:auto;opacity:.82;text-align:left}
+#craftTip b{display:block;color:#efe4d2;font-weight:600;letter-spacing:.04em}
+#craftTip i{display:block;font-style:normal;color:#9be86a}
+#craftTip i.fire{color:#ffb347}
+#craftTip.ready{opacity:1;border-color:#6a8a3a}
+.album{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:10px;max-height:60vh;overflow:auto}
+.ashot{background:#f3ead8;color:#3a2e22;border:0;border-radius:2px;padding:6px 6px 8px;cursor:pointer;text-align:center;box-shadow:0 4px 10px rgba(0,0,0,.4);transform:rotate(-1deg)}
+.ashot:nth-child(2n){transform:rotate(1.2deg)}
+.ashot:hover{transform:scale(1.04)}
+.ashot canvas,.ashot .blank{display:block;width:100%;aspect-ratio:3/2;image-rendering:pixelated;background:#2a2026}
+.ashot .blank{display:grid;place-items:center;color:#a89070;font:700 28px var(--display)}
+.ashot b{display:block;font:600 15px var(--hand);margin-top:4px}
+.ashot span{display:block;font:13px var(--hand);color:#6a5a48}
+.ashot.noshot{opacity:.85}
+.wPick{display:inline-flex;align-items:center;gap:6px;font:12px var(--mono);color:var(--muted);cursor:pointer;margin-left:4px}
+.wPick input{width:30px;height:26px;border:2px solid var(--line);border-radius:4px;background:none;padding:0;cursor:pointer}

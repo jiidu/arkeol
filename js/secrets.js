@@ -1,7 +1,7 @@
 /*
-  Arkeol v0.3.3 · Copyright (C) 2026 JP Hakoluoto
+  Arkeol v0.3.4 · Copyright (C) 2026 JP Hakoluoto
   Free software under the GNU GPL v3 or later, with an attribution term (see LICENSE and NOTICE).
-  secrets.js – old computers with number puzzles (and the databases they unlock),
+  secrets.js – old computers with number puzzles (each one burns a useful disc),
                and sealed vaults that only open with a lever or a button somewhere in the layer
 */
 'use strict';
@@ -28,24 +28,11 @@ function makePuzzle(lv){const R=(a,b)=>a+Math.floor(Math.random()*(b-a+1)),d=Mat
   return {q,a,opts:[...opts].sort(()=>Math.random()-.5)}}
 
 /* ------------------------------------------------ what the databases hold */
-const DBS=[
- {id:'recipes',f:'recipes.db',kind:'recipe'},{id:'survey',f:'survey_layer.db',kind:'map'},{id:'facility',f:'facility_doors.db',kind:'vault'},{id:'wallet',f:'wallet.dat',kind:'cash'},
- {id:'cat',f:'IMG_0042.txt',kind:'art',art:` /\\_/\\\n( o.o )   "the office cat, 2006"\n > ^ <    (he ran the whole department)`},
- {id:'puijo',f:'puijo_tower.txt',kind:'art',art:`        |\n       _|_\n      |___|\n       | |      PUIJO\n       | |      view: ~100 lakes\n  _____| |_____\n ~~~~~~~~~~~~~~~ Kallavesi ~~~~`},
- {id:'kukko',f:'kalakukko.txt',kind:'art',art:`   ___________\n  /  o   o    \\    KALAKUKKO\n |   RYE CRUST |   fish inside, as tradition demands\n  \\___________/    bake 6 h. knock. if it sounds like\n                   a door, it is done.`,learn:'kalakukko'},
- {id:'rocket',f:'launch_2009.txt',kind:'art',art:`     /\\\n    /  \\\n   | () |\n   |    |    "launch postponed:\n  /|    |\\    sky busy"\n /_|____|_\\\n    /||\\`},
- {id:'m1',f:'meme_001.jpg.txt',kind:'meme',en:'ME: just one more block\nALSO ME, 400 METRES LATER:\n"where exactly was the surface"',fi:'MINÄ: vielä yksi palikka\nMYÖS MINÄ 400 METRIÄ MYÖHEMMIN:\n"missä se pinta oikein olikaan"'},
- {id:'m2',f:'meme_002.jpg.txt',kind:'meme',en:'SPIDER: *swells up*\nME, WITH ZERO ROPES:\n[ visible panic ]',fi:'HÄMÄHÄKKI: *turpoaa*\nMINÄ, NOLLA KÖYTTÄ:\n[ näkyvää paniikkia ]'},
- {id:'m3',f:'meme_003.jpg.txt',kind:'meme',en:'There are 10 kinds of diggers:\nthose who read binary\nand those who don\'t.',fi:'Kaivajia on 10 lajia:\nne jotka osaavat binääriä\nja ne jotka eivät.'},
- {id:'m4',f:'meme_004.jpg.txt',kind:'meme',en:'HAVE YOU TRIED TURNING\nTHE PYRAMID\nOFF AND ON AGAIN?',fi:'OLETKO KOKEILLUT SAMMUTTAA\nPYRAMIDIN\nJA KÄYNNISTÄÄ UUDELLEEN?'},
- {id:'m5',f:'meme_005.jpg.txt',kind:'meme',en:'ERROR 404\nSURFACE NOT FOUND',fi:'VIRHE 404\nPINTAA EI LÖYTYNYT'},
- {id:'m6',f:'meme_006.jpg.txt',kind:'meme',en:'SABU: "A deal is a deal."\nALSO SABU:\n*sells one rope for 350*',fi:'SABU: "Kauppa on kauppa."\nMYÖS SABU:\n*myy yhden köyden 350:llä*'},
- {id:'m7',f:'meme_007.jpg.txt',kind:'meme',en:'WOLF: grrr…\nME: i respect your\nboundaries',fi:'SUSI: grrr…\nMINÄ: kunnioitan\nrajojasi'},
- {id:'m8',f:'meme_008.jpg.txt',kind:'meme',en:'REIJO: "everything works"\nTHE SCRAP PISTOL, SHOT 9:\n*creak*',fi:'REIJO: "kaikki toimii"\nROMUPISTOOLI, 9. LAUKAUS:\n*narsk*'},
- {id:'fact',f:'facts_savo.txt',kind:'meme',en:'FACT: the lake town has a tower on a hill,\na lake in every direction and an\nalarming number of fish pasties.',fi:'FAKTA: järvikaupungissa on torni mäellä,\njärvi joka suunnassa ja hälyttävän\nmonta kalakukkoa.'}
-];
-function pickDb(){const v=vaults.find(q=>!q.open);const pool=DBS.filter(d=>!store.dbs[d.id]&&(d.kind!=='vault'||v)&&(d.kind!=='recipe'||lockedRecipes().length));
-  if(pool.length)return pickR(pool);return v&&Math.random()<.5?DBS.find(d=>d.kind==='vault'):DBS.find(d=>d.kind==='cash')}
+/* a solved computer burns one useful disc: a recipe, a map, door controls, a wardrobe unlock or old bitcoins */
+const DISCS={recipe:'RECIPES.ISO',map:'SURVEY_MAP.ISO',vault:'DOOR_CONTROL.ISO',cash:'WALLET.DAT',unlock:'WARDROBE.ISO'};
+function pickDb(){const v=vaults.find(q=>!q.open),w=[];
+  if(lockedRecipes().length)w.push(['recipe',3]);if(v)w.push(['vault',2]);w.push(['map',1],['cash',3]);if(randomCosmetic())w.push(['unlock',1.5]);
+  let r=Math.random()*w.reduce((s,q)=>s+q[1],0),k='cash';for(const [kk,n] of w){r-=n;if(r<=0){k=kk;break}}return {id:k,kind:k,f:DISCS[k]}}
 
 /* ------------------------------------------------ generation */
 function spawnSecrets(lv,H){const {ri,r,airFloor,far,sy,freeRect,protRect}=H;terms=[];vaults=[];
@@ -97,14 +84,15 @@ function updSecrets(){for(const v of vaults){if(!v.opening||v.open)continue;v.op
 /* ------------------------------------------------ the console */
 function openTerm(tm){if(state!=='play')return;curTerm=tm;state='term';releaseAll();$('term').hidden=false;$('termOut').textContent='';$('termOpts').innerHTML='';$('termInput').value='';
   if(tm.locked){termPrint([`arkeol-os login: guest`,``,`Kernel panic - not syncing: too many wrong answers`,`[ the screen flickers and goes dark ]`],()=>{})}
-  else if(tm.solved){termPrint([`arkeol-os login: guest`,`$ ls /var/archive`,`${tm.db.f}  (decrypted)`,``,...dbLines(tm.db)],()=>{})}
+  else if(tm.solved){termPrint([`arkeol-os login: guest`,`$ eject /dev/cdrom`,LANG==='fi'?'Asema on tyhjä.':'The drive is empty.'],()=>{})}
   else{if(!tm.puz)tm.puz=makePuzzle(level);
     termPrint([`ARKEOL-OS 2.6.18 (tty1)`,``,`arkeol-os login: guest`,`Last login: ${pickR(['Mon Mar 14 04:12','Fri Jun 12 07:40','Tue Apr  2 23:59'])} 2009 on tty1`,`$ ./decrypt /var/archive/*.db`,``,t('termLocked'),t('termSolve',tm.tries),``,`    ${tm.puz.q}`,``],()=>showAnswer(tm))}}
 function showAnswer(tm){const o=$('termOpts');o.innerHTML='';tm.puz.opts.forEach((v,i)=>{const b=document.createElement('button');b.type='button';b.className='termBtn';b.textContent=`[${i+1}] ${v}`;b.addEventListener('click',()=>answerTerm(v));o.append(b)});
   const inp=$('termInput');inp.disabled=false;setTimeout(()=>inp.focus(),20)}
 function answerTerm(v){const tm=curTerm;if(!tm||termBusy||tm.solved||tm.locked)return;$('termOpts').innerHTML='';$('termInput').value='';
-  if(+v===tm.puz.a){tm.solved=true;tm.db=pickDb();store.dbs[tm.db.id]=1;store.stats.hacks=(store.stats.hacks||0)+1;save();if(store.stats.hacks>=5)unlock('hacker');sfx.relic();
-    termPrint([`> ${v}`,``,'ACCESS GRANTED',`decrypting ${tm.db.f} ... OK`,``,...dbLines(tm.db,true)],()=>{})}
+  if(+v===tm.puz.a){tm.solved=true;tm.db=pickDb();store.stats.hacks=(store.stats.hacks||0)+1;save();if(store.stats.hacks>=5)unlock('hacker');sfx.relic();
+    termPrint([`> ${v}`,``,'ACCESS GRANTED',`burning ${tm.db.f} to CD-ROM ... OK`,``,LANG==='fi'?'[ asema avautuu ja romppu liukuu ulos ]':'[ the drive tray slides out with a disc ]'],()=>{});
+    pickups.push({x:tm.tx*T+12,y:tm.ty*T-2,w:8,h:6,vx:rand(-.6,.6),vy:-2.2,kind:'disc',db:tm.db,value:0,t:0})}
   else{tm.tries--;sfx.nope();if(tm.tries<=0){tm.locked=true;termPrint([`> ${v}`,'ACCESS DENIED','',`Kernel panic - not syncing: too many wrong answers`],()=>{});particle(tm.tx*T+16,tm.ty*T+4,['#fff1b0','#ffb347'],14,2,24,.15,1)}
     else{tm.puz=makePuzzle(level);termPrint([`> ${v}`,'ACCESS DENIED',t('termSolve',tm.tries),``,`    ${tm.puz.q}`,``],()=>showAnswer(tm))}}}
 /* run the reward (once) and describe it */
@@ -114,8 +102,7 @@ function dbLines(db,first){const L=[];
   else if(db.kind==='vault'){const v=vaults.find(q=>!q.open)||vaults[0];if(v&&v.lever){if(first){const{tx,ty}=v.lever;for(let y=ty-2;y<=ty+2;y++)for(let x=tx-2;x<=tx+2;x++)if(x>=0&&y>=0&&x<MW&&y<MH)seen[idx(x,y)]=1;for(const [x,y] of v.door)seen[idx(x,y)]=1;if(!mapOn)toggleMap();else drawMini()}
       const dx=v.lever.tx-Math.floor((P.x+5)/T),dy=v.lever.ty-Math.floor((P.y+8)/T);L.push(t('dbVault',Math.abs(dx),dx<0?t('west'):t('east'),Math.abs(dy),dy<0?t('up'):t('down')))}else L.push(t('dbVaultNone'))}
   else if(db.kind==='cash'){const v=300+level*60;if(first)addMoney(v,P.x+5,P.y-6,'#9ff0a0');L.push(t('dbCash',fmt(v)))}
-  else if(db.kind==='art'){L.push(...db.art.split('\n'));if(db.learn&&first)setTimeout(()=>learnRecipe(db.learn),400)}
-  else{const box=tr(db).split('\n'),w=Math.max(...box.map(s=>s.length));L.push('+'+'-'.repeat(w+2)+'+',...box.map(s=>'| '+s.padEnd(w)+' |'),'+'+'-'.repeat(w+2)+'+')}
+  else if(db.kind==='unlock'){if(first){const k=randomCosmetic();if(k){db.got=k;setTimeout(()=>gainCosmetic(k,P.x+5,P.y-20),300)}else{addMoney(400,P.x+5,P.y-6,'#9ff0a0')}}L.push(t('dbUnlock'))}
   return L}
 function termPrint(lines,done){termBusy=true;$('termInput').disabled=true;const out=$('termOut'),base=out.textContent.replace(/█$/,''),txt=lines.join('\n')+'\n';let i=0;
   const step=()=>{if(state!=='term'){termBusy=false;return}i=Math.min(txt.length,i+3);out.textContent=base+txt.slice(0,i)+(i<txt.length?'█':'');out.scrollTop=out.scrollHeight;
@@ -135,3 +122,6 @@ function drawTerminal(d){const x=d.tx*T,y=d.ty*T,tm=terms.find(q=>q.tx===d.tx&&q
 function drawLever(d){const x=d.tx*T,y=d.ty*T;R(x+4,y+13,8,3,'#5e6670');R(x+4,y+13,8,1,'#8f99a3');ctx.save();ctx.translate(x+8,y+14);ctx.rotate(d.on?.7:-.7);R(-1,-10,2,10,'#3a3236');R(-2,-12,4,3,'#c0392b');R(-1,-12,1,1,'#ff8a7a');ctx.restore()}
 function drawWButton(d){const x=d.tx*T+(d.sx<0?0:12),y=d.ty*T+5;R(x,y,4,7,'#5e6670');R(x+(d.sx<0?1:0),y+2,3,3,d.on?'#5a8a3a':'#c0392b');if(!d.on&&(frame>>5)%2)R(x+(d.sx<0?2:1),y+3,1,1,'#ff8a7a')}
 function secretsLight(hole,glows){for(const tm of terms){if(tm.locked)continue;const x=tm.tx*T+13,y=tm.ty*T+1;hole(x,y,2.4*T,.75);glows.push([x,y,1.6*T,'rgba(60,255,120,.14)'])}}
+
+function applyDisc(db,x,y){if(!db)return;sfx.relic();const L=dbLines(db,true);
+  const el=document.createElement('div');el.className='achT';el.innerHTML=`<small>CD-ROM · ${esc(db.f)}</small><b>${esc(t('discT'))}</b>${esc(L.join(' '))}`;$('achs').appendChild(el);setTimeout(()=>el.remove(),5200)}

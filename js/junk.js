@@ -1,5 +1,5 @@
 /*
-  Arkeol v0.3.3 · Copyright (C) 2026 JP Hakoluoto
+  Arkeol v0.3.4 · Copyright (C) 2026 JP Hakoluoto
   Free software under the GNU GPL v3 or later, with an attribution term (see LICENSE and NOTICE).
   junk.js – Reijo the scrap dealer, scrap weapons that wear out, fishing spots,
             the opening walk and the iris wipe between layers

@@ -1,5 +1,5 @@
 /*
-  Arkeol v0.3.3 · Copyright (C) 2026 JP Hakoluoto
+  Arkeol v0.3.4 · Copyright (C) 2026 JP Hakoluoto
   Free software under the GNU GPL v3 or later, with an attribution term (see LICENSE and NOTICE).
   foes2.js – bats, mimic chests, burrowing worms and will-o'-the-wisps
 */
@@ -85,16 +85,20 @@ function updWorm(f,dx,dy,dist,sees,fcx,fcy){const pcx=fcx+dx,pcy=fcy+dy;f.anim++
   f.trail.unshift([f.hx,f.hy]);if(f.trail.length>44)f.trail.length=44;f.x=f.hx-6;f.y=f.hy-6;f.face=f.vx>=0?1:-1;
   if(f.st==='lunge'&&state==='play'){for(let k=0;k<f.trail.length;k+=4){const [sx,sy]=f.trail[k];if(sx>P.x-3&&sx<P.x+P.w+3&&sy>P.y-3&&sy<P.y+P.h+3){hurt(1,'cWorm',sx);break}}}
   return f.st==='lurk'?(dist<8*T?.25:0):.9}
-function updWisp(f,dx,dy,dist,sees,fcx,fcy){f.t++;const pcx=fcx+dx,pcy=fcy+dy;
+function updWisp(f,dx,dy,dist,sees,fcx,fcy){f.t++;const pcx=fcx+dx,pcy=fcy+dy;f.vx=f.vx||0;f.vy=f.vy||0;
   if(f.fade<1)f.fade=Math.min(1,f.fade+.02);
-  if(f.st==='drift'){let tx=f.hx+Math.sin(f.t*.013+f.anim)*22,ty=f.hy+Math.cos(f.t*.019+f.anim)*12;
-    if(dist<7*T&&!P.dead&&sees){tx=pcx;ty=pcy-4}
-    const sp=dist<7*T&&sees?.42:.3;const a=Math.atan2(ty-fcy,tx-fcx),d=Math.hypot(tx-fcx,ty-fcy);if(d>1){f.x+=Math.cos(a)*Math.min(sp,d);f.y+=Math.sin(a)*Math.min(sp,d)}
+  if(sees&&dist<7*T&&!P.dead)f.chase=90;else if(f.chase>0)f.chase--;
+  if(f.st==='drift'){let tx=f.hx+Math.sin(f.t*.011+f.anim)*22,ty=f.hy+Math.cos(f.t*.016+f.anim)*12;
+    if(f.chase>0){tx=pcx;ty=pcy-4}
+    // smooth steering: ease toward a desired velocity instead of stepping straight at the target
+    const ax=tx-fcx,ay=ty-fcy,d=Math.hypot(ax,ay)||1,top=f.chase>0?.5:.28,sp=top*Math.min(1,d/18);
+    f.vx+=(ax/d*sp-f.vx)*.035;f.vy+=(ay/d*sp-f.vy)*.035;f.x+=f.vx;f.y+=f.vy;
     if(state==='play'&&overlap(P,f)&&f.fade>=1){P.dark=720;sfx.wispSteal();floatText(fcx,f.y-8,t('lightStolen'),'#9fe8ff');f.st='flee';f.t=0;particle(fcx,fcy,['#c8fbff','#7fe8ff'],16,1.8,40,0,1)}}
-  else{f.x+=-Math.sign(dx||1)*1.5;f.y-=.4;
+  else{f.vx+=(-Math.sign(dx||1)*1.3-f.vx)*.05;f.vy+=(-.45-f.vy)*.05;f.x+=f.vx;f.y+=f.vy;f.fade=Math.max(0,1-f.t/110);
     if(f.t>110){for(let a=0;a<200;a++){const x=1+Math.floor(Math.random()*(MW-2)),y=1+Math.floor(Math.random()*(MH-2));
-        if(grid[idx(x,y)]===AIR&&Math.hypot(x*T-pcx,y*T-pcy)>14*T){f.x=f.hx=x*T+4;f.y=f.hy=y*T+4;break}}f.st='drift';f.t=0;f.fade=0}}
-  if(frame%9===0)parts.push({x:f.x+4+rand(-2,2),y:f.y+4,vx:0,vy:-.15,life:30,max:30,col:'rgba(160,240,255,.7)',g:0,sz:1});
+        if(grid[idx(x,y)]===AIR&&Math.hypot(x*T-pcx,y*T-pcy)>14*T){f.x=f.hx=x*T+4;f.y=f.hy=y*T+4;break}}f.st='drift';f.t=0;f.fade=0;f.vx=f.vy=0;f.chase=0;f.trail=[]}}
+  f.trail=f.trail||[];if(f.t%3===0){f.trail.unshift([f.x+4,f.y+4]);if(f.trail.length>7)f.trail.length=7}
+  if(frame%14===0)parts.push({x:f.x+4+rand(-1.5,1.5),y:f.y+2,vx:f.vx*.2,vy:-.12,life:40,max:40,col:'rgba(170,240,255,.55)',g:0,sz:1});
   return 0}
 
 function updFrog(f,dx,dy,dist,sees,fcx){
@@ -147,9 +151,17 @@ function drawWorm(f){const N=11;
     const r=6.5-k*.38,c=f.hurt>0?'#fff':k%2?'#b8706a':'#a8605c';ctx.fillStyle=c;ctx.beginPath();ctx.arc(sx,sy,r,0,7);ctx.fill();ctx.strokeStyle='#5a2a2a';ctx.lineWidth=1;ctx.stroke();ctx.fillStyle='rgba(255,220,210,.35)';ctx.fillRect(sx-r*.5,sy-r*.7,r*.8,1);
     if(k===0){const a=Math.atan2(f.vy,f.vx);ctx.save();ctx.translate(sx,sy);ctx.rotate(a);ctx.fillStyle='#3a0a10';ctx.beginPath();ctx.arc(3,0,4.2,0,7);ctx.fill();
       ctx.fillStyle='#efe8dc';for(let i=0;i<8;i++){const b=i/8*Math.PI*2;ctx.fillRect(3+Math.cos(b)*3.6-.5,Math.sin(b)*3.6-.5,1,1)}ctx.restore()}}}
-function drawWisp(f){const x=f.x+4,y=f.y+4+Math.sin(frame*.06+f.anim)*1.5,a=f.fade,fl=.8+Math.sin(frame*.3+f.anim)*.2;
-  const g=ctx.createRadialGradient(x,y,0,x,y,7);g.addColorStop(0,`rgba(255,255,255,${.95*a})`);g.addColorStop(.35,`rgba(170,245,255,${.7*a*fl})`);g.addColorStop(1,'rgba(90,200,255,0)');ctx.fillStyle=g;ctx.beginPath();ctx.arc(x,y,7,0,7);ctx.fill();
-  if(P&&Math.hypot(P.x-f.x,P.y-f.y)<4*T&&f.st==='drift'){ctx.fillStyle=`rgba(20,40,60,${.8*a})`;ctx.fillRect(x-2,y-1,1,1);ctx.fillRect(x+1,y-1,1,1)}}
+function drawWisp(f){const a=f.fade,bob=Math.sin(frame*.035+f.anim)*1.2,x=f.x+4,y=f.y+4+bob,pul=.9+Math.sin(frame*.05+f.anim)*.1;
+  // a soft trail of fading light
+  (f.trail||[]).forEach((q,i)=>{const k=1-i/7;ctx.fillStyle=`rgba(140,225,255,${(.16*k*a).toFixed(3)})`;ctx.beginPath();ctx.arc(q[0],q[1]+bob,2.6*k+.6,0,7);ctx.fill()});
+  // halo
+  const h=ctx.createRadialGradient(x,y,0,x,y,11*pul);h.addColorStop(0,`rgba(190,245,255,${.45*a})`);h.addColorStop(.45,`rgba(110,210,255,${.16*a})`);h.addColorStop(1,'rgba(80,180,255,0)');ctx.fillStyle=h;ctx.beginPath();ctx.arc(x,y,11*pul,0,7);ctx.fill();
+  // flame-like body: a teardrop that leans against its motion
+  const lean=clamp(-f.vx*2.5,-2.5,2.5);ctx.fillStyle=`rgba(200,248,255,${.9*a})`;ctx.beginPath();ctx.moveTo(x+lean,y-7);ctx.quadraticCurveTo(x+4.2,y-1,x,y+3.8);ctx.quadraticCurveTo(x-4.2,y-1,x+lean,y-7);ctx.fill();
+  const c=ctx.createRadialGradient(x,y,0,x,y,3);c.addColorStop(0,`rgba(255,255,255,${a})`);c.addColorStop(1,`rgba(150,230,255,${.6*a})`);ctx.fillStyle=c;ctx.beginPath();ctx.arc(x,y,2.8,0,7);ctx.fill();
+  // eyes that watch you when you are near
+  if(P&&Math.hypot(P.x-f.x,P.y-f.y)<4*T&&f.st==='drift'){const lx=clamp((P.x-f.x)/40,-.8,.8),blink=(frame+f.anim*7|0)%200<6;ctx.fillStyle=`rgba(20,50,80,${.85*a})`;
+    if(blink){ctx.fillRect(x-2.2+lx,y,1.6,.6);ctx.fillRect(x+.8+lx,y,1.6,.6)}else{ctx.fillRect(x-2+lx,y-.8,1.2,1.6);ctx.fillRect(x+1+lx,y-.8,1.2,1.6)}}}
 const EXTRA_DRAW={frog:drawFrog,bat:drawBat,mimic:drawMimic,worm:drawWorm,wisp:drawWisp};
 function extraLight(hole,glows){for(const f of foes){if(f.dead)continue;
   if(f.type==='wisp'){hole(f.x+4,f.y+4,2.6*T*f.fade,.8);glows.push([f.x+4,f.y+4,2*T,`rgba(120,220,255,${.25*f.fade})`])}}}
