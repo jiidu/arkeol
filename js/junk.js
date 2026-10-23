@@ -1,5 +1,5 @@
 /*
-  Arkeol v0.3.2 · Copyright (C) 2026 JP Hakoluoto
+  Arkeol v0.3.3 · Copyright (C) 2026 JP Hakoluoto
   Free software under the GNU GPL v3 or later, with an attribution term (see LICENSE and NOTICE).
   junk.js – Reijo the scrap dealer, scrap weapons that wear out, fishing spots,
             the opening walk and the iris wipe between layers
@@ -16,7 +16,9 @@ const JUNK_ITEMS=[
  {id:'jfuel',n:{en:'Dented jerrycan',fi:'Lommoinen kanisteri'},d:{en:'Half a tank for the drill. Smells a bit odd.',fi:'Puoli tankkia poraan. Haisee vähän oudolta.'},p:180,ic:'fuel',ok:()=>P.hasDrill&&P.fuel<100,buy:()=>{P.fuel=Math.min(100,P.fuel+50)}},
  {id:'jdrill',n:{en:'Drill',fi:'Pora'},d:{en:'Bores through rock fast. Runs on fuel; comes with a full tank.',fi:'Poraa kiven läpi nopeasti. Kulkee bensalla, tankki täynnä.'},p:900,ic:'drill',once:true,ok:()=>!P.hasDrill,buy:()=>{P.hasDrill=true;P.fuel=100;renderHotbar()}},
  {id:'jdrill2',n:{en:'Golden drill',fi:'Kultapora'},d:{en:'Drills almost twice as fast and saves fuel.',fi:'Poraa lähes kaksi kertaa nopeammin ja säästää bensaa.'},p:2200,ic:'drill2',once:true,ok:()=>P.hasDrill&&P.drill<2,buy:()=>{P.drill=2}},
- {id:'jhat',n:{en:'Hard hat',fi:'Kypärä'},d:{en:'From a building site in Kuopio, 2008. For the wardrobe.',fi:'Kuopiolaiselta työmaalta, 2008. Vaatekaappiin.'},p:300,ic:'m_scrap',once:true,ok:()=>!wOwn('h:hardhat'),buy:()=>gainCosmetic('h:hardhat')}
+ {id:'jcoffee',n:{en:'Tin of coffee',fi:'Kahvipurkki'},d:{en:'3 portions of coffee beans for pan coffee.',fi:'3 annosta kahvipapuja pannukahveihin.'},p:140,ic:'m_beans',ok:()=>true,buy:()=>{P.mats.beans=(P.mats.beans||0)+3}},
+ {id:'jplank',n:{en:'Stack of planks',fi:'Lautapino'},d:{en:'6 wooden blocks for bridges and steps.',fi:'6 puupalikkaa siltoihin ja portaisiin.'},p:90,ic:'plank',ok:()=>true,buy:()=>{P.planks=(P.planks||0)+6;renderHotbar()}},
+ {id:'jhat',n:{en:'Hard hat',fi:'Kypärä'},d:{en:'From a building site by the big lake, 2008. For the wardrobe.',fi:'Järvikaupungin työmaalta, 2008. Vaatekaappiin.'},p:300,ic:'m_scrap',once:true,ok:()=>!wOwn('h:hardhat'),buy:()=>gainCosmetic('h:hardhat')}
 ];
 const REIJO={name:'Reijo',
   hi:{en:['Well hello there. Come and look, everything works. Mostly.',"Junk? This is quality scrap, friend. Hand-picked from the finest tunnels.","They say I talk too much. I don't see it myself, but they do say it."],
@@ -41,7 +43,7 @@ function drawReijoPortrait(c){const g=c.getContext('2d');c.width=32;c.height=32;
 function nearJunk(cx,cy){return junk&&Math.abs(junk.merchant.x+7-cx)<3*T&&Math.abs(junk.merchant.y+9-cy)<2*T}
 
 /* ------------------------------------------------ scrap weapons wear out and get tossed */
-function wearWeapon(w){if(w!=='pistol'&&w!=='gun')return;P.wdur[w]=(P.wdur[w]??8)-1;
+function wearWeapon(w){if(!P.wdur||P.wdur[w]===undefined)return;P.wdur[w]--;
   if(P.wdur[w]<=2&&P.wdur[w]>0)floatText(P.x+5,P.y-8,t('creaks'),'#c7d3d9');
   if(P.wdur[w]<=0){const at=P.weapons.indexOf(w);P.weapons=P.weapons.filter(x=>x!==w);P.wi=Math.max(0,Math.min(at,P.weapons.length-1));if(!P.weapons.length&&P.slot===1)P.slot=5;
     tossed.push({x:P.x+5,y:P.y+4,vx:-P.face*2.2,vy:-3.2,rot:0,vr:-P.face*.3,life:120,k:w});sfx.knock();setTimeout(()=>sfx.knock(),200);
@@ -71,7 +73,7 @@ function screenPos(wx,wy){const r=cv.getBoundingClientRect(),k=r.width/VW;return
 function irisRun(from,to,frames,wx,wy,done){iris={from,to,frames,f:0,wx,wy,done};const el=$('fade');el.classList.add('iris');
   const tick=()=>{if(!iris)return;iris.f++;const k=Math.min(1,iris.f/iris.frames),e=k<.5?2*k*k:1-Math.pow(-2*k+2,2)/2,r=iris.from+(iris.to-iris.from)*e;
     const p=screenPos(iris.wx,iris.wy);el.style.background=`radial-gradient(circle at ${p.x}px ${p.y}px, transparent ${Math.max(0,r)}px, #000 ${Math.max(0,r)+1.5}px)`;el.style.opacity=1;
-    if(k<1)requestAnimationFrame(tick);else{const d=iris.done;iris=null;if(to>0){el.classList.remove('iris');el.style.background='';el.style.opacity=''}if(d)d()}};requestAnimationFrame(tick)}
+    if(k<1)requestAnimationFrame(tick);else{const d=iris.done;iris=null;if(to>0){el.style.transition='none';el.style.opacity='0';el.classList.remove('iris');el.style.background='transparent';requestAnimationFrame(()=>requestAnimationFrame(()=>{el.style.background='';el.style.transition='';el.style.opacity=''}))}if(d)d()}};requestAnimationFrame(tick)}
 const irisMax=()=>Math.hypot(innerWidth,innerHeight);
 function irisClose(wx,wy,frames,done){irisRun(irisMax(),0,frames,wx,wy,done)}
 function irisOpen(wx,wy,frames,done){irisRun(0,irisMax(),frames,wx,wy,done)}

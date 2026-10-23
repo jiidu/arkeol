@@ -1,5 +1,5 @@
 /*
-  Arkeol v0.3.2 · Copyright (C) 2026 JP Hakoluoto
+  Arkeol v0.3.3 · Copyright (C) 2026 JP Hakoluoto
   Free software under the GNU GPL v3 or later, with an attribution term (see LICENSE and NOTICE).
   foes2.js – bats, mimic chests, burrowing worms and will-o'-the-wisps
 */
@@ -72,7 +72,7 @@ function updMimic(f,dx,dy,dist,sees,fcx){
   return .6}
 function updWorm(f,dx,dy,dist,sees,fcx,fcy){const pcx=fcx+dx,pcy=fcy+dy;f.anim++;
   if(f.st==='lurk'){f.cd--;
-    if(dist<13*T){const tx=pcx,ty=pcy+4*T,a=Math.atan2(ty-f.hy,tx-f.hx),nx=f.hx+Math.cos(a)*.7,ny=f.hy+Math.sin(a)*.7;if(cellSolid(nx,ny)||!cellSolid(f.hx,f.hy)){f.hx=nx;f.hy=ny}
+    if(dist<13*T&&(dx||dy)){const tx=pcx,ty=pcy+4*T,a=Math.atan2(ty-f.hy,tx-f.hx),nx=f.hx+Math.cos(a)*.7,ny=f.hy+Math.sin(a)*.7;if(cellSolid(nx,ny)||!cellSolid(f.hx,f.hy)){f.hx=nx;f.hy=ny}
       else{const b=a+(Math.random()<.5?1.4:-1.4),bx=f.hx+Math.cos(b)*.7,by=f.hy+Math.sin(b)*.7;if(cellSolid(bx,by)){f.hx=bx;f.hy=by}}}
     if(f.cd<=0&&Math.abs(f.hx-pcx)<2.6*T&&f.hy>pcy&&f.hy-pcy<7*T&&P.onGround&&!P.dead&&cellSolid(f.hx,f.hy)){f.st='rumble';f.t=55;sfx.rumble()}}
   else if(f.st==='rumble'){shake=Math.max(shake,2.2);

@@ -3,10 +3,11 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="Arkeol v0.3.2 – an open source archaeological mining game for the browser.">
+<meta name="description" content="Arkeol v0.3.3 – an open source archaeological mining game for the browser.">
 <title>Arkeol</title>
+<link rel="icon" type="image/svg+xml" href="favicon.svg">
 <!--
-  Arkeol v0.3.2
+  Arkeol v0.3.3
   Copyright (C) 2026 JP Hakoluoto
 
   This program is free software: you can redistribute it and/or modify it under the terms of the
@@ -34,6 +35,7 @@
     <div class="grp" id="status" hidden></div>
     <div class="grp"><span class="lbl" data-i18n="lblMoney"></span><b id="money">$0</b></div>
     <div class="grp" id="fuelGrp"><span class="lbl" data-i18n="lblDrill"></span><span class="bar"><i id="fuel"></i></span></div>
+    <div class="grp"><span class="lbl" data-i18n="lblLevel"></span><b id="lvlNum">1</b></div>
     <div class="grp"><span class="lbl" data-i18n="lblDepth"></span><b id="depth">40 m</b></div>
     <span class="spacer"></span>
     <button class="hbtn" id="craftBtn" type="button" data-i18n="btnCraft"></button>
@@ -48,7 +50,7 @@
   <div id="achs"></div>
   <div id="talk" hidden></div>
   <div id="hint" hidden></div>
-  <div id="ver">v0.3.2</div>
+  <div id="ver">v0.3.3</div>
   <div id="toast"><div class="kick" id="toastKick"></div><div class="big" id="toastBig"></div><div class="small" id="toastSmall"></div></div>
   <div id="touch">
     <div class="pad l">
@@ -67,6 +69,7 @@
   </div>
 </div>
 <div id="fade"></div>
+<div id="rareFx" class="rareFx" hidden aria-live="polite"></div>
 
 <div id="menu" class="screen">
   <div class="menuCol">
@@ -82,7 +85,7 @@
     </nav>
     <p class="records" id="records" hidden></p>
   </div>
-  <div class="menuVer">v0.3.2</div>
+  <div class="menuVer">v0.3.3</div>
 </div>
 
 <div id="wardrobe" class="screen" hidden>
@@ -170,6 +173,7 @@
       <button class="tab" role="tab" data-tab="papers" aria-selected="true" data-i18n="tabPapers"></button>
       <button class="tab" role="tab" data-tab="photos" aria-selected="false" data-i18n="tabPhotos"></button>
       <button class="tab" role="tab" data-tab="relics" aria-selected="false" data-i18n="tabRelics"></button>
+      <button class="tab" role="tab" data-tab="items" aria-selected="false" data-i18n="tabItems"></button>
     </div>
     <div class="agrid" id="archGrid"></div>
     <div class="row" style="margin-top:16px"><button class="btn2 closeScreen" type="button" data-i18n="close"></button></div>
@@ -229,6 +233,9 @@
 <script src="js/foes2.js"></script>
 <script src="js/junk.js"></script>
 <script src="js/secrets.js"></script>
+<script src="js/deep.js"></script>
+<script src="js/surface.js"></script>
+<script src="js/void.js"></script>
 <script src="js/pad.js"></script>
 <script src="js/main.js"></script>
 </body>

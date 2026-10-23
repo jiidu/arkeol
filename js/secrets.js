@@ -1,5 +1,5 @@
 /*
-  Arkeol v0.3.2 · Copyright (C) 2026 JP Hakoluoto
+  Arkeol v0.3.3 · Copyright (C) 2026 JP Hakoluoto
   Free software under the GNU GPL v3 or later, with an attribution term (see LICENSE and NOTICE).
   secrets.js – old computers with number puzzles (and the databases they unlock),
                and sealed vaults that only open with a lever or a button somewhere in the layer
@@ -31,7 +31,7 @@ function makePuzzle(lv){const R=(a,b)=>a+Math.floor(Math.random()*(b-a+1)),d=Mat
 const DBS=[
  {id:'recipes',f:'recipes.db',kind:'recipe'},{id:'survey',f:'survey_layer.db',kind:'map'},{id:'facility',f:'facility_doors.db',kind:'vault'},{id:'wallet',f:'wallet.dat',kind:'cash'},
  {id:'cat',f:'IMG_0042.txt',kind:'art',art:` /\\_/\\\n( o.o )   "the office cat, 2006"\n > ^ <    (he ran the whole department)`},
- {id:'puijo',f:'puijo_tower.txt',kind:'art',art:`        |\n       _|_\n      |___|\n       | |      PUIJO, KUOPIO\n       | |      view: ~100 lakes\n  _____| |_____\n ~~~~~~~~~~~~~~~ Kallavesi ~~~~`},
+ {id:'puijo',f:'puijo_tower.txt',kind:'art',art:`        |\n       _|_\n      |___|\n       | |      PUIJO\n       | |      view: ~100 lakes\n  _____| |_____\n ~~~~~~~~~~~~~~~ Kallavesi ~~~~`},
  {id:'kukko',f:'kalakukko.txt',kind:'art',art:`   ___________\n  /  o   o    \\    KALAKUKKO\n |   RYE CRUST |   fish inside, as tradition demands\n  \\___________/    bake 6 h. knock. if it sounds like\n                   a door, it is done.`,learn:'kalakukko'},
  {id:'rocket',f:'launch_2009.txt',kind:'art',art:`     /\\\n    /  \\\n   | () |\n   |    |    "launch postponed:\n  /|    |\\    sky busy"\n /_|____|_\\\n    /||\\`},
  {id:'m1',f:'meme_001.jpg.txt',kind:'meme',en:'ME: just one more block\nALSO ME, 400 METRES LATER:\n"where exactly was the surface"',fi:'MINÄ: vielä yksi palikka\nMYÖS MINÄ 400 METRIÄ MYÖHEMMIN:\n"missä se pinta oikein olikaan"'},
@@ -42,7 +42,7 @@ const DBS=[
  {id:'m6',f:'meme_006.jpg.txt',kind:'meme',en:'SABU: "A deal is a deal."\nALSO SABU:\n*sells one rope for 350*',fi:'SABU: "Kauppa on kauppa."\nMYÖS SABU:\n*myy yhden köyden 350:llä*'},
  {id:'m7',f:'meme_007.jpg.txt',kind:'meme',en:'WOLF: grrr…\nME: i respect your\nboundaries',fi:'SUSI: grrr…\nMINÄ: kunnioitan\nrajojasi'},
  {id:'m8',f:'meme_008.jpg.txt',kind:'meme',en:'REIJO: "everything works"\nTHE SCRAP PISTOL, SHOT 9:\n*creak*',fi:'REIJO: "kaikki toimii"\nROMUPISTOOLI, 9. LAUKAUS:\n*narsk*'},
- {id:'fact',f:'facts_kuopio.txt',kind:'meme',en:'FACT: Kuopio has a tower on a hill,\na lake in every direction and an\nalarming number of fish pasties.',fi:'FAKTA: Kuopiossa on torni mäellä,\njärvi joka suunnassa ja hälyttävän\nmonta kalakukkoa.'}
+ {id:'fact',f:'facts_savo.txt',kind:'meme',en:'FACT: the lake town has a tower on a hill,\na lake in every direction and an\nalarming number of fish pasties.',fi:'FAKTA: järvikaupungissa on torni mäellä,\njärvi joka suunnassa ja hälyttävän\nmonta kalakukkoa.'}
 ];
 function pickDb(){const v=vaults.find(q=>!q.open);const pool=DBS.filter(d=>!store.dbs[d.id]&&(d.kind!=='vault'||v)&&(d.kind!=='recipe'||lockedRecipes().length));
   if(pool.length)return pickR(pool);return v&&Math.random()<.5?DBS.find(d=>d.kind==='vault'):DBS.find(d=>d.kind==='cash')}
