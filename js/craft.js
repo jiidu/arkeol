@@ -1,5 +1,5 @@
 /*
-  Arkeol v0.3.2 · Copyright (C) 2026 JP Hakoluoto
+  Arkeol v0.3.3 · Copyright (C) 2026 JP Hakoluoto
   Free software under the GNU GPL v3 or later, with an attribution term (see LICENSE and NOTICE).
   craft.js – materials, recipes, campfires as workbenches and placeable torches and ladders
 */
@@ -14,7 +14,8 @@ const MATS={
   spores:{n:{en:'Spores',fi:'Itiöt'},c:'#7fe8d8'},
   shroom:{n:{en:'Mushrooms',fi:'Sienet'},c:'#d83a2a'},
   berry:{n:{en:'Berries',fi:'Marjat'},c:'#3a5ad8'},
-  fish:{n:{en:'Fish',fi:'Kala'},c:'#b8c8d8'}
+  fish:{n:{en:'Fish',fi:'Kala'},c:'#b8c8d8'},
+  beans:{n:{en:'Coffee beans',fi:'Kahvipavut'},c:'#8a5a30'}
 };
 const MATKEYS=Object.keys(MATS);
 const RECIPES=[
@@ -24,9 +25,12 @@ const RECIPES=[
  {id:'ladder',n:{en:'Ladder',fi:'Tikkaat'},d:{en:'Place it to climb up to a ceiling or down a drop.',fi:'Aseta ja kiipeä kattoon asti tai alas pudotukseen.'},need:{wood:4},ic:'ladder',start:1,station:1,make:()=>{P.ladders=(P.ladders||0)+1}},
  {id:'silkrope',n:{en:'Silk rope',fi:'Seittiköysi'},d:{en:'Spider silk is stronger than it looks. +1 rope.',fi:'Seitti on vahvempaa kuin luulisi. +1 köysi.'},need:{silk:2},ic:'rope'},
  {id:'arrows',n:{en:'Arrows',fi:'Nuolet'},d:{en:'Bone tips on wooden shafts. +5 arrows.',fi:'Luukärjet puuvarsissa. +5 nuolta.'},need:{wood:1,bone:1},ic:'arrows',make:()=>{P.arrows+=5}},
+ {id:'plank',n:{en:'Wooden blocks',fi:'Puupalikat'},d:{en:'3 blocks to build bridges, steps and walls. Select them in the hotbar and place with Use.',fi:'3 palikkaa siltoihin, portaisiin ja seiniin. Valitse pikapalkista ja aseta Käytä-toiminnolla.'},need:{wood:1},ic:'plank',start:1,make:()=>{P.planks=(P.planks||0)+3}},
+ {id:'fire',n:{en:'Campfire',fi:'Nuotio'},d:{en:'Build your own fire anywhere on solid ground. It works as a workbench.',fi:'Rakenna oma nuotio mihin tahansa tukevalle maalle. Toimii työpisteenä.'},need:{wood:3,fiber:1},ic:'campfireI',start:1,make:()=>{P.fires=(P.fires||0)+1}},
+ {id:'coffee',n:{en:'Pan coffee',fi:'Pannukahvit'},d:{en:'Boiled three times over the fire. Drink it and you slowly heal (+1 heart every 5 s, about 25 s).',fi:'Keitetään kolmeen kertaan nuotiolla. Juotuasi paranet hiljalleen (+1 sydän 5 s välein, noin 25 s).'},need:{beans:1,wood:1},ic:'coffeeI',station:1,start:1,make:()=>{P.regen=1500;sfx.eat()}},
  {id:'fried',n:{en:'Fried mushrooms',fi:'Paistetut sienet'},d:{en:'Keeps in your pack. Eat later: +1 heart and a digging frenzy.',fi:'Säilyy repussa. Syö myöhemmin: +1 sydän ja kaivuuvimma.'},need:{shroom:2},ic:'meal_fried',station:1,start:1,meal:1},
  {id:'pie',n:{en:'Blueberry pie',fi:'Mustikkapiirakka'},d:{en:'Keeps in your pack. Eat later: +2 hearts.',fi:'Säilyy repussa. Syö myöhemmin: +2 sydäntä.'},need:{berry:3,wood:1},ic:'meal_pie',station:1,start:1,meal:1},
- {id:'kalakukko',n:{en:'Kalakukko',fi:'Kalakukko'},d:{en:"Grandma's fish pasty from Kuopio. Keeps for days. Eat later: +3 hearts and cures poison.",fi:'Mummon kalakukko Kuopiosta. Säilyy päiviä. Syö myöhemmin: +3 sydäntä ja parantaa myrkytyksen.'},need:{fish:2,wood:1,berry:1},ic:'meal_kukko',station:1,meal:1,special:1},
+ {id:'kalakukko',n:{en:'Kalakukko',fi:'Kalakukko'},d:{en:"Grandma's fish pasty from the lake country. Keeps for days. Eat later: +3 hearts and cures poison.",fi:'Mummon kalakukko Savosta. Säilyy päiviä. Syö myöhemmin: +3 sydäntä ja parantaa myrkytyksen.'},need:{fish:2,wood:1,berry:1},ic:'meal_kukko',station:1,meal:1,special:1},
  {id:'stew',meal:1,n:{en:'Mushroom stew',fi:'Sienimuhennos'},d:{en:'Keeps in your pack. Eat later: +2 hearts.',fi:'Säilyy repussa. Syö myöhemmin: +2 sydäntä.'},need:{spores:3,bone:1},ic:'stew',station:1,make:()=>{P.hp=Math.min(8,P.hp+2);P.maxHp=Math.max(P.maxHp,P.hp)}},
  {id:'bomb',n:{en:'Bomb',fi:'Pommi'},d:{en:'Saltpetre packed in a scrap shell. +1 bomb.',fi:'Salpietaria romukuoressa. +1 pommi.'},need:{powder:2,scrap:1},ic:'bomb',station:1,make:()=>{P.bombs++}},
  {id:'ammo',n:{en:'Hand-loaded rounds',fi:'Itse ladatut patruunat'},d:{en:'+4 rounds for the pistol and shotgun.',fi:'+4 patruunaa pistooliin ja haulikkoon.'},need:{powder:1,scrap:2},ic:'ammo',station:1,make:()=>{P.ammo+=4}}
@@ -81,7 +85,7 @@ function renderCraft(){const at=nearStation();
   const mr=$('craftMats');mr.innerHTML='';for(const k of MATKEYS){const s=document.createElement('span');s.className='mat'+((P.mats[k]||0)?'':' zero');s.innerHTML=`<img alt="" src="${ICON['m_'+k]}"><b>${P.mats[k]||0}</b><small>${esc(tr(MATS[k].n))}</small>`;mr.append(s)}
   const pl=$('craftPlace');pl.innerHTML='';
   for(const id of Object.keys(MEALS)){const n=P.meals[id]||0;if(!n)continue;const r=RECIPES.find(q=>q.id===id),b=document.createElement('button');b.type='button';b.className='btn2 eatBtn';b.textContent=t('eatMeal',tr(r.n),n);b.addEventListener('click',()=>{eatMeal(id);renderCraft()});pl.append(b)}
-  for(const [id,cnt,fn] of [['torch',P.torches||0,placeTorch],['ladder',P.ladders||0,placeLadder]]){if(!cnt)continue;const b=document.createElement('button');b.type='button';b.className='btn2';b.textContent=t('place_'+id,cnt);
+  for(const [id,cnt,fn] of [['fire',P.fires||0,placeFire],['torch',P.torches||0,placeTorch],['ladder',P.ladders||0,placeLadder]]){if(!cnt)continue;const b=document.createElement('button');b.type='button';b.className='btn2';b.textContent=t('place_'+id,cnt);
     b.addEventListener('click',()=>{closeCraft();if(!fn()){sfx.nope();floatText(P.x+5,P.y-8,t('cantPlace'),'#ffb0a0')}});pl.append(b)}
   pl.hidden=!pl.children.length;
   const g=$('craftGrid');g.innerHTML='';const known=RECIPES.filter(r=>knowsRecipe(r.id)).length;$('craftProg').textContent=t('recipesKnown',known,RECIPES.length);

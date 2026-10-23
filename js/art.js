@@ -1,5 +1,5 @@
 /*
-  Arkeol v0.3.2 · Copyright (C) 2026 JP Hakoluoto
+  Arkeol v0.3.3 · Copyright (C) 2026 JP Hakoluoto
   Free software under the GNU GPL v3 or later, with an attribution term (see LICENSE and NOTICE).
 */
 'use strict';
@@ -108,6 +108,9 @@ const ICON={};
   ICON.meal_fried=pixIcon(p=>{p(2,9,12,3,'#5e6670');p(1,9,1,2,'#7a828c');p(14,10,2,1,'#3a3236');for(const [x,c] of [[3,'#d83a2a'],[6,'#c06a3a'],[9,'#d83a2a'],[11,'#c06a3a']]){p(x,7,3,2,c);p(x+1,6,1,1,'#efe8dc')}p(5,3,1,3,'rgba(220,220,220,.5)');p(9,2,1,3,'rgba(220,220,220,.4)')});
   ICON.meal_pie=pixIcon(p=>{p(2,8,12,5,'#c49a52');p(1,8,14,1,'#e0b870');p(3,9,10,3,'#3a3a8a');for(let x=3;x<13;x+=3)p(x,9,2,1,'#e0b870');p(4,10,1,1,'#6a6ad8');p(9,11,1,1,'#6a6ad8');p(2,13,12,1,'#8a6a3a')});
   ICON.meal_kukko=pixIcon(p=>{p(3,6,10,7,'#5a3a20');p(2,7,12,5,'#5a3a20');p(4,5,8,1,'#6b4426');p(4,6,7,1,'#8a5a30');p(5,8,3,1,'#7a4a28');p(9,10,2,1,'#7a4a28');p(3,13,10,1,'#3a2614')});
+  ICON.campfireI=pixIcon(p=>{p(2,12,12,2,'#6a6c77');p(3,10,10,2,'#5a3a20');p(6,5,4,5,'#ff8a2a');p(7,3,2,3,'#ffcf5a');p(7,6,2,3,'#fff1b0')});
+  ICON.coffeeI=pixIcon(p=>{p(3,6,9,8,'#3a3236');p(3,6,9,1,'#6a6470');p(12,8,2,4,'#3a3236');p(2,5,4,1,'#3a3236');p(5,2,1,3,'rgba(220,220,220,.6)');p(8,1,1,3,'rgba(220,220,220,.5)');p(5,9,5,1,'#8a5a30')});
+  ICON.m_beans=pixIcon(p=>{for(const [x,y] of [[3,6],[8,4],[6,9],[10,9]]){p(x,y,4,3,'#6b3a1a');p(x+1,y+1,2,1,'#2a1408')}});
   ICON.blueprint=pixIcon(p=>{p(2,3,12,10,'#3d5fb8');p(2,3,12,1,'#6a8ad8');p(4,5,6,1,'#cfdcf0');p(4,7,4,1,'#cfdcf0');p(9,8,3,3,'#cfdcf0');p(10,9,1,1,'#3d5fb8')});
   ICON.none=pixIcon(p=>{for(let i=3;i<13;i+=2){p(i,i,1,1,'#5a4f55');p(15-i,i,1,1,'#5a4f55')}});
   ICON.whip=pixIcon((p,g)=>{g.strokeStyle='#8a5f34';g.lineWidth=1.5;g.beginPath();g.arc(9,8,4.5,0,Math.PI*1.7);g.stroke();g.beginPath();g.arc(9,8,2.2,0,Math.PI*1.8);g.stroke();p(2,11,4,2,'#4b3628');p(1,12,2,2,'#2a1e16')});

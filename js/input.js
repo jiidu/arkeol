@@ -1,5 +1,5 @@
 /*
-  Arkeol v0.3.2 · Copyright (C) 2026 JP Hakoluoto
+  Arkeol v0.3.3 · Copyright (C) 2026 JP Hakoluoto
   Free software under the GNU GPL v3 or later, with an attribution term (see LICENSE and NOTICE).
 */
 'use strict';
@@ -25,7 +25,7 @@ addEventListener('keydown',e=>{
   if(e.code==='KeyN'){toggleMusic();return}
   if(e.code==='Enter'){if(modalOpen){closeModal();e.preventDefault()}else if((state==='menu'||state==='over')&&!openPanel){newGame();e.preventDefault()}return}
   if(modalOpen&&(e.code==='KeyE'||e.code==='Space')){closeModal();e.preventDefault();return}
-  if(/^Digit[1-6]$/.test(e.code)&&state==='play'){const s=slotAtPos(+e.code[5]-1);pickSlot(s);return}
+  if(/^Digit[1-7]$/.test(e.code)&&state==='play'){const s=slotAtPos(+e.code[5]-1);pickSlot(s);return}
   const a=KEYMAP[e.code];if(a){if(a==='use')useSrc='key';if(['dig','drill','weapon','use','fish','bomb','rope','throw'].includes(a))inputMode='key';press(a);if(state==='play')e.preventDefault()}
 });
 addEventListener('keyup',e=>{const a=KEYMAP[e.code];if(a)release(a)});

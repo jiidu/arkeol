@@ -1,5 +1,5 @@
 /*
-  Arkeol v0.3.2 · Copyright (C) 2026 JP Hakoluoto
+  Arkeol v0.3.3 · Copyright (C) 2026 JP Hakoluoto
   Free software under the GNU GPL v3 or later, with an attribution term (see LICENSE and NOTICE).
 */
 'use strict';
@@ -37,6 +37,7 @@ const ACH=[
  {id:'worm1',n:{en:'Wyrm Slayer',fi:'Madonkaataja'},d:{en:'Defeat a burrowing worm.',fi:'Kaada kaivajamato.'}},
  {id:'hacker',n:{en:'Root Access',fi:'Pääkäyttäjä'},d:{en:'Crack five old computers.',fi:'Murra viisi vanhaa tietokonetta.'}},
  {id:'vault1',n:{en:'Open Sesame',fi:'Seesam aukene'},d:{en:'Open a sealed vault.',fi:'Avaa sinetöity holvi.'}},
+ {id:'dragon1',n:{en:'Here Be Dragons',fi:'Täällä asuu lohikäärmeitä'},d:{en:'Slay a dragon.',fi:'Kaada lohikäärme.'}},
  {id:'sniper',n:{en:'Sharpshooter',fi:'Tarkka-ampuja'},d:{en:'Take down an enemy from afar with a bow, crossbow or pistol.',fi:'Kaada vihollinen kaukaa jousella, varsijousella tai pistoolilla.'}}
 ];
 function unlock(id){if(store.ach[id])return;const a=ACH.find(a=>a.id===id);if(!a)return;store.ach[id]=Date.now();save();sfx.ach();
@@ -77,6 +78,7 @@ function renderArchive(tab){
     if(found)b.addEventListener('click',onOpen);else b.disabled=true;g.appendChild(b)};
   if(tab==='papers')PAPERS.forEach((p,i)=>mkItem(store.lore['p'+i],tr(p.who),tr(p.body).split('\n')[0].slice(0,40)+'…',()=>showPaper(i)));
   if(tab==='photos')PHOTOS.forEach((p,i)=>mkItem(store.lore['f'+i],tr(p.cap),t('photo'),()=>showPhoto(i),c=>drawPhoto(p.draw,c)));
+  if(tab==='items')ITEMS.forEach(it=>{const n=store.items[it.id]||0;mkItem(n>0,tr(it.n),`${tr(RARITY[it.r].n)}${n>1?' ×'+n:''}`,()=>{},null);const last=$('archGrid').lastChild;if(n>0){last.style.setProperty('--rc',RARITY[it.r].c);last.classList.add('rar')}});
   if(tab==='relics')RELICS.forEach(r=>mkItem(store.relics[r.id],tr(r.name),`${tr(ERA)} · ${fmt(r.value)}`,()=>showRelic(r),c=>drawRelic(r.id,c)));
 }
 function renderAch(){const g=$('achGrid');g.innerHTML='';let n=0;

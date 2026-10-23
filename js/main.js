@@ -1,5 +1,5 @@
 /*
-  Arkeol v0.3.2 · Copyright (C) 2026 JP Hakoluoto
+  Arkeol v0.3.3 · Copyright (C) 2026 JP Hakoluoto
   Free software under the GNU GPL v3 or later, with an attribution term (see LICENSE and NOTICE).
 */
 'use strict';
@@ -18,7 +18,8 @@ document.querySelectorAll('[data-lang]').forEach(b=>b.addEventListener('click',(
 /* =========================================================== loop */
 function step(){
   frame++;
-  if(state==='play'){introInput();updatePlayer();updateWorld();updTossed();updSecrets();if(frame%30===0)checkAch()}
+  updSurface();
+  if(state==='play'){introInput();updatePlayer();updateWorld();updTossed();updSecrets();updDeep();updVoid();if(frame%30===0)checkAch()}
   else if(state==='dead'){P.vy=Math.min(P.vy+.33,7.5);move(P);if(P.hitY)P.vy=0;P.vx*=.9;updateWorld()}
   else if(state==='menu'||state==='over'){updateWorld()}
   Music.tension+=((state==='play'?Music.target:0)-Music.tension)*.01;
