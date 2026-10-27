@@ -1,5 +1,5 @@
 /*
-  Arkeol v0.3.4 · Copyright (C) 2026 JP Hakoluoto
+  Arkeol v0.3.5 · Copyright (C) 2026 JP Hakoluoto
   Free software under the GNU GPL v3 or later, with an attribution term (see LICENSE and NOTICE).
 */
 /* Layout: full-bleed cave canvas; HUD strip top, toolbar bottom-centre, touch pads in the corners.
@@ -264,7 +264,7 @@ body.inMenu #ui{display:none}
 #status{gap:6px}
 .chip{font:600 12px var(--mono);padding:1px 6px;border-radius:2px;color:#1b1206}
 
-/* ---------- v0.3.4 main menu: the camp scene stays visible, a plain list of choices */
+/* ---------- v0.3.5 main menu: the camp scene stays visible, a plain list of choices */
 #menu{background:linear-gradient(180deg,rgba(8,5,3,.15) 0%,rgba(8,5,3,.35) 45%,rgba(8,5,3,.82) 100%);place-items:center}
 .menuCol{display:flex;flex-direction:column;align-items:center;text-align:center;padding:24px 16px;width:min(420px,100%)}
 #menu .kicker{color:#e8c890;font:500 12px/1 var(--serif);letter-spacing:.3em;margin:0 0 10px;text-shadow:0 1px 2px rgba(0,0,0,.8)}
@@ -411,3 +411,26 @@ body.inMenu #ui{display:none}
 .ashot.noshot{opacity:.85}
 .wPick{display:inline-flex;align-items:center;gap:6px;font:12px var(--mono);color:var(--muted);cursor:pointer;margin-left:4px}
 .wPick input{width:30px;height:26px;border:2px solid var(--line);border-radius:4px;background:none;padding:0;cursor:pointer}
+#ending{position:fixed;inset:0;z-index:80;background:#000;opacity:0;transition:opacity 2.5s;overflow:hidden;display:flex;justify-content:center}
+#ending.black{opacity:1}
+#endRoll{position:absolute;top:0;width:min(560px,90%);text-align:center;color:#efe4d2;font:22px/1.5 var(--hand);transform:translateY(105vh)}
+#ending.roll #endRoll{animation:endroll 38s linear forwards}
+@keyframes endroll{from{transform:translateY(105vh)}to{transform:translateY(calc(-100% + 70vh))}}
+#endRoll p{margin:0}
+#endRoll .eTitle{font:700 clamp(40px,10vw,80px)/1 var(--poster,var(--display));color:#f2c84b;letter-spacing:.06em;margin-bottom:8px}
+#endRoll .eBy{color:#ffe7a8}#endRoll .eHead{color:#f2c84b;margin-top:10px;font-family:var(--display);letter-spacing:.12em;text-transform:uppercase;font-size:15px}
+#endRoll .eYou{font-size:30px;color:#fff3c0}#endRoll .eSmall{font-size:14px;color:#a89070}
+#endRoll .btn{margin-top:20px}
+#talk .talkGlyph{display:block;max-width:100%;height:auto;margin:4px 0;background:#0e1a16;border-radius:3px;padding:4px}
+#talk .talkGift{display:block;font:14px var(--mono);color:#9be86a;margin-top:2px;font-style:normal}
+#tut{position:fixed;left:50%;top:calc(64px + env(safe-area-inset-top,0px));transform:translate(-50%,-14px);width:min(470px,calc(100% - 32px));z-index:25;pointer-events:none;
+  background:linear-gradient(#efe4c8,#e2d4b0);color:#3a2e22;border-radius:3px;padding:10px 16px 12px;box-shadow:0 10px 28px rgba(0,0,0,.45),inset 0 0 0 1px rgba(90,60,30,.25);opacity:0;transition:opacity .45s,transform .45s}
+#tut::before{content:"";position:absolute;left:18px;top:-6px;width:46px;height:14px;background:rgba(240,230,190,.7);transform:rotate(-4deg);box-shadow:0 1px 2px rgba(0,0,0,.2)}
+#tut.on{opacity:1;transform:translate(-50%,0)}#tut.hide{opacity:0!important}
+#tut .tKick{display:flex;justify-content:space-between;align-items:center;font:600 11px var(--mono);letter-spacing:.14em;text-transform:uppercase;color:#8a5a2a}
+#tut .tKick button{pointer-events:auto;background:none;border:0;color:#8a6a48;font:600 11px var(--mono);letter-spacing:.08em;cursor:pointer;text-decoration:underline;padding:2px 0}
+#tut p{margin:4px 0 8px;font:22px/1.25 var(--hand)}
+#tut kbd{background:#3a2e22;color:#f3ead8;border:0;border-bottom:2px solid #1a140e;font:600 12px var(--mono);padding:1px 6px;border-radius:3px;vertical-align:2px;white-space:nowrap}
+#tut .tBar{height:3px;background:rgba(90,60,30,.18);border-radius:2px;overflow:hidden}#tut .tBar i{display:block;height:100%;width:0;background:#b8862a;transition:width .5s}
+#tut.done p{color:#5a7a3a}#tut.done p::after{content:"  ✓";color:#5a8a3a;font-weight:700}
+body.inMenu #tut{display:none}

@@ -1,5 +1,5 @@
 /*
-  Arkeol v0.3.4 · Copyright (C) 2026 JP Hakoluoto
+  Arkeol v0.3.5 · Copyright (C) 2026 JP Hakoluoto
   Free software under the GNU GPL v3 or later, with an attribution term (see LICENSE and NOTICE).
   folk.js – talking voices, the tea-drinking philosopher, Hilda's bakery and the fish in the pools
 */
@@ -22,7 +22,7 @@ function shopSay(txt){typeInto($('sabuSay'),txt,shopKind())}
 
 /* ================================================= more to say for everybody */
 const MORE={
-  coffee:{en:['Never trust anyone who drinks lukewarm coffee. Or a wolf. Wolves do not drink coffee at all.','The grounds tell the future. These ones say: more coffee.','My brother went up for milk in 2009. I take mine black now.','Lava makes a fine stove. Just do not leave the pot too long.','The tea man down the tunnel says coffee makes you anxious. I say he has never tried it boiled properly.'],
+  coffeeOld:{en:['Never trust anyone who drinks lukewarm coffee. Or a wolf. Wolves do not drink coffee at all.','The grounds tell the future. These ones say: more coffee.','My brother went up for milk in 2009. I take mine black now.','Lava makes a fine stove. Just do not leave the pot too long.','The tea man down the tunnel says coffee makes you anxious. I say he has never tried it boiled properly.'],
           fi:['Älä luota keneenkään, joka juo haaleaa kahvia. Äläkä suteen. Sudet eivät juo kahvia ollenkaan.','Porot kertovat tulevaisuuden. Nämä sanovat: lisää kahvia.','Veljeni lähti ylös hakemaan maitoa vuonna 2009. Juon nykyään mustana.','Laava on hyvä liesi. Pannua ei vain saa unohtaa sinne.','Se teemies tuolla käytävässä sanoo, että kahvi hermostuttaa. Hän ei ole koskaan juonut kunnolla keitettyä.']},
   fisher:{en:['The fish down here have no eyes. They do not need them. They have patience.','Did you see them? Little silver ones in the pool. They know when you are thinking about them.','I named one of them Pertti. Then I realised they are all Pertti.','This water is older than the sea. Tastes a bit like coins.','If you fall in, keep your mouth shut. The fish are shy, not stupid.'],
           fi:['Täällä alhaalla kaloilla ei ole silmiä. Ne eivät tarvitse niitä. Niillä on kärsivällisyyttä.','Näitkö ne? Pieniä hopeisia lammessa. Ne tietävät, kun ajattelet niitä.','Nimesin yhden Pertiksi. Sitten tajusin, että ne kaikki ovat Perttejä.','Tämä vesi on vanhempaa kuin meri. Maistuu vähän kolikoilta.','Jos putoat veteen, pidä suu kiinni. Kalat ovat ujoja, eivät tyhmiä.']},
@@ -33,7 +33,7 @@ const MORE={
   reader:{en:['Page six says the council approved a new bridge. I hope they built it.','There is a crossword. Fourteen across: "the deep place", seven letters. I have been stuck for nine years.','The comic strip makes me laugh every day. Same joke. Still funny.','The obituaries are the most cheerful page. Everyone in them is finally resting.'],
           fi:['Sivulla kuusi kerrotaan, että valtuusto hyväksyi uuden sillan. Toivottavasti se rakennettiin.','Tässä on ristisanatehtävä. Neljätoista vaakaan: "syvä paikka", seitsemän kirjainta. Olen jumittanut yhdeksän vuotta.','Sarjakuva naurattaa joka päivä. Sama vitsi. Yhä hauska.','Muistokirjoitukset ovat lehden iloisin sivu. Kaikki niissä saavat vihdoin levätä.']}
 };
-for(const k in MORE){NPCD[k].lines.en.push(...MORE[k].en);NPCD[k].lines.fi.push(...MORE[k].fi)}
+for(const k in MORE){if(!NPCD[k])continue;NPCD[k].lines.en.push(...MORE[k].en);NPCD[k].lines.fi.push(...MORE[k].fi)}
 REIJO.hi.en.push("This one's from an Egyptian merchant. Well, from his bin.","Hello again! Or for the first time. I lose track down here.","The drill? Purrs like a cat. A cat with a cough.","Mind the scorpions. They never buy anything.","I tried that philosopher's tea once. Felt so calm I gave away a drill. Never again.");
 REIJO.hi.fi.push('Tämä on egyptiläiseltä kauppiaalta. No, sen roskiksesta.','Terve taas! Tai ensimmäistä kertaa, mää en pysy kärryillä täällä alhaalla.','Pora? Kehrää ku kissa. Kissa jolla on yskä.','Varo skorppiooneja. Ne ei ikinä osta mittään.','Join kerran sen filosoofin teetä. Tuli niin rauhallinen olo että annoin poran ilimaseksi. Ei enää ikinä.');
 REIJO.buy.en.push("Lovely. Now you look like a proper scrap professional.");REIJO.buy.fi.push('Kaunista. Nyt näytät oikealta romuammattilaiselta.');
@@ -42,25 +42,26 @@ SABU.hi.fi.push('Skarabee vierittää aurinkoa taivaan halki. Sabu vierittää h
 
 /* ================================================= the stoic who brews herbal tea */
 NPCD.stoic={names:['Teofilus','Aurelia','Zenobius'],
-  lines:{en:["Blueberries. They are blue, and they are berries. Some things are exactly what they say.", "You can't choose the rock. You can choose how you dig.", "Worry only about what you can change. Leave the rest to the rocks.", "A cave-in is not up to you. Your breathing is. Breathe.", "A bad day is only one day. Tomorrow you dig again.", "The spider is not angry at you. It is just a spider.", "Gold is heavy. Carry only what you need.", "If you fall, get up. That is the whole lesson.", "You can't control the dark. You can carry a lamp.", "Fear makes every tunnel longer.", "Be kind to everyone you meet down here. They are lost too.", "Why do we say \"dig down\"? Nobody digs up.", "A hole is nothing at all. And yet you can fall into it.", "Mushrooms grow in the dark and never complain. Be like a mushroom.", "Slow is fine. Stopping is fine too. Tea helps.", "Everything ends. Even this tunnel. Even this tea.", "If the way is blocked, the block is the way. Unless it is granite. Then go around."],
-   fi:["Blueberries. Ne ovat sinisiä, ja ne ovat marjoja. Jotkin asiat ovat juuri sitä, miltä kuulostavat.", "Kiveä et voi valita. Sen voit valita, miten kaivat.", "Murehdi vain sitä, mitä voit muuttaa. Loput voi jättää kiville.", "Sortuma ei ole sinun käsissäsi. Hengitys on. Hengitä.", "Huono päivä on vain yksi päivä. Huomenna kaivat taas.", "Hämähäkki ei ole vihainen sinulle. Se on vain hämähäkki.", "Kulta on raskasta. Kanna vain sen verran kuin tarvitset.", "Jos kaadut, nouse ylös. Siinä koko oppi.", "Pimeää et voi hallita. Lampun voit kantaa.", "Pelko tekee jokaisesta tunnelista pidemmän.", "Ole ystävällinen kaikille, joita täällä tapaat. Hekin ovat eksyksissä.", "Miksi sanotaan \"kaivaa alas\"? Kukaan ei kaiva ylös.", "Kuoppa on pelkkää tyhjää. Silti siihen voi pudota.", "Sienet kasvavat pimeässä eivätkä valita. Ole kuin sieni.", "Hitaasti on hyvä. Pysähtyminenkin on hyvä. Tee auttaa.", "Kaikki loppuu. Tämäkin tunneli. Tämäkin tee.", "Jos tie on tukossa, tukos on tie. Paitsi graniitti. Sen voi kiertää."]},
+  lines:{en:["Some things are up to us, and some are not. Spend your strength only on the first kind.", "You cannot choose what happens. You can choose what you make of it.", "We suffer more in imagination than in reality.", "Before you speak, ask: is it true, is it kind, is it needed?", "Every morning, remember: today you will meet rude people. Be patient with them anyway.", "Wealth is not having many things. It is wanting few.", "Anger is a heavy stone you carry to throw at someone else.", "Do not wish for things to happen as you want. Want them to happen as they do.", "Nobody is free who is not master of himself.", "Waste no more time arguing what a good person should be. Be one.", "If someone insults you, consider whether they are right. If they are, learn. If not, smile.", "The present moment is the only one you are given. Drink your tea while it is warm.", "Fear of loss is often worse than the loss itself.", "Be kind. Everyone you meet is fighting a battle you know nothing about.", "Small daily habits make a life. Big plans only make plans.", "Blueberries. They are blue, and they are berries. Some things are exactly what they say.", "Remember that you will die. It makes the tea taste better.", "You have two ears and one mouth. Listen twice as much as you speak."],
+   fi:["Jotkin asiat ovat meidän vallassamme, jotkin eivät. Käytä voimasi vain ensimmäisiin.", "Et voi valita, mitä tapahtuu. Voit valita, mitä teet sillä.", "Kärsimme enemmän mielikuvissa kuin todellisuudessa.", "Ennen kuin puhut, kysy: onko se totta, onko se ystävällistä, onko se tarpeen?", "Muista joka aamu: tänään tapaat tylyjä ihmisiä. Ole kärsivällinen heidän kanssaan silti.", "Rikkaus ei ole sitä, että omistaa paljon. Se on sitä, että haluaa vähän.", "Viha on raskas taakka, jota kannat heittääksesi sen jonkun toisen päälle.", "Älä toivo, että asiat tapahtuvat niin kuin haluat. Halua, että ne tapahtuvat niin kuin ne tapahtuvat.", "Kukaan ei ole vapaa, joka ei hallitse itseään.", "Älä tuhlaa aikaa väittelemällä siitä, millainen hyvän ihmisen pitäisi olla. Ole sellainen.", "Jos joku loukkaa sinua, mieti onko hän oikeassa. Jos on, opi. Jos ei, hymyile.", "Tämä hetki on ainoa, joka sinulle annetaan. Juo teesi, kun se on vielä lämmintä.", "Menettämisen pelko on usein pahempi kuin itse menetys.", "Ole ystävällinen. Jokainen kohtaamasi käy taistelua, josta et tiedä mitään.", "Pienet päivittäiset tavat tekevät elämän. Suuret suunnitelmat tekevät vain suunnitelmia.", "Blueberries. Ne ovat sinisiä, ja ne ovat marjoja. Jotkin asiat ovat juuri sitä, miltä kuulostavat.", "Muista, että kuolet. Se saa teen maistumaan paremmalta.", "Sinulla on kaksi korvaa ja yksi suu. Kuuntele kaksi kertaa enemmän kuin puhut."]},
   tea:{en:['Here, chamomile tea. Sit down and breathe. (Health restored)','Tea first. Thinking later. (Health restored)','Linden blossom tea. Drink slowly, the world can wait. (Health restored)','Nettle tea. It stings when picked and heals when drunk. (Health restored)','Blueberry leaf tea. Blue, and from berries. Honest tea. (Health restored)'],
        fi:['Tässä, kamomillateetä. Istu alas ja hengitä. (Terveys palautui)','Ensin tee. Ajatellaan myöhemmin. (Terveys palautui)','Lehmuksenkukkateetä. Juo hitaasti, maailma odottaa. (Terveys palautui)','Nokkosteetä. Poimiessa se polttaa, juodessa parantaa. (Terveys palautui)','Mustikanlehtiteetä. Sinistä ja marjoista. Rehellistä teetä. (Terveys palautui)']},
   gift(){return ''}};
 function stoicTalk(n){const ready=!n.teaAt||frame-n.teaAt>2400;
   if(ready){n.teaAt=frame;P.maxHp=Math.max(P.maxHp,3);P.hp=Math.max(P.hp,P.maxHp);P.poison=0;P.cozy=900;sfx.tea();
-    if(!n.gift){n.gift=true;store.stats.talks++;save();store.stats.teas=(store.stats.teas||0)+1}const L=tr(NPCD.stoic.tea);return L[(n.ti=(n.ti||0)+1)%L.length]}
-  const ls=tr(NPCD.stoic.lines);const l=ls[n.li%ls.length];n.li++;return l}
+    if(!n.gift){n.gift=true;store.stats.talks++;save();store.stats.teas=(store.stats.teas||0)+1}const L=tr(NPCD[n.type].tea);const tl=L[(n.ti=(n.ti||0)+1)%L.length];if(n.domain&&!n.welcomed){n.welcomed=true;return pickR(tr(DOMAIN_HELLO))+' '+tl}return tl}
+  const ls=tr(NPCD[n.type].lines);const l=ls[n.li%ls.length];n.li++;return l}
 
 /* talking replaces the old one-liner: voices, the philosopher and the bakery */
 function talkTo(n){
   if(n.type==='baker'){if(!n.shop.greeted){n.shop.greeted=true}openShop(n.shop);return}
+  if(PEOPLE_TALK[n.type]){PEOPLE_TALK[n.type](n);checkAch();return}
   const D=NPCD[n.type];let line;
-  if(n.type==='stoic')line=stoicTalk(n);
+  if(n.type==='stoic'||n.type==='hippie')line=stoicTalk(n);
   else if(!n.gift){n.gift=true;line=D.gift();if(n.type==='coffee'){P.mats.beans=(P.mats.beans||0)+2;setTimeout(()=>floatText(P.x+5,P.y-14,'+2 '+tr(MATS.beans.n),MATS.beans.c),600)}store.stats.talks++;save();
     const k=n.type==='knitter'?(['h:beanie','n:scarf','t:sweater'].find(k=>!wOwn(k))||randomCosmetic()):Math.random()<.4?randomCosmetic():null;if(k)setTimeout(()=>gainCosmetic(k,n.x,n.y-24),900)}
-  else{const ls=tr(D.lines);line=ls[n.li%ls.length];n.li++}
-  showTalk(n.name,line,n.type);checkAch()}
+  else{line=extraLine(n);if(!line){const ls=tr(D.lines);line=ls[n.li%ls.length];n.li++}}
+  showTalk(npcTitle(n),line,n.type);checkAch()}
 
 /* ================================================= Hilda's bakery: pastries that change you for the rest of the run */
 const BAKER={hi:{en:['Fresh from the oven! Well, from the lava. Same thing, really.','Every pastry changes you a little. For the better. That is what pastries are for.','My sourdough starter is older than the pyramids. Sabu insists it is the other way round.','Mind the crumbs, the ants are listening.','The philosopher comes by for a cinnamon bun every Tuesday. Or what he calls Tuesday.','Butter, flour, patience. And a pinch of something from layer nine. Do not ask.'],
@@ -132,7 +133,7 @@ const FOLK_DRAW={
     ctx.restore();
     if(frame%30===0)parts.push({x:x+10,y:y-12,vx:rand(-.1,.1),vy:-.25,life:50,max:50,col:'rgba(255,240,220,.35)',g:-.002,sz:1})}
 };
-function drawFolkDeco(d){const x=d.tx*T,y=d.ty*T;if(drawTentDeco(d)||drawEraDeco(d))return true;if(d.k==='vent'){drawVent(d);return true}if(d.k==='ddoor'){drawDebugDoor(d);return true}
+function drawFolkDeco(d){const x=d.tx*T,y=d.ty*T;if(drawTentDeco(d)||drawEraDeco(d)||drawPeopleDeco(d)||drawAtmosDeco(d))return true;if(d.k==='vent'){drawVent(d);return true}if(d.k==='goldhole')return drawGoldHole(d);if(d.k==='ddoor'){drawDebugDoor(d);return true}
   if(d.k==='oven'){R(x-2,y-6,22,22,'#8a4a34');ctx.fillStyle='#9a5a3e';ctx.beginPath();ctx.arc(x+9,y+2,11,Math.PI,0);ctx.fill();R(x-2,y+2,22,14,'#9a5a3e');
     for(let k=0;k<4;k++)R(x-2,y+3+k*4,22,1,'#7a3a28');for(let k=0;k<3;k++)R(x+2+k*6,y-4,1,6,'#7a3a28');
     R(x+3,y+5,12,9,'#1a0c08');const fl=Math.sin(frame*.25)*.6+.8;ctx.fillStyle=`rgba(255,140,40,${.7*fl})`;ctx.fillRect(x+4,y+10,10,4);ctx.fillStyle=`rgba(255,220,120,${.8*fl})`;ctx.fillRect(x+6,y+12,6,2);
@@ -142,7 +143,7 @@ function drawFolkDeco(d){const x=d.tx*T,y=d.ty*T;if(drawTentDeco(d)||drawEraDeco
     ctx.font='5px "Pixelify Sans", monospace';ctx.fillStyle='#f3dfb0';ctx.textAlign='center';ctx.fillText(LANG==='fi'?'LEIPOMO':'BAKERY',x+15,y+16);ctx.textAlign='left';return true}
   if(d.k==='flourbag'){R(x+3,y+7,10,9,'#e8e2d0');R(x+4,y+6,8,1,'#d8d0bc');R(x+6,y+5,4,1,'#c8a070');R(x+5,y+10,6,3,'#c8b090');return true}
   return false}
-function folkLight(hole,glows){tentLight(hole,glows);for(const d of decos)if(d.k==='oven'){const fl=1+Math.sin(frame*.25)*.06;hole(d.tx*T+9,d.ty*T+8,4.4*T*fl,.9);glows.push([d.tx*T+9,d.ty*T+10,3*T,'rgba(255,150,60,.25)'])}
+function folkLight(hole,glows){tentLight(hole,glows);atmosLight(hole,glows);bottomLight(hole,glows);peopleLight(hole,glows);for(const d of decos)if(d.k==='oven'){const fl=1+Math.sin(frame*.25)*.06;hole(d.tx*T+9,d.ty*T+8,4.4*T*fl,.9);glows.push([d.tx*T+9,d.ty*T+10,3*T,'rgba(255,150,60,.25)'])}
   for(const f of fishes)if(f.glow)glows.push([f.x,f.y,10,'rgba(120,240,220,.35)']);
   if(P&&P.cozy>0){const k=Math.min(1,P.cozy/120);hole(P.x+P.w/2,P.y,(P.lampR+3)*T*k,.55*k);glows.push([P.x+P.w/2,P.y,6*T*k,`rgba(255,180,110,${.18*k})`])}}
 function folkOverlay(){if(!P||!(P.cozy>0))return;const k=Math.min(1,P.cozy/120);
@@ -182,7 +183,7 @@ function drawFish(){for(const f of fishes){if(Math.abs(f.x-cam.x-VW/2)>VW||Math.
 function updFolk(){if(!P)return;if(P.cozy>0)P.cozy--;if(frame%20===0)updCraftTip();
   for(const n of npcs){if(n.type!=='stoic'||Math.abs(n.x-P.x)>VW)continue;if(frame%11===0){const f=n.face,sip=(n.anim%420)<50;parts.push({x:n.x+f*(sip?6:6),y:n.y-(sip?18:12),vx:rand(-.1,.1),vy:-.3,life:45,max:45,col:'rgba(235,235,235,.4)',g:-.002,sz:1})}
     if(frame%13===0)parts.push({x:n.x-n.face*12,y:n.y-12,vx:-n.face*.15,vy:-.25,life:40,max:40,col:'rgba(235,235,235,.35)',g:-.002,sz:1})}
-  updFish();updVents()}
+  updFish();updVents();updPeople();updDomain();updTutorial();updFireRest()}
 
 Object.assign(STR.en,{bakeTitle:"Hilda's Bakery",fireS:'Campfire (Use: place)',torchS:'Torch (Use: place)',discT:'A disc from the computer',dbUnlock:'WARDROBE DATA: a new piece of clothing is yours.',craftHint:'You can craft something · Q'});
 Object.assign(STR.fi,{bakeTitle:'Hildan leipomo',fireS:'Nuotio (Käytä: aseta)',torchS:'Soihtu (Käytä: aseta)',discT:'Romppu tietokoneesta',dbUnlock:'VAATEKAAPPIDATA: uusi vaate on nyt sinun.',craftHint:'Voit askarrella jotain · Q'});

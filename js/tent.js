@@ -1,5 +1,5 @@
 /*
-  Arkeol v0.3.4 · Copyright (C) 2026 JP Hakoluoto
+  Arkeol v0.3.5 · Copyright (C) 2026 JP Hakoluoto
   Free software under the GNU GPL v3 or later, with an attribution term (see LICENSE and NOTICE).
   tent.js – the inside of the tent at the camp: a calm place with its own music, the relic shelf,
             the photo board, the wardrobe trunk and the layer album (jump to any layer you have reached)

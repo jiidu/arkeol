@@ -1,5 +1,5 @@
 /*
-  Arkeol v0.3.4 · Copyright (C) 2026 JP Hakoluoto
+  Arkeol v0.3.5 · Copyright (C) 2026 JP Hakoluoto
   Free software under the GNU GPL v3 or later, with an attribution term (see LICENSE and NOTICE).
   secrets.js – old computers with number puzzles (each one burns a useful disc),
                and sealed vaults that only open with a lever or a button somewhere in the layer
@@ -13,7 +13,7 @@ store.dbs=store.dbs||{};
 function makePuzzle(lv){const R=(a,b)=>a+Math.floor(Math.random()*(b-a+1)),d=Math.min(lv,9);
   const kinds=['arith','seq','bin','eq'];if(d>=4)kinds.push('mod','seq');if(d>=5)kinds.push('hex','fib');
   const k=pickR(kinds);let q,a;
-  if(k==='arith'){const x=R(3,6+d),y=R(3,6+d),z=R(2,10+d*2),op=Math.random()<.5;q=`${x} * ${y} ${op?'+':'-'} ${z}`;a=x*y+(op?z:-z)}
+  if(k==='arith'){const x=R(3,6+d),y=R(3,6+d),z=R(2,Math.min(10+d*2,x*y-1)),op=Math.random()<.5;q=`${x} * ${y} ${op?'+':'-'} ${z}`;a=x*y+(op?z:-z)}
   else if(k==='seq'){const t=R(0,3);
     if(t===0){const s=R(1,5),st=R(2,4);const v=[s,s*st,s*st*st,s*st**3];q=v.join(', ')+', ?';a=s*st**4}
     else if(t===1){const s=R(1,20),st=R(3,9+d);const v=[0,1,2,3].map(i=>s+i*st);q=v.join(', ')+', ?';a=s+4*st}
@@ -24,7 +24,7 @@ function makePuzzle(lv){const R=(a,b)=>a+Math.floor(Math.random()*(b-a+1)),d=Mat
   else if(k==='hex'){const n=R(20,200);q=`0x${n.toString(16).toUpperCase()} = ? (decimal)`;a=n}
   else if(k==='mod'){const n=R(40,400),m=R(3,9);q=`${n} mod ${m} = ?`;a=n%m}
   else{const x=R(2,9+d),m=R(2,6),c=R(1,20);q=`${m}x + ${c} = ${m*x+c}   x = ?`;a=x}
-  const opts=new Set([a]);while(opts.size<4){const o=a+pickR([-1,1])*R(1,Math.max(3,Math.round(Math.abs(a)*.25)+2));if(o>=0)opts.add(o)}
+  const opts=new Set([a]);for(let g=0;opts.size<4&&g<200;g++){const o=a+pickR([-1,1])*R(1,Math.max(3,Math.round(Math.abs(a)*.25)+2));if(o>=0||a<0)opts.add(o)}for(let o=a+1;opts.size<4;o++)opts.add(o)
   return {q,a,opts:[...opts].sort(()=>Math.random()-.5)}}
 
 /* ------------------------------------------------ what the databases hold */
@@ -51,10 +51,11 @@ function spawnSecrets(lv,H){const {ri,r,airFloor,far,sy,freeRect,protRect}=H;ter
       if(r()<.5)pickups.push({x:(cx-2)*T+4,y:(fy+1)*T-6.001,w:7,h:6,vx:0,vy:0,kind:'gem',value:500,t:99,still:true});
       {const lk=lockedRecipes();if(lk.length)pickups.push({x:(x0+1)*T+4,y:(fy+1)*T-6.001,w:8,h:6,vx:0,vy:0,kind:'recipe',rid:pickR(lk).id,value:0,t:99,still:true})}
       // the lever or button that opens it, somewhere else in the layer
-      for(let b=0;b<3000&&!v.lever;b++){const x=ri(2,MW-3),y=ri(sy,MH-3);const dd=Math.hypot(x-dx,y-(y0+h-2));if(dd<7||dd>24)continue;
+      for(let b=0;b<3000&&!v.lever;b++){const x=ri(2,MW-3),y=ri(sy,MH-3);const dd=Math.hypot(x-dx,y-(y0+h-2));if(dd<3||dd>(b<2000?8:12))continue;
         if(grid[idx(x,y)]!==AIR||prot[idx(x,y)]||isWater(x,y))continue;
         if(airFloor(x,y)&&grid[idx(x,y-1)]===AIR&&r()<.6){v.lever={tx:x,ty:y,k:'lever'};decos.push({tx:x,ty:y,k:'lever',sx:0,sy:1,on:0})}
         else{const s=isSolid(x-1,y)?-1:isSolid(x+1,y)?1:0;if(s&&isSolid(x,y+1)){v.lever={tx:x,ty:y,k:'wbutton'};decos.push({tx:x,ty:y,k:'wbutton',sx:s,sy:0,on:0})}}}
+      if(!v.lever){const lx=dx+side*3,ly=y0+h-2;if(grid[idx(lx,ly)]===AIR&&isSolid(lx,ly+1)){v.lever={tx:lx,ty:ly,k:'lever'};decos.push({tx:lx,ty:ly,k:'lever',sx:0,sy:1,on:0})}}
       if(!v.lever){vaults.pop()}   // no lever spot found: leave it sealed forever? no – drop it
       break}}
   // old computers
