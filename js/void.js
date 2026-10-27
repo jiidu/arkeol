@@ -1,5 +1,5 @@
 /*
-  Arkeol v0.3.4 · Copyright (C) 2026 JP Hakoluoto
+  Arkeol v0.3.5 · Copyright (C) 2026 JP Hakoluoto
   Free software under the GNU GPL v3 or later, with an attribution term (see LICENSE and NOTICE).
   void.js – the other side of the rifts (contains spoilers), demon weapons, wooden blocks,
             and the look of the main trader's shop
@@ -167,7 +167,7 @@ function drawTentacle(d){const pts=tentPts(d),N=pts.length-1;d.tip=pts[N];
   const [tx,ty]=pts[N];if(d.reach>.5){ctx.fillStyle='rgba(255,90,90,.7)';ctx.fillRect(tx-.5,ty-.5,1,1)}}
 function updTentacles(){if(!P)return;const pcx=P.x+P.w/2,pcy=P.y+P.h/2;
   for(const d of decos){if(d.k!=='tentacle'||d.dead)continue;const [bx,by]=tentBase(d),dist=Math.hypot(pcx-bx,pcy-by);if(d.cd>0)d.cd--;
-    if(d.grab>0){d.grab--;d.reach=Math.min(1,d.reach+.05);const tp=d.tip||[bx,by];P.x+=(tp[0]-P.w/2-P.x)*.25;P.y+=(tp[1]-P.h/2-P.y)*.25;P.vx=0;P.vy=0;P.climb=null;
+    if(d.grab>0){d.grab--;d.held=(d.held||0)+1;if(d.held%120===0){P.inv=0;hurt(1,'cTentacle');P.vx=0;P.vy=0}d.reach=Math.min(1,d.reach+.05);const tp=d.tip||[bx,by];P.x+=(tp[0]-P.w/2-P.x)*.25;P.y+=(tp[1]-P.h/2-P.y)*.25;P.vx=0;P.vy=0;P.climb=null;
       if(frame%20===0)shake=Math.max(shake,2);
       if(hit.jump||hit.dig||hit.mdig||hit.weapon){d.struggle=(d.struggle||0)+1;particle(pcx,pcy,['#3a0a1a','#7a1a3a'],4,1.2,14,.1,1)}
       if(d.grab<=0||d.struggle>=4||P.dead){d.grab=0;d.struggle=0;d.cd=420;P.vy=-2.5;P.vx=(pcx<bx?-1:1)*2;sfx.squish()}
@@ -177,7 +177,7 @@ function updTentacles(){if(!P)return;const pcx=P.x+P.w/2,pcy=P.y+P.h/2;
     if(want&&d.reach>.3&&frame%90===0&&Math.random()<.15&&sfx.whisper)sfx.whisper();
     const tp=d.tip;
     if(tp&&!d.weak&&d.reach>.6&&!(P.inv>0)&&Math.abs(tp[0]-pcx)<P.w/2+3&&Math.abs(tp[1]-pcy)<P.h/2+3&&!decos.some(o=>o.k==='tentacle'&&o.grab>0)){
-      d.grab=90;d.struggle=0;hurt(1,'cTentacle');P.inv=Math.max(P.inv,100);sfx.chomp&&sfx.chomp();floatText(pcx,P.y-10,LANG==='fi'?'Rimpuile irti!':'Struggle free!','#ff8a9a')}
+      d.grab=300;d.held=0;d.struggle=0;shake=Math.max(shake,3);sfx.chomp&&sfx.chomp();floatText(pcx,P.y-10,LANG==='fi'?'Rimpuile irti!':'Struggle free!','#ff8a9a')}
     // a swing at the tentacle makes it flinch back
     if(melee&&tp&&d.reach>.2){const b=meleeBox(melee.side,melee.reach);if(tp[0]>b.x&&tp[0]<b.x+b.w&&tp[1]>b.y&&tp[1]<b.y+b.h){d.reach=0;d.cd=300;d.grab=0;particle(tp[0],tp[1],['#3a0a1a','#7a1a3a','#c86a8a'],10,1.6,20,.1,1);sfx.squish()}}}}
 function drawStareEye(d,x,y,big){const s=big?2:1,ox=d.sx<0?x+3:d.sx>0?x+13-6*s:x+8-3*s,oy=d.sy<0?y+1:d.sy>0?y+15-4*s:y+6,blinkP=(frame+d.tx*53+d.ty*29)%(big?340:220),bl=blinkP<10?1-Math.abs(blinkP-5)/5:0;
@@ -206,7 +206,7 @@ function startHorror(){if(!P)return;const pcx=P.x+P.w/2,pcy=P.y+P.h/2,eyes=[],te
     tents.push({tx:ax,ty:ay,k:'tentacle',sx:o===-1?1:o===1?-1:0,sy:o===2?-1:o===-2?1:0,len:18+Math.random()*16,ph:Math.random()*99,reach:0,cd:0,grab:0})}
   const dur=70+(Math.random()*40|0);horror={t:dur,dur,eyes,tents,blank:false};
   shake=Math.max(shake,4);(sfx.farScream||(()=>{}))();if(sfx.whisper)setTimeout(()=>sfx.whisper(),200);tone(46,1.2,'sawtooth',.06,-12);noise(.4,.06,240,'lowpass')}
-function updHorror(){if(inTent){horror=null;return}
+function updHorror(){if(inTent||domain){horror=null;return}
   // a running horror moment always plays out and ends, wherever you are
   if(horror){horror.t--;const age=horror.dur-horror.t;horror.blank=age<14&&(age>>2)%2===1||horror.t<10&&(horror.t>>1)%2===0;
     for(const d of horror.tents)d.reach=Math.min(1,age/40)*(horror.t<20?horror.t/20:1);
@@ -231,7 +231,7 @@ function spawnCorruption(lv,H){corA=new Uint8Array(MW*MH);if(inVoid||lv<9)return
     let sx=0,sy=0;if(isSolid(x-1,y))sx=-1;else if(isSolid(x+1,y))sx=1;else if(isSolid(x,y-1))sy=-1;else continue;
     decos.push({tx:x,ty:y,k:'tentacle',sx,sy,len:14+ri(0,14),ph:Math.random()*99,reach:0,cd:ri(0,300),grab:0,weak:lv<10});c++}}
 const corruptAt=i=>!!(corA&&corA[i]);
-function drawSeep(){if(inVoid||inDebug||level<9||horror)return;const k=Math.min(1,(level-8)/5),p=.5+.5*Math.sin(frame*.02);
+function drawSeep(){if(inVoid||inDebug||domain||level<9||horror)return;const k=Math.min(1,(level-8)/5),p=.5+.5*Math.sin(frame*.02);
   ctx.setTransform(1,0,0,1,0,0);const g=ctx.createRadialGradient(cv.width/2,cv.height/2,cv.height*.3,cv.width/2,cv.height/2,cv.width*.7);
   g.addColorStop(0,'rgba(0,0,0,0)');g.addColorStop(1,`rgba(40,0,10,${(.25+.2*p)*k})`);ctx.fillStyle=g;ctx.fillRect(0,0,cv.width,cv.height)}
 function drawHorror(ox,oy){drawSeep();if(!horror||horror.blank||horror.t<=0)return;const k=Math.min(1,(horror.dur-horror.t)/10,horror.t/10);

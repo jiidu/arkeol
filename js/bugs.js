@@ -1,5 +1,5 @@
 /*
-  Arkeol v0.3.4 · Copyright (C) 2026 JP Hakoluoto
+  Arkeol v0.3.5 · Copyright (C) 2026 JP Hakoluoto
   Free software under the GNU GPL v3 or later, with an attribution term (see LICENSE and NOTICE).
   bugs.js – ant columns and scorpions
 */
@@ -21,7 +21,7 @@ function spawnBugs(lv,H){const {ri,r,airFloor,far,sy}=H;if(inVoid||lv<2)return;
     const n=3+ri(0,2+Math.min(2,lv>>2)),fire=biome==='hot'||(lv>=7&&r()<.4);
     for(let k=0;k<n;k++)foes.push(mkAnt(x*T+2+k*6,(y+1)*T-4.001,fire));c++}
   // scorpions like it hot and dry
-  if(lv>=3&&biome!=='cold'&&biome!=='moss'){const nS=(biome==='hot'?2:r()<.6?1:0)+(lv>=8&&r()<.4?1:0);let s=0;
+  if(lv>=3&&biome!=='cold'&&biome!=='moss'){const nS=(biome==='hot'||biome==='desert'?2:r()<.6?1:0)+(lv>=8&&r()<.4?1:0);let s=0;
     for(let a=0;a<1500&&s<nS;a++){const x=ri(3,MW-4),y=ri(sy+3,MH-3);
       if(!airFloor(x,y)||!airFloor(x+1,y)||!far(x,y,12)||isWater(x,y))continue;foes.push(mkScorpion(x*T+1,(y+1)*T-8.001));s++}}
 }

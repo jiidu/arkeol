@@ -1,5 +1,5 @@
 /*
-  Arkeol v0.3.4 · Copyright (C) 2026 JP Hakoluoto
+  Arkeol v0.3.5 · Copyright (C) 2026 JP Hakoluoto
   Free software under the GNU GPL v3 or later, with an attribution term (see LICENSE and NOTICE).
   deep.js – coloured gems, the dragon, layers out of time, the darkness that grows with depth,
             keepsakes found with letters (with rarities), campfires and pan coffee
@@ -150,7 +150,7 @@ function deepLight(hole,glows){for(const d of decos){if(d.dead)continue;const x=
   for(const f of foes)if(!f.dead&&f.type==='dragon'&&f.st==='breath'){const mx=f.x+f.w/2+f.face*17,my=f.y+6;hole(mx,my,3*T,.85);glows.push([mx,my,2.4*T,'rgba(255,120,40,.3)'])}}
 /* ambient dread in the deep */
 let nextDread=0;
-function updDeep(){updRegen();if(level<6||state!=='play')return;if(!nextDread)nextDread=frame+1800;if(frame<nextDread)return;
+function updDeep(){updRegen();if(level<6||domain||state!=='play')return;if(!nextDread)nextDread=frame+1800;if(frame<nextDread)return;
   nextDread=frame+Math.max(1200,3600-level*200)+Math.random()*1800;const k=Math.random();if(k<.45)sfx.whisper();else if(k<.75)sfx.farScream();else sfx.musicbox()}
 
 EXTRA_UPD.dragon=updDragon;EXTRA_DRAW.dragon=drawDragon;

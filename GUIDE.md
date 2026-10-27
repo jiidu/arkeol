@@ -1,6 +1,6 @@
 # Arkeol – Player's Guide
 
-*Version 0.3.4 · Arkeol by JP Hakoluoto · Spoiler-free*
+*Version 0.3.5 · Arkeol by JP Hakoluoto · Spoiler-free*
 
 Arkeol is an open source browser game about digging. You play an archaeologist who climbs down through a
 procedurally generated underground world, one layer at a time. Each layer is new: dig, gather treasure and
@@ -12,6 +12,9 @@ The game runs in English and Finnish. You can switch languages in **Settings**.
 ---
 
 ## Getting started
+
+At the start of every run, short field notes walk you through the basics, one step at a time. They wait until you
+have tried each thing. You can skip them, or turn them off for good in **Settings**.
 
 1. Open `index.html` in a modern browser (Chrome, Edge, Firefox or Safari). No installation or server is needed.
 2. From the main menu, choose **New Game**.
@@ -123,6 +126,8 @@ Other people live down here: they brew coffee, fish, knit, read and play music. 
 click). Everyone has their own voice and plenty to say, and a first conversation often comes with a small gift.
 If you meet someone sipping herbal tea and thinking about life, stop for a cup. You will feel better.
 
+Now and then a layer opens up to the sky. Those are good places to catch your breath.
+
 Along the way you will also find notes and diaries from many places and many people. Not all of them were
 written on this planet, or in a script anyone can read.
 
@@ -135,6 +140,7 @@ the middle mouse button, or **View** on a controller) to open the crafting scree
 
 - **Small things** such as rope, torches and bandages can be made anywhere.
 - **Bigger things** marked with a flame need a **campfire**. Some can be found, and you can also build your own.
+- **Resting by a fire** slowly brings your hearts back. Coffee brewed at a fire goes into a thermos you can drink later.
 - **Food** gathered in the caves can be eaten raw, or cooked at a fire into meals that keep in your pack for later.
   The crafting screen shows the stored meals you can eat.
 - **Campfires and torches** you have made go to the hotbar: select one and press Use to set it down.

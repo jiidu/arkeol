@@ -1,5 +1,5 @@
 /*
-  Arkeol v0.3.4 · Copyright (C) 2026 JP Hakoluoto
+  Arkeol v0.3.5 · Copyright (C) 2026 JP Hakoluoto
   Free software under the GNU GPL v3 or later, with an attribution term (see LICENSE and NOTICE).
   craft.js – materials, recipes, campfires as workbenches and placeable torches and ladders
 */
@@ -27,7 +27,7 @@ const RECIPES=[
  {id:'arrows',n:{en:'Arrows',fi:'Nuolet'},d:{en:'Bone tips on wooden shafts. +5 arrows.',fi:'Luukärjet puuvarsissa. +5 nuolta.'},need:{wood:1,bone:1},ic:'arrows',make:()=>{P.arrows+=5}},
  {id:'plank',n:{en:'Wooden blocks',fi:'Puupalikat'},d:{en:'3 blocks to build bridges, steps and walls. Select them in the hotbar and place with Use.',fi:'3 palikkaa siltoihin, portaisiin ja seiniin. Valitse pikapalkista ja aseta Käytä-toiminnolla.'},need:{wood:1},ic:'plank',start:1,make:()=>{P.planks=(P.planks||0)+3}},
  {id:'fire',n:{en:'Campfire',fi:'Nuotio'},d:{en:'Build your own fire anywhere on solid ground. It works as a workbench.',fi:'Rakenna oma nuotio mihin tahansa tukevalle maalle. Toimii työpisteenä.'},need:{wood:3,fiber:1},ic:'campfireI',start:1,make:()=>{P.fires=(P.fires||0)+1}},
- {id:'coffee',n:{en:'Pan coffee',fi:'Pannukahvit'},d:{en:'Boiled three times over the fire. Drink it and you slowly heal (+1 heart every 5 s, about 25 s).',fi:'Keitetään kolmeen kertaan nuotiolla. Juotuasi paranet hiljalleen (+1 sydän 5 s välein, noin 25 s).'},need:{beans:1,wood:1},ic:'coffeeI',station:1,start:1,make:()=>{P.regen=1500;sfx.eat()}},
+ {id:'coffee',n:{en:'Thermos of pan coffee',fi:'Termospullo pannukahvia'},d:{en:'Boiled three times over the fire and poured into a thermos. Keeps in your pack. Drink later: +2 hearts.',fi:'Keitetty kolmesti nuotiolla ja kaadettu termospulloon. Säilyy repussa. Juo myöhemmin: +2 sydäntä.'},need:{beans:1,wood:1},ic:'coffeeI',station:1,start:1,meal:1},
  {id:'fried',n:{en:'Fried mushrooms',fi:'Paistetut sienet'},d:{en:'Keeps in your pack. Eat later: +1 heart and a digging frenzy.',fi:'Säilyy repussa. Syö myöhemmin: +1 sydän ja kaivuuvimma.'},need:{shroom:2},ic:'meal_fried',station:1,start:1,meal:1},
  {id:'pie',n:{en:'Blueberry pie',fi:'Mustikkapiirakka'},d:{en:'Keeps in your pack. Eat later: +2 hearts.',fi:'Säilyy repussa. Syö myöhemmin: +2 sydäntä.'},need:{berry:3,wood:1},ic:'meal_pie',station:1,start:1,meal:1},
  {id:'kalakukko',n:{en:'Kalakukko',fi:'Kalakukko'},d:{en:"Grandma's fish pasty from the lake country. Keeps for days. Eat later: +3 hearts and cures poison.",fi:'Mummon kalakukko Savosta. Säilyy päiviä. Syö myöhemmin: +3 sydäntä ja parantaa myrkytyksen.'},need:{fish:2,wood:1,berry:1},ic:'meal_kukko',station:1,meal:1,special:1},
@@ -41,7 +41,7 @@ store.recipes=store.recipes||{};
 (function(){try{const s=JSON.parse(localStorage.getItem(SKEY)||'null');if(s&&s.recipes)store.recipes=s.recipes}catch(e){}for(const r of RECIPES)if(r.start)store.recipes[r.id]=1})();
 const knowsRecipe=id=>!!store.recipes[id];
 const lockedRecipes=()=>RECIPES.filter(r=>!knowsRecipe(r.id)&&!r.special);
-const MEALS={fried:{hp:1,haste:1},pie:{hp:2},kalakukko:{hp:3,cure:1},stew:{hp:2}};
+const MEALS={fried:{hp:1,haste:1},pie:{hp:2},kalakukko:{hp:3,cure:1},stew:{hp:2},coffee:{hp:2}};
 function eatMeal(id){const m=MEALS[id];if(!(P.meals[id]>0))return;P.meals[id]--;sfx.eat();P.hp=Math.min(8,P.hp+m.hp);P.maxHp=Math.max(P.maxHp,P.hp);if(m.cure)P.poison=0;if(m.haste)P.haste=1200;
   const r=RECIPES.find(q=>q.id===id);floatText(P.x+5,P.y-10,tr(r.n),'#ffcf7a');particle(P.x+5,P.y+4,['#ffcf7a','#ff8a7a'],12,1.6,24,0,1)}
 function learnRecipe(id,x,y){if(!id||knowsRecipe(id))return false;store.recipes[id]=1;save();const r=RECIPES.find(q=>q.id===id);sfx.page();

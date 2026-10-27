@@ -1,5 +1,5 @@
 /*
-  Arkeol v0.3.4 · Copyright (C) 2026 JP Hakoluoto
+  Arkeol v0.3.5 · Copyright (C) 2026 JP Hakoluoto
   Free software under the GNU GPL v3 or later, with an attribution term (see LICENSE and NOTICE).
 */
 'use strict';
@@ -9,7 +9,7 @@ let npcs=[],foods=[],gnats=[],drips=[],rocks=[],biome='normal',lastBiome='normal
 let surf=null,shaft=null,clouds=[],motes=[],pendingRopes=[];
 let cam={x:0,y:0},shake=0,gemsTotal=0,relicsRun=0,mapOn=false,underwaterT=0;
 const idx=(x,y)=>y*MW+x;
-const tileAt=(x,y)=>(x<0||y<0||x>=MW||y>=MH)?BED:grid[idx(x,y)];
+const tileAt=(x,y)=>(y>=MH&&typeof bottom!=='undefined'&&bottom&&x===bottom.tx)?AIR:(x<0||y<0||x>=MW||y>=MH)?BED:grid[idx(x,y)];
 const isSolid=(x,y)=>SOL[tileAt(x,y)]===1;
 const isWater=(x,y)=>tileAt(x,y)===WATER;
 const isSky=(x,y)=>x>=0&&y>=0&&x<MW&&y<MH&&skyA[idx(x,y)]===1;
@@ -34,7 +34,7 @@ function genLevel(lv){
   const seed=(Math.random()*2**31)|0;
   const r=mulberry32(seed), nz=makeNoise(r), nz2=makeNoise(r), nz3=makeNoise(r);
   const ri=(a,b)=>a+Math.floor(r()*(b-a+1));
-  if(inVoid)biome='void';else if(DBG&&DBG.biome){biome=DBG.biome;lastBiome=biome}else{if(lv===1)biome='normal';else{const opts=['normal','hot','cold','moss','shroom'].filter(b=>b!==lastBiome);biome=opts[ri(0,opts.length-1)]}lastBiome=biome}
+  if(inVoid)biome='void';else if(DBG&&DBG.biome){biome=DBG.biome;lastBiome=biome}else{if(lv===1)biome='normal';else{const opts=['normal','hot','cold','moss','shroom','desert'].filter(b=>b!==lastBiome);biome=opts[ri(0,opts.length-1)]}lastBiome=biome}
   const edge=(x,y)=>x<=1||y<=1||x>=MW-2||y>=MH-2;
   // the surface (layer 1) or a ceiling with a light shaft (deeper layers)
   const sx=ri(6,MW-7);
@@ -164,7 +164,7 @@ function genLevel(lv){
       if((biome==='normal'||biome==='moss')&&r()<.75){const c=ri(tp.l,tp.rr);for(let k=2;k<16;k++){const ty=tp.y-k;if(ty<2)break;if(isSolid(c,ty)){if(k>=4&&tileAt(c,ty)!==BED)springs.push({tx:c,ty});break}}}}
   }
   // underground dwellers
-  const want=[];if(inVoid){}else if(lv===1){if(r()<.5)want.push('coffee')}else{if(r()<.4)want.push('stoic');const pool=NT.filter(q=>q!=='fisher'||((biome==='normal'||biome==='moss')&&basins.length));if(r()<.45){want.push(pool[ri(0,pool.length-1)]);if(r()<.12){const p2=pool.filter(q=>q!==want[0]);want.push(p2[ri(0,p2.length-1)])}}}
+  const want=[];if(inVoid){}else if(DBG&&DBG.people){want.push('soldier','traveler','alien','hippie')}else if(lv===1){if(r()<.5)want.push('coffee')}else{if(r()<.4)want.push(r()<.35?'hippie':'stoic');if(lv>=3&&r()<.16)want.push('soldier');if(r()<.16)want.push('traveler');if(basins.length&&(biome==='normal'||biome==='moss'||biome==='desert')&&!want.includes('fisher')&&r()<.4)want.push('fisher');if(lv>=4&&r()<.11)want.push('alien');const pool=NT.filter(q=>q!=='fisher'||((biome==='normal'||biome==='moss'||biome==='desert')&&basins.length));if(r()<.45){want.push(pool[ri(0,pool.length-1)]);if(r()<.12){const p2=pool.filter(q=>q!==want[0]);want.push(p2[ri(0,p2.length-1)])}}}
   for(const type of want){
     for(let a=0;a<900;a++){const x=ri(3,MW-4),y=ri(sy,MH-3);
       if(npcs.some(n=>Math.abs(n.x/T-x)<8&&Math.abs(n.y/T-y)<6))continue;
@@ -205,7 +205,7 @@ function genLevel(lv){
     for(let a=0;a<1500&&sc<nS;a++){const x=ri(2,MW-3),y=ri(sy+2,MH-3);if(!airFloor(x,y)||!airFloor(x+1,y)||!far(x,y,12)||isWater(x,y))continue;foes.push(mkSnake(x*T+1,(y+1)*T-7.001));sc++}}
   if(lv>=2){const nM=Math.min((biome==='hot'?2:1)+Math.floor(lv/3),5);let mc=0;
     for(let a=0;a<1500&&mc<nM;a++){const x=ri(2,MW-3),y=ri(sy+2,MH-3);if(!airFloor(x,y)||grid[idx(x,y-1)]!==AIR||!far(x,y,15)||isWater(x,y))continue;foes.push(mkMummy(x*T+3,(y+1)*T-16.001));mc++}}
-  spawnExtraFoes(lv,{ri,r,airFloor,far,sy});spawnBugs(lv,{ri,r,airFloor,far,sy});spawnAmbientFish();spawnVents(lv,{ri,r,sy});spawnCorruption(lv,{ri});
+  spawnExtraFoes(lv,{ri,r,airFloor,far,sy});spawnBugs(lv,{ri,r,airFloor,far,sy});spawnAmbientFish();spawnVents(lv,{ri,r,sy});spawnDesertDecor({ri});decorateAllNpcs();spawnCorruption(lv,{ri});
   drips=[];const nD=lv===1?6:biome==='cold'?9:biome==='hot'?2:4;
   for(let a=0;a<900&&drips.length<nD;a++){const x=ri(2,MW-3),y=ri(sy,MH-4);
     if(grid[idx(x,y)]!==AIR||!isSolid(x,y-1)||isSolid(x,y+1)||isSolid(x,y+2)||isSolid(x,y+3)||prot[idx(x,y)]||!far(x,y,6))continue;
@@ -292,6 +292,7 @@ function genLevel(lv){
   pendingRopes=natRopes;
   for(let y=1;y<MH-1;y++)for(let x=1;x<MW-1;x++){const i=idx(x,y);if(grid[i]===SAND){const b=grid[idx(x,y+1)];if(b===AIR||LIQ[b])grid[i]=DIRT}}
   waterAwake=true;sandAwake=true;
+  clearFriendsArea();
   return {sx,sy};
 }
 const CHAPTERS={en:['To the Depths','The Whispering Dark','Halls of the Forgotten','Where the Radios Fell Silent','The Merchant’s Road','Bones and Embers','The Sleeping Pharaoh','Beneath the Beneath','The Last Lantern','No Bottom, Only Deeper'],
@@ -305,7 +306,7 @@ let placedLore=new Set();
 function chooseLore(){const pool=[];PAPERS.forEach((pp,i)=>{const k='p'+i;if(!store.lore[k]&&!placedLore.has(k)&&(pp.minLv||0)<=level)pool.push({cat:'paper',id:i,k})});PHOTOS.forEach((ph,i)=>{const k='f'+i;if(!store.lore[k]&&!placedLore.has(k)&&(ph.minLv||0)<=level)pool.push({cat:'photo',id:i,k})});
   if(!pool.length)return null;const it=pickR(pool);placedLore.add(it.k);return it}
 function buildLevel(){resetAtmosphere();
-  const {sx}=genLevel(level);
+  const {sx}=genLevel(level);domain=null;bottom=null;{const dk=pickDomain(level);if(dk)buildDomain(dk);else if(level===LAST_LAYER&&!inVoid)buildBottom()}
   acids=[];puddles=[];arrows=[];bombs=[];shots=[];tossed=[];fishSpots={};ropes=pendingRopes.slice();parts=[];texts=[];flashes=[];levelKills=0;
   // drop in from above
   P.x=sx*T+T-P.w/2;P.y=(level===1?1:0)*T+2;P.vx=0;P.vy=.5;P.peak=P.y;P.climb=null;P.inv=30;P.breath=P.maxBreath;P.safeFall=true;P.line=null;
@@ -316,11 +317,12 @@ function buildLevel(){resetAtmosphere();
   fireballs=[];flies=[];levelTime=0;nextAmbient=frame+400;
   showToast(chapterName(level),level===1?skyLabel():t('lvl',level,t('b_'+biome),!!shop,!!junk)+(era?' · '+t('era_'+era):''),t('chapterN',level));
   pickLevelMusic();if(state==='play'||state==='trans')Music.play(levelTrack());
+  if(domain)domainArrive();else if(bottom)showToast(TL('The bottom of the world','Maailman pohja'),TL('There is no door here.','Täällä ei ole ovea.'),TL('Layer ','Kerros ')+level);
 }
 function newGame(){
   ensureAudio();closePanel(true);
   rollSky();level=1;gemsTotal=0;relicsRun=0;runFinds=0;runKills={spider:0,wolf:0,mummy:0,snake:0,frog:0,dragon:0,bat:0,mimic:0,worm:0,wisp:0,ant:0,scorpion:0,raptor:0,rex:0,knight:0,mammoth:0};placedLore=new Set();store.runs=(store.runs||0)+1;save();
   inDebug=false;DBG=null;inTent=false;tentSnap=null;P=newPlayer();state='play';buildLevel();
   for(const id of ['menu','over','pause','modal','shop','howto','settings','credits','license'])$(id).hidden=true;
-  releaseAll();renderHotbar();Music.hero(levelTrack());if(level===1)startAtTent();
+  releaseAll();renderHotbar();Music.hero(levelTrack());if(level===1)startAtTent();startTutorial();
 }

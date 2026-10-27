@@ -1,5 +1,5 @@
 /*
-  Arkeol v0.3.4 · Copyright (C) 2026 JP Hakoluoto
+  Arkeol v0.3.5 · Copyright (C) 2026 JP Hakoluoto
   Free software under the GNU GPL v3 or later, with an attribution term (see LICENSE and NOTICE).
   debug.js – a hidden test hall with doors to every layer, biome, era and the other side.
              Reached by pressing End while standing at the tent on the surface.
@@ -10,9 +10,9 @@ let inDebug=false,DBG=null; // DBG: forced options for the next generated layer 
 const L2=(en,fi)=>LANG==='fi'?fi:en;
 function debugDoors(){const D=[];
   // hall A: every layer
-  for(let n=1;n<=12;n++)D.push({hall:0,label:()=>L2('Layer ','Kerros ')+n,go:()=>goLayer(n,null)});
+  for(let n=1;n<=15;n++)D.push({hall:0,tag:''+n,label:()=>L2('Layer ','Kerros ')+n,go:()=>goLayer(n,null)});
   // hall B: biomes and eras
-  for(const [b,en,fi] of [['normal','Earth','Multa'],['hot','Hot','Kuuma'],['cold','Ice','Jää'],['moss','Moss','Sammal'],['shroom','Shrooms','Sienet']])D.push({hall:1,label:()=>L2(en,fi),go:()=>goLayer(4,{biome:b})});
+  for(const [b,en,fi] of [['normal','Earth','Multa'],['hot','Hot','Kuuma'],['cold','Ice','Jää'],['moss','Moss','Sammal'],['shroom','Shrooms','Sienet'],['desert','Desert','Aavikko']])D.push({hall:1,label:()=>L2(en,fi),go:()=>goLayer(4,{biome:b})});
   for(const [e,en,fi] of [['stone','Stone Age','Kivikausi'],['roman','Rome','Rooma'],['medieval','Middle Ages','Keskiaika'],['future','Future','Tulevaisuus'],['dino','Dinosaurs','Dinosaurukset']])D.push({hall:1,label:()=>L2(en,fi),go:()=>goLayer(5,{era:e})});
   // hall C: people, beasts and the other side
   D.push({hall:2,label:()=>L2("Sabu's shop",'Sabun kauppa'),go:()=>goLayer(3,{shop:1})});
@@ -20,6 +20,11 @@ function debugDoors(){const D=[];
   D.push({hall:2,label:()=>L2('Bakery','Leipomo'),go:()=>goLayer(3,{bake:1})});
   D.push({hall:2,label:()=>L2('Dragon','Lohikäärme'),go:()=>goLayer(9,{dragon:1})});
   D.push({hall:2,label:()=>L2('The other side','Toinen puoli'),go:()=>{state='play';enterVoid({tx:0,ty:0})}});
+  D.push({hall:2,label:()=>L2('Philosopher','Filosofi'),go:()=>goLayer(5,{domain:'philo'})});
+  D.push({hall:2,label:()=>L2('Fisher','Kalastaja'),go:()=>goLayer(5,{domain:'fisher'})});
+  D.push({hall:2,label:()=>L2('Traveller','Matkailija'),go:()=>goLayer(5,{domain:'traveler'})});
+  D.push({hall:2,label:()=>L2('People','Ihmiset'),go:()=>goLayer(6,{people:1})});
+  D.push({hall:2,label:()=>L2('The bottom','Pohja'),go:()=>goLayer(LAST_LAYER,null)});
   D.push({hall:2,label:()=>L2('Back to camp','Takaisin leiriin'),go:()=>goLayer(1,null)});
   return D}
 
@@ -40,7 +45,7 @@ function buildDebugRoom(){
   shaft={x:4,y0:2,y1:HALLS[0]-1};
   ropes=[{tx:MW-6,top:HALLS[0],len:HALLS[2]+4-HALLS[0],cur:HALLS[2]+4-HALLS[0],head:HALLS[0]*T,lad:true}];
   // doors, spaced along each hall, with torches between them
-  const D=debugDoors();for(let h=0;h<3;h++){const list=D.filter(d=>d.hall===h),gap=Math.floor((MW-16)/list.length);
+  const D=debugDoors();for(let h=0;h<3;h++){const list=D.filter(d=>d.hall===h),gap=list.length>12?3:Math.floor((MW-16)/list.length);
     list.forEach((d,i)=>{const tx=8+i*gap,fy=HALLS[h]+3;decos.push({tx,ty:fy,k:'ddoor',sx:0,sy:1,dd:d});if(i%2===0)decos.push({tx:tx+Math.floor(gap/2),ty:fy,k:'ftorch',sx:0,sy:1})})}
   P.x=4*T+8;P.y=(HALLS[0]+4)*T-P.h-.01;P.vx=P.vy=0;P.peak=P.y;P.climb=null;P.safeFall=true;P.hp=Math.max(P.hp,P.maxHp);P.line=null;
   cam.x=P.x-VW/2;cam.y=P.y-VH/2;clampCam();
@@ -56,4 +61,4 @@ function debugHint(p,cx){if(!inDebug)return '';const cy=p.y+p.h/2;
 function drawDebugDoor(d){const x=d.tx*T,y=d.ty*T-8;
   R(x-3,y-3,22,27,'#3a3f52');R(x-3,y-3,22,1,'#5a6078');R(x,y,16,24,'#120e1a');
   const pulse=.6+.4*Math.sin(frame*.05+d.tx);ctx.fillStyle=`rgba(120,200,255,${.35*pulse})`;ctx.fillRect(x+2,y+2,12,22);ctx.fillStyle=`rgba(220,240,255,${.35*pulse})`;ctx.fillRect(x+5,y+7,6,17);
-  ctx.font='6px "Pixelify Sans", monospace';ctx.textAlign='center';const lb=d.dd.label();ctx.fillStyle='#000';ctx.fillText(lb,x+8.5,y-6.5);ctx.fillStyle='#cfe8ff';ctx.fillText(lb,x+8,y-7);ctx.textAlign='left'}
+  ctx.font='6px "Pixelify Sans", monospace';ctx.textAlign='center';const lb=d.dd.tag||d.dd.label();ctx.fillStyle='#000';ctx.fillText(lb,x+8.5,y-6.5);ctx.fillStyle='#cfe8ff';ctx.fillText(lb,x+8,y-7);ctx.textAlign='left'}

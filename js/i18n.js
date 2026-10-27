@@ -1,15 +1,15 @@
 /*
-  Arkeol v0.3.4 · Copyright (C) 2026 JP Hakoluoto
+  Arkeol v0.3.5 · Copyright (C) 2026 JP Hakoluoto
   Free software under the GNU GPL v3 or later, with an attribution term (see LICENSE and NOTICE).
 */
 'use strict';
-const VERSION='0.3.4';
+const VERSION='0.3.5';
 /* =========================================================== language */
 let LANG='en';try{const l=localStorage.getItem('arkeol-lang');if(l==='fi'||l==='en')LANG=l}catch(e){}
 const STR={
  en:{
   kicker:'An archaeological expedition',newExp:'New Expedition',howto:'How to Play',archive:'Archive',achievements:'Achievements',language:'Language',
-  credit:'Arkeol v0.3.4 · © 2026 JP Hakoluoto · free software under the GPL-3.0',
+  credit:'Arkeol v0.3.5 · © 2026 JP Hakoluoto · free software under the GPL-3.0',
   best:(b,a,at,l,lt)=>`Achievements ${a}/${at} · Archive ${l}/${lt}`,recTitle:'Your records',recBest:'Best haul',recDepth:'Deepest',recRuns:'Expeditions',newRecord:'New record!',
   howtoTitle:'How to Play',close:'Close',
   howtoBody:`<p class="sub">You are an archaeologist. The remains of a bygone world lie buried below: letters, photographs and objects nobody remembers using any more. Dig through earth, stone and granite, avoid spiders, wolves and traps, and find the door down to the next layer. On the way you will meet the people who live underground, brewing coffee over a fire or fishing in the pools. Sabu the merchant waits deeper down.</p>
@@ -64,7 +64,7 @@ const STR={
   cFall:'a long fall',cBomb:'your own bomb',cBite:'a spider bite',cAcid:'corrosive slime',cTrap:'an arrow trap',cWolf:'a wolf bite',cDrown:'drowning',
   pick:'Pickaxe',pick2:'Diamond pickaxe',drill:'Drill',drill2:'Golden drill',noWeapon:'No weapon',rod:'Fishing rod',noRodS:'No fishing rod',bomb:'Bomb',rope:'Rope',arrowsW:'arrows',ammoW:'rounds',
   newGame:'New Game',wardrobe:'Wardrobe',wHat:'Hat',wHatC:'Hat colour',wTop:'Top',wTopC:'Top colour',wPants:'Trousers',wNeck:'Neckwear',wNeckC:'Neckwear colour',wProg:(a,b)=>`Clothes and dyes found: ${a}/${b}. More are hidden in chests, pots and with the people of the deep.`,wLocked:'Not found yet',newClothes:'New clothes!',wHint:'Try it on in the Wardrobe.',wDyeSuffix:'dye',recLine:(b,d,r)=>`Best\u00a0haul\u00a0${b} · Deepest\u00a0${d} · ${r}\u00a0expeditions`,settings:'Settings',credits:'Credits',license:'License',musicVol:'Music volume',sfxVol:'Sound effects',shakeOpt:'Screen shake',
-  creditsBody:`<p class="byline" data-wave>Arkeol by JP Hakoluoto</p><dl class="credits"><dt>Typefaces</dt><dd>Silkscreen, Pixelify Sans and VT323 via Google Fonts (SIL Open Font License)</dd><dt>Inspired by</dt><dd>Spelunky and Minecraft</dd></dl><p class="sub">v0.3.4 · <button class="linkBtn" type="button" data-open="license">License</button></p><p class="fine">AI was used as an aid in developing this game.</p>`,
+  creditsBody:`<p class="byline" data-wave>Arkeol by JP Hakoluoto</p><dl class="credits"><dt>Typefaces</dt><dd>Silkscreen, Pixelify Sans and VT323 via Google Fonts (SIL Open Font License)</dd><dt>Inspired by</dt><dd>Spelunky and Minecraft</dd></dl><p class="sub">v0.3.5 · <button class="linkBtn" type="button" data-open="license">License</button></p><p class="fine">AI was used as an aid in developing this game.</p>`,
   licenseBody:`<p class="sub">Arkeol is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License or (at your option) any later version. It is distributed without any warranty.</p><p class="sub"><b>Additional term under GPL-3.0 section 7(b):</b> every copy, modified version or work based on Arkeol must keep the copyright and licence notices and must visibly credit the original project: "Based on Arkeol by JP Hakoluoto".</p><p class="sub"><a href="https://www.gnu.org/licenses/gpl-3.0.html" target="_blank" rel="noopener">Read the full GNU GPL version 3</a></p><p class="sub">Copyright © 2026 JP Hakoluoto</p>`,
   noDrill:'You have no drill',noDrillS:'No drill',foundDrill:'Found a drill!',foundBow:'Found a bow!',
   hintEat:n=>`E: eat ${n}`,hintEatT:n=>`Act: eat ${n}`,fxHaste:'Digging frenzy!',fxTrip:'The walls are breathing…',fxBitter:'Bitter!',cBerry:'poisonous berries',stHaste:'Frenzy',stTrip:'Visions',stPoison:'Poison',
@@ -76,7 +76,7 @@ const STR={
  },
  fi:{
   kicker:'Arkeologinen tutkimusmatka',newExp:'Uusi retki',howto:'Pelaaminen',archive:'Arkisto',achievements:'Saavutukset',language:'Kieli',
-  credit:'Arkeol v0.3.4 · © 2026 JP Hakoluoto · vapaa ohjelmisto GPL-3.0-lisenssillä',
+  credit:'Arkeol v0.3.5 · © 2026 JP Hakoluoto · vapaa ohjelmisto GPL-3.0-lisenssillä',
   best:(b,a,at,l,lt)=>`Saavutuksia ${a}/${at} · Arkistossa ${l}/${lt}`,recTitle:'Ennätyksesi',recBest:'Paras saalis',recDepth:'Syvin',recRuns:'Retkiä',newRecord:'Uusi ennätys!',
   howtoTitle:'Pelaaminen',close:'Sulje',
   howtoBody:`<p class="sub">Olet arkeologi. Maan alle on hautautunut menneen maailman jäänteitä: kirjeitä, valokuvia ja esineitä, joita kukaan ei enää muista käyttäneensä. Kaiva tiesi läpi maan, kiven ja graniitin, väistä hämähäkkejä, susia ja ansoja, ja etsi ovi seuraavaan kerrokseen. Matkalla tapaat maanalaisia asukkaita, jotka keittävät pannukahvia nuotiolla tai kalastavat altailla. Kauppias Sabu odottaa syvemmällä.</p>
@@ -131,7 +131,7 @@ const STR={
   cFall:'putoaminen',cBomb:'oma pommi',cBite:'hämähäkin purema',cAcid:'syövyttävä mönjä',cTrap:'nuoliansa',cWolf:'suden purema',cDrown:'hukkuminen',
   pick:'Hakku',pick2:'Timanttihakku',drill:'Pora',drill2:'Kultapora',noWeapon:'Ei asetta',rod:'Onki',noRodS:'Ei onkea',bomb:'Pommi',rope:'Köysi',arrowsW:'nuolia',ammoW:'patruunoita',
   newGame:'Uusi peli',wardrobe:'Vaatekaappi',wHat:'Hattu',wHatC:'Hatun väri',wTop:'Yläosa',wTopC:'Yläosan väri',wPants:'Housut',wNeck:'Kaulassa',wNeckC:'Kaulaliinan väri',wProg:(a,b)=>`Vaatteita ja värejä löydetty: ${a}/${b}. Lisää löytyy arkuista, ruukuista ja syvyyksien asukkailta.`,wLocked:'Ei vielä löydetty',newClothes:'Uusia vaatteita!',wHint:'Kokeile sitä vaatekaapissa.',wDyeSuffix:'väri',recLine:(b,d,r)=>`Paras\u00a0saalis\u00a0${b} · Syvin\u00a0${d} · ${r}\u00a0retkeä`,settings:'Asetukset',credits:'Tekijät',license:'Lisenssi',musicVol:'Musiikin voimakkuus',sfxVol:'Äänitehosteet',shakeOpt:'Ruudun tärinä',
-  creditsBody:`<p class="byline" data-wave>Arkeol by JP Hakoluoto</p><dl class="credits"><dt>Kirjasinlajit</dt><dd>Silkscreen, Pixelify Sans ja VT323 Google Fontsista (SIL Open Font License)</dd><dt>Innoittajat</dt><dd>Spelunky ja Minecraft</dd></dl><p class="sub">v0.3.4 · <button class="linkBtn" type="button" data-open="license">Lisenssi</button></p><p class="fine">Pelin kehityksessä on käytetty apuna tekoälyä.</p>`,
+  creditsBody:`<p class="byline" data-wave>Arkeol by JP Hakoluoto</p><dl class="credits"><dt>Kirjasinlajit</dt><dd>Silkscreen, Pixelify Sans ja VT323 Google Fontsista (SIL Open Font License)</dd><dt>Innoittajat</dt><dd>Spelunky ja Minecraft</dd></dl><p class="sub">v0.3.5 · <button class="linkBtn" type="button" data-open="license">Lisenssi</button></p><p class="fine">Pelin kehityksessä on käytetty apuna tekoälyä.</p>`,
   licenseBody:`<p class="sub">Arkeol on vapaa ohjelmisto. Sitä saa jakaa ja muokata Free Software Foundationin julkaiseman GNU General Public License -lisenssin version 3 tai (valintasi mukaan) minkä tahansa myöhemmän version ehdoilla. Ohjelmalla ei ole mitään takuuta.</p><p class="sub"><b>Lisäehto GPL-3.0:n kohdan 7(b) nojalla:</b> jokaisessa kopiossa, muokatussa versiossa ja Arkeoliin perustuvassa työssä on säilytettävä tekijänoikeus- ja lisenssimerkinnät, ja alkuperäinen projekti on mainittava näkyvästi: "Perustuu JP Hakoluodon Arkeol-peliin".</p><p class="sub"><a href="https://www.gnu.org/licenses/gpl-3.0.html" target="_blank" rel="noopener">Lue koko GNU GPL -lisenssin versio 3</a></p><p class="sub">Copyright © 2026 JP Hakoluoto</p>`,
   noDrill:'Sinulla ei ole poraa',noDrillS:'Ei poraa',foundDrill:'Löysit poran!',foundBow:'Löysit jousen!',
   hintEat:n=>`E: syö ${n}`,hintEatT:n=>`Toimi: syö ${n}`,fxHaste:'Kaivuuvimma!',fxTrip:'Seinät hengittävät…',fxBitter:'Kitkerää!',cBerry:'myrkylliset marjat',stHaste:'Vimma',stTrip:'Näyt',stPoison:'Myrkky',

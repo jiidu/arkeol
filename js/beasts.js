@@ -1,5 +1,5 @@
 /*
-  Arkeol v0.3.4 · Copyright (C) 2026 JP Hakoluoto
+  Arkeol v0.3.5 · Copyright (C) 2026 JP Hakoluoto
   Free software under the GNU GPL v3 or later, with an attribution term (see LICENSE and NOTICE).
   beasts.js – creatures of the slipped-in-time layers: raptors and a great tyrant in the age of dinosaurs,
               knights, mammoths and a dragon in the medieval layer

@@ -1,6 +1,6 @@
 # Developing Arkeol
 
-*Version 0.3.4 · Arkeol by JP Hakoluoto · GPL-3.0-or-later with an attribution term (see `LICENSE` and `NOTICE`)*
+*Version 0.3.5 · Arkeol by JP Hakoluoto · GPL-3.0-or-later with an attribution term (see `LICENSE` and `NOTICE`)*
 
 This document is for people who want to read, modify or extend the code. It describes the architecture,
 conventions and the usual extension points. It does not explain the story or the game's secrets. Where a file
@@ -68,8 +68,12 @@ it. Calls made later, at runtime, can go in any direction.
 | 22 | `folk.js` | Character voices and typewriter speech (`showTalk`, `shopSay`, `VOICE`), extra dialogue, the tea philosopher, the bakery (`BAKE_ITEMS`), visible fish (`fishes`), the small crafting reminder beside the hotbar (`updCraftTip`); defines the final `talkTo` |
 | 23 | `debug.js` | Hidden test hall: press **End** at the tent on the surface. Doors to every layer, biome, era, trader, the dragon and the other side (`buildDebugRoom`, `goLayer`, forced options in `DBG`) |
 | 24 | `tent.js` | Inside the camp tent (E at the tent): calm music (`TRACKS.tent`), relic shelf, photo board, wardrobe trunk, a cot, and the layer album (`store.shots`, `store.maxLayer`, `openAlbum`) for jumping to any layer already reached |
-| 25 | `pad.js` | Gamepad support (standard mapping) |
-| 26 | `main.js` | Language switching, the main loop, menu wiring, settings |
+| 25 | `people.js` | Generic titles (`NPC_TITLE`, `npcTitle`), the lost soldier, the traveller, the visitor (laser drill and laser pistol), the flower philosopher, nature around each character (`decorateNpc`), deep warnings (`WARN`) and rumours about the bottom |
+| 26 | `domains.js` | Open-sky rest layers (`pickDomain`, `buildDomain`, `domainArrive`), the last layer `LAST_LAYER` with its golden hole (`buildBottom`) and the ending (`startEnding`) **(contains spoilers)** |
+| 27 | `atmos.js` | Drifting fog, floor mist and dust motes (`drawAtmos`), the sunken desert biome, caravan props, and the present-minded lines everyone speaks (`SAY`) |
+| 28 | `tutorial.js` | The field-note tutorial at the start of every run (`TUT` steps, each with a `done()` test; turned off in Settings, key `arkeol-tutorial`) |
+| 29 | `pad.js` | Gamepad support (standard mapping) |
+| 30 | `main.js` | Language switching, the main loop, menu wiring, settings |
 
 Every file starts with the same GPL header and `'use strict';`. Keep both in new files.
 

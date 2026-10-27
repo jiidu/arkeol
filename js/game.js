@@ -1,5 +1,5 @@
 /*
-  Arkeol v0.3.4 · Copyright (C) 2026 JP Hakoluoto
+  Arkeol v0.3.5 · Copyright (C) 2026 JP Hakoluoto
   Free software under the GNU GPL v3 or later, with an attribution term (see LICENSE and NOTICE).
 */
 'use strict';
@@ -148,8 +148,8 @@ const WPN={whip:{n:{en:'Whip',fi:'Ruoska'},ic:'whip',cd:22},bow:{n:{en:'Bow',fi:
 const curW=()=>P.weapons[P.wi]||null;
 function ammoKind(){if(P.weapons.some(w=>WPN[w].am==='arrows'))return 'arrows';if(P.weapons.some(w=>WPN[w].am==='ammo'))return 'ammo';return null}
 function giveWeapon(w){if(!P.weapons.includes(w))P.weapons.push(w);P.wi=P.weapons.indexOf(w);P.slot=1}
-function slotNames(){const w=curW();return [P.hasDrill?t(P.drill>1?'drill2':'drill'):t('noDrillS'),w?tr(WPN[w].n)+(WPN[w].am?` · ${P[WPN[w].am]} ${t(WPN[w].am==='arrows'?'arrowsW':WPN[w].am==='souls'?'soulsW':'ammoW')}`:'')+(P.wdur&&P.wdur[w]!==undefined?` · ${t('usesLeft',P.wdur[w])}`:''):t('noWeapon'),P.rod?t('rod'):t('noRodS'),t('bomb'),t('rope'),t('stone'),t('plankS'),t('fireS'),t('torchS')]}
-function slotIcon(i){const w=curW();return [!P.hasDrill?ICON.none:P.drill>1?ICON.drill2:ICON.drill,w?ICON[WPN[w].ic]:ICON.none,P.rod?ICON.rod:ICON.none,ICON.bomb,ICON.rope,ICON.stone,ICON.plank,ICON.campfireI,ICON.torch][i]}
+function slotNames(){const w=curW();return [P.hasDrill?t(P.drill>2?'drill3':P.drill>1?'drill2':'drill'):t('noDrillS'),w?tr(WPN[w].n)+(WPN[w].am?` · ${P[WPN[w].am]} ${t(WPN[w].am==='arrows'?'arrowsW':WPN[w].am==='souls'?'soulsW':'ammoW')}`:'')+(P.wdur&&P.wdur[w]!==undefined?` · ${t('usesLeft',P.wdur[w])}`:''):t('noWeapon'),P.rod?t('rod'):t('noRodS'),t('bomb'),t('rope'),t('stone'),t('plankS'),t('fireS'),t('torchS')]}
+function slotIcon(i){const w=curW();return [!P.hasDrill?ICON.none:P.drill>2?ICON.drill3:P.drill>1?ICON.drill2:ICON.drill,w?ICON[WPN[w].ic]:ICON.none,P.rod?ICON.rod:ICON.none,ICON.bomb,ICON.rope,ICON.stone,ICON.plank,ICON.campfireI,ICON.torch][i]}
 function slotHas(i){return [P.hasDrill,P.weapons.length>0,P.rod,P.gotBomb||P.bombs>0,P.gotRope||P.ropes>0,P.gotStone||P.stones>0,P.gotPlank||P.planks>0,P.gotFire||P.fires>0,P.gotTorch||P.torches>0][i]}
 function renderHotbar(){if(!P)return;const hb=$('hotbar');
   if(!hb.children.length){
@@ -240,8 +240,8 @@ function updatePlayer(){
   const srcOf=k=>viaUse(k)&&!held[k]?useSrc:'key';
   p.drilling=false;
   if((held.drill||viaUse('drill'))&&!p.hasDrill){if(!p.noDrillWarn){p.noDrillWarn=true;floatText(cx,p.y-8,t('noDrill'),'#c7d3d9')}}
-  else if(held.drill||viaUse('drill')){if(p.fuel>0){const a=aimFor(srcOf('drill'));setFaceFromAim(a);p.drilling=true;p.fuel=Math.max(0,p.fuel-(p.drill>1?.11:.16));
-      if(a.tx!==null&&damageTile(a.tx,a.ty,(p.drill>1?.42:.24)*(p.haste>0?1.7:1))){if(frame%3===0)particle(a.tx*T+8,a.ty*T+8,TILECOL[tileAt(a.tx,a.ty)]||'#999',2,2,12,.1,1);shake=Math.max(shake,1.2)}
+  else if(held.drill||viaUse('drill')){if(p.fuel>0){const a=aimFor(srcOf('drill'));setFaceFromAim(a);p.drilling=true;p.fuel=Math.max(0,p.fuel-(p.drill>2?.015:p.drill>1?.11:.16));
+      if(a.tx!==null&&damageTile(a.tx,a.ty,(p.drill>2?.85:p.drill>1?.42:.24)*(p.haste>0?1.7:1))){if(frame%3===0)particle(a.tx*T+8,a.ty*T+8,TILECOL[tileAt(a.tx,a.ty)]||'#999',2,2,12,.1,1);shake=Math.max(shake,1.2)}
       if(frame%6===0)hitStuff({x:a.hx-7,y:a.hy-7,w:14,h:14},.35,cx,'drill');
       if(++drillSnd%5===0)sfx.drill();if(frame%20===0)renderHotbar()}
     else if(!p.fuelWarn){p.fuelWarn=true;floatText(cx,p.y-8,t('noFuel'),'#c7d3d9')}}
@@ -269,7 +269,7 @@ function updatePlayer(){
     hintTxt=coarse?t('hintShopT'):t('hintShop');if(!shop.greeted){shop.greeted=true;floatText(shop.merchant.x+7,shop.merchant.y-6,t('welcome'),'#f3dfb0')}
     if(hit.act)openShop()}
   if(nearJunk(cx,p.y+p.h/2)){hintTxt=coarse?t('hintJunkT'):t('hintJunk');if(!junk.greeted){junk.greeted=true;floatText(junk.merchant.x+7,junk.merchant.y-6,t('junkHi'),'#f3dfb0')}if(hit.act)openShop(junk)}
-  for(const n of npcs){if(Math.abs(n.x-cx)<1.8*T&&Math.abs(n.y-(p.y+p.h))<1.2*T){hintTxt=coarse?t('hintTalkT',n.name):t('hintTalk',n.name);if(hit.act)talkTo(n);break}}
+  for(const n of npcs){if(Math.abs(n.x-cx)<1.8*T&&Math.abs(n.y-(p.y+p.h))<1.2*T){hintTxt=coarse?t('hintTalkT',npcTitle(n)):t('hintTalk',npcTitle(n));if(hit.act)talkTo(n);break}}
   if(!hintTxt){const h=debugHint(p,cx);if(h)hintTxt=h}
   if(!hintTxt){const h=tentHint(p,cx);if(h)hintTxt=h}
   if(!hintTxt){const h=secretsHint(p,cx);if(h)hintTxt=h}
@@ -285,7 +285,7 @@ function updatePlayer(){
     if(on&&!l.pressed){l.anim=20;sfx.click();const tt=tileAt(l.tx,l.ty);
       if((tt===TRAPL||tt===TRAPR)&&!l.spent){l.spent=true;arrows.push({x:l.dir<0?l.tx*T-1:l.tx*T+T+1,y:l.ty*T+8,vx:l.dir*7,stuck:false,life:240,sx:0,sy:0,trap:byP,hp0:P.hp});setTimeout(sfx.arrow,40);if(byR&&!byP)unlock('rockplate')}}
     l.pressed=on;if(l.anim>0)l.anim--}
-  if(p.y>MH*T)hurt(9,'cFall');
+  if(p.y>MH*T){if(bottom){if(p.y>MH*T+3*T)startEnding()}else hurt(9,'cFall')}
   for(const s of springs){const sx=s.tx*T+5;if(cx>sx-2&&cx<sx+8&&p.y>s.ty*T){const bot=fallBottom(s);if(p.y<bot){unlock('shower');if(frame%30===0)particle(cx,p.y,'#cfeaff',3,1,14,.1,1)}}}
 }
 function enterDoor(){
@@ -539,7 +539,7 @@ function updateWorld(){
   if(biome==='shroom'&&frame%6===0)parts.push({x:cam.x+Math.random()*VW,y:cam.y+VH*Math.random(),vx:rand(-.15,.15),vy:-rand(.05,.2),life:180,max:180,col:pickR(['rgba(200,150,255,.6)','rgba(120,230,220,.5)','rgba(255,170,220,.5)']),g:0,sz:1});
   if(biome==='hot'&&frame%5===0)parts.push({x:cam.x+Math.random()*VW,y:cam.y+VH+4,vx:rand(-.2,.2),vy:-rand(.3,.8),life:200,max:200,col:pickR(['#ff8a3a','#ffb347','#ff6a1a']),g:-.001,sz:1});
   if(biome==='hot'&&frame%7===0){const x=Math.floor((cam.x+Math.random()*VW)/T),y=Math.floor((cam.y+Math.random()*VH)/T);if(tileAt(x,y)===LAVA&&!LIQ[tileAt(x,y-1)])particle(x*T+8,y*T+2,['#ffd27a','#ff8a3a'],3,1.2,20,.08,1)}
-  if(frame%30===0&&state==='play'){const near=npcs.some(n=>Math.hypot(n.x-(P.x+P.w/2),n.y-(P.y+P.h))<7*T);const inShop=shop&&P.x>shop.x0*T&&P.x<(shop.x0+shop.w)*T&&P.y>shop.y0*T&&P.y<(shop.y0+shop.h)*T;Music.play(inTent?'tent':inVoid?'void':inShop?'crypt':near||nearJunk(P.x+5,P.y+8)?'campfire':levelTrack())}
+  if(frame%30===0&&state==='play'){const near=npcs.some(n=>Math.hypot(n.x-(P.x+P.w/2),n.y-(P.y+P.h))<7*T);const inShop=shop&&P.x>shop.x0*T&&P.x<(shop.x0+shop.w)*T&&P.y>shop.y0*T&&P.y<(shop.y0+shop.h)*T;Music.play(inTent?'tent':inVoid?'void':nearPeace()?'peace':domain?'camp':inShop?'crypt':near||nearJunk(P.x+5,P.y+8)?'campfire':levelTrack())}
   for(const b of bombs){b.fuse--;const wet=inWaterAt(b.x+3,b.y+3);b.vy=Math.min(b.vy+(wet?.1:.3),wet?1.2:7);if(wet)b.vx*=.92;const vx0=b.vx,vy0=b.vy;move(b);
     if(b.hitX)b.vx=-vx0*.45;if(b.hitY>0){b.vy=Math.abs(vy0)>1.2?-vy0*.35:0;b.vx*=.75}else if(b.hitY<0)b.vy=0;
     if(b.onGround)b.vx*=.9;
